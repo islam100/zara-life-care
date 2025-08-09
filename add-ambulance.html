@@ -1,22 +1,227 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Simple Camera Test</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Driver Registration</title>
+<style>
+  body { font-family: Arial, sans-serif; padding: 10px; max-width: 480px; margin: auto; }
+  input, textarea, button, select { width: 100%; margin: 8px 0; padding: 8px; font-size: 16px; box-sizing: border-box; }
+  button {
+    background: #2a9df4;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    box-shadow: 0 4px 6px #1976d2;
+    cursor: pointer;
+    font-weight: bold;
+    transition: box-shadow 0.2s ease;
+  }
+  button:hover {
+    box-shadow: 0 6px 10px #1565c0;
+  }
+  video, canvas {
+    width: 100%;
+    max-height: 300px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+  }
+  #selfieSection {
+    margin-top: 20px;
+  }
+  #captureBtn {
+    width: auto;
+    margin-top: 6px;
+  }
+</style>
 </head>
 <body>
-  <h2>Camera Test</h2>
-  <video id="video" width="400" height="300" autoplay></video>
-  <script>
-    const video = document.getElementById('video');
 
-    // कैमरा स्ट्रीम मांगो
-    navigator.mediaDevices.getUserMedia({ video: true })
-      .then(stream => {
-        video.srcObject = stream;
-      })
-      .catch(err => {
-        alert('Camera access denied or not available: ' + err.message);
+<h1>Join as Driver</h1>
+<form id="driverForm">
+
+  <input type="text" id="name" placeholder="Full Name" required />
+  <input type="text" id="ambulanceNo" placeholder="Ambulance No" required />
+  <input type="text" id="licenseNo" placeholder="Driving License No" required />
+  
+  <label>Upload Driving License:</label>
+  <input type="file" id="licenseUpload" accept="image/*,application/pdf" required />
+  
+  <label>Upload RC Book:</label>
+  <input type="file" id="rcBookUpload" accept="image/*,application/pdf" required />
+  
+  <label>Upload Aadhar Front:</label>
+  <input type="file" id="aadharFront" accept="image/*,application/pdf" required />
+  
+  <label>Upload Aadhar Back:</label>
+  <input type="file" id="aadharBack" accept="image/*,application/pdf" required />
+  
+  <label>Upload PAN Card:</label>
+  <input type="file" id="panUpload" accept="image/*,application/pdf" required />
+  
+  <div id="selfieSection">
+    <label>Live Selfie (Click Capture to take photo):</label>
+    <video id="video" autoplay playsinline></video>
+    <button type="button" id="captureBtn">Capture Selfie</button>
+    <canvas id="canvas" style="display:none;"></canvas>
+  </div>
+
+  <textarea id="address" placeholder="Full Address" required></textarea>
+  
+  <button type="submit">Submit</button>
+</form>
+
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-storage.js"></script>
+
+<script>
+  // Firebase config
+  const firebaseConfig = {
+    apiKey: "AIzaSyCFgRQxK_W2T9S5QWZnxAd-kYV52Kzyb94",
+    authDomain: "zara-life-care.firebaseapp.com",
+    projectId: "zara-life-care",
+    storageBucket: "zara-life-care.appspot.com",
+    messagingSenderId: "307306937129",
+    appId: "1:307306937129:web:a949207fe64fe87dd3d538"
+  };
+  firebase.initializeApp(firebaseConfig);
+
+  // Elements
+  const video = document.getElementById('video');
+  const canvas = document.getElementById('canvas');
+  const captureBtn = document.getElementById('captureBtn');
+  const driverForm = document.getElementById('driverForm');
+
+  let selfieBlob = null;
+
+  // Start webcam stream
+  async function startCamera() {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      video.srcObject = stream;
+    } catch (err) {
+      alert("Cannot access camera: " + err.message);
+    }
+  }
+
+  startCamera();
+
+  // Capture selfie on button click
+  captureBtn.addEventListener('click', () => {
+    const context = canvas.getContext('2d');
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+    canvas.style.display = 'block';
+
+    canvas.toBlob(blob => {
+      selfieBlob = blob;
+      alert('Selfie captured! Now submit the form.');
+    }, 'image/jpeg', 0.9);
+  });
+
+  // Form submit handler
+  driverForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const user = firebase.auth().currentUser;
+    if (!user) {
+      alert('Please login first.');
+      window.location.href = 'login.html';
+      return;
+    }
+    if (!selfieBlob) {
+      alert('Please capture your selfie before submitting.');
+      return;
+    }
+
+    // Disable submit button to prevent multiple submits
+    driverForm.querySelector('button[type="submit"]').disabled = true;
+
+    const name = document.getElementById('name').value.trim();
+    const ambulanceNo = document.getElementById('ambulanceNo').value.trim();
+    const licenseNo = document.getElementById('licenseNo').value.trim();
+    const address = document.getElementById('address').value.trim();
+
+    const licenseFile = document.getElementById('licenseUpload').files[0];
+    const rcBookFile = document.getElementById('rcBookUpload').files[0];
+    const aadharFrontFile = document.getElementById('aadharFront').files[0];
+    const aadharBackFile = document.getElementById('aadharBack').files[0];
+    const panFile = document.getElementById('panUpload').files[0];
+
+    if (!licenseFile || !rcBookFile || !aadharFrontFile || !aadharBackFile || !panFile) {
+      alert('Please upload all required documents.');
+      driverForm.querySelector('button[type="submit"]').disabled = false;
+      return;
+    }
+
+    const storageRef = firebase.storage().ref();
+    const uid = user.uid;
+
+    try {
+      // Upload all files and get URLs
+      const licenseRef = storageRef.child(`drivers/${uid}/license.${licenseFile.name.split('.').pop()}`);
+      const rcBookRef = storageRef.child(`drivers/${uid}/rcbook.${rcBookFile.name.split('.').pop()}`);
+      const aadharFrontRef = storageRef.child(`drivers/${uid}/aadharFront.${aadharFrontFile.name.split('.').pop()}`);
+      const aadharBackRef = storageRef.child(`drivers/${uid}/aadharBack.${aadharBackFile.name.split('.').pop()}`);
+      const panRef = storageRef.child(`drivers/${uid}/pan.${panFile.name.split('.').pop()}`);
+      const selfieRef = storageRef.child(`drivers/${uid}/selfie.jpg`);
+
+      const uploadPromises = [
+        licenseRef.put(licenseFile),
+        rcBookRef.put(rcBookFile),
+        aadharFrontRef.put(aadharFrontFile),
+        aadharBackRef.put(aadharBackFile),
+        panRef.put(panFile),
+        selfieRef.put(selfieBlob)
+      ];
+
+      const uploadResults = await Promise.all(uploadPromises);
+
+      // Get download URLs
+      const licenseURL = await licenseRef.getDownloadURL();
+      const rcBookURL = await rcBookRef.getDownloadURL();
+      const aadharFrontURL = await aadharFrontRef.getDownloadURL();
+      const aadharBackURL = await aadharBackRef.getDownloadURL();
+      const panURL = await panRef.getDownloadURL();
+      const selfieURL = await selfieRef.getDownloadURL();
+
+      // Save data in Realtime Database
+      await firebase.database().ref('drivers/' + uid).set({
+        name,
+        ambulanceNo,
+        licenseNo,
+        address,
+        status: 'pending',
+        licenseURL,
+        rcBookURL,
+        aadharFrontURL,
+        aadharBackURL,
+        panURL,
+        selfieURL,
+        wallet: 0,
+        phone: user.phoneNumber || user.email || 'N/A'
       });
-  </script>
+
+      alert('Form submitted successfully! Please wait for approval.');
+      driverForm.reset();
+      canvas.style.display = 'none';
+      selfieBlob = null;
+    } catch (error) {
+      alert('Error uploading files: ' + error.message);
+      driverForm.querySelector('button[type="submit"]').disabled = false;
+    }
+  });
+
+  // Check auth state and redirect if not logged in
+  firebase.auth().onAuthStateChanged(user => {
+    if (!user) {
+      window.location.href = 'login.html';
+    }
+  });
+</script>
+
 </body>
 </html>
