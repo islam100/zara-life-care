@@ -1,26 +1,103 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Ambulance Service - Home</title>
 <style>
-  body { font-family: Arial, sans-serif; }
-  .card { border: 1px solid #ccc; border-radius: 8px; padding: 10px; margin: 10px; display: inline-block; width: 200px; vertical-align: top; }
-  .card h3 { margin: 5px 0; }
-  .dropdown { padding: 5px; font-size: 12px; }
+  body {
+    font-family: Arial, sans-serif;
+    margin: 0; padding: 0;
+    background: #f5f5f5;
+  }
+  nav {
+    background: #007bff;
+    padding: 10px 20px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px;
+    flex-wrap: wrap;
+  }
+  nav select {
+    padding: 6px 12px;
+    border-radius: 5px;
+    border: none;
+    font-size: 14px;
+    cursor: pointer;
+  }
+  h1 {
+    text-align: center;
+    margin: 20px 0 10px;
+    color: #333;
+  }
+  #drivers-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 15px;
+    padding: 10px 15px 30px;
+  }
+  .card {
+    background: white;
+    width: 220px;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 0 8px rgba(0,0,0,0.1);
+    text-align: center;
+    transition: box-shadow 0.3s ease;
+  }
+  .card:hover {
+    box-shadow: 0 0 15px rgba(0,123,255,0.5);
+  }
+  .card h3 {
+    margin: 0 0 10px;
+    color: #007bff;
+  }
+  .card p {
+    margin: 5px 0;
+    font-size: 14px;
+    color: #555;
+  }
+  @media(max-width: 600px) {
+    nav {
+      justify-content: center;
+    }
+    #drivers-container {
+      flex-direction: column;
+      align-items: center;
+    }
+    .card {
+      width: 90%;
+    }
+  }
 </style>
 </head>
 <body>
 
-<h1>Available Ambulances</h1>
-<div id="drivers-container"></div>
+<nav>
+  <select onchange="if(this.value) window.location.href=this.value">
+    <option value="">Services</option>
+    <option value="add-ambulance.html">Join as Driver</option>
+    <option value="patient-dashboard.html">Patient Dashboard</option>
+  </select>
 
-<!-- Firebase -->
+  <select onchange="if(this.value) window.location.href=this.value">
+    <option value="">More</option>
+    <option value="about.html">About</option>
+    <option value="privacy.html">Privacy Policy</option>
+    <option value="contact.html">Contact</option>
+  </select>
+</nav>
+
+<h1>Available Ambulances</h1>
+<div id="drivers-container">Loading ambulances...</div>
+
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
+
 <script>
+  // Firebase config
   const firebaseConfig = {
     apiKey: "AIzaSyCFgRQxK_W2T9S5QWZnxAd-kYV52Kzyb94",
     authDomain: "zara-life-care.firebaseapp.com",
@@ -43,14 +120,18 @@
     const container = document.getElementById('drivers-container');
     firebase.database().ref('drivers').orderByChild('status').equalTo('approved').on('value', snapshot => {
       container.innerHTML = '';
+      if (!snapshot.exists()) {
+        container.innerHTML = '<p>No approved ambulances available at the moment.</p>';
+        return;
+      }
       snapshot.forEach(child => {
         const d = child.val();
         container.innerHTML += `
           <div class="card">
             <h3>${d.name || 'Unknown'}</h3>
-            <p>Ambulance No: ${d.ambulanceNo}</p>
-            <select class="dropdown"><option>Option 1</option><option>Option 2</option></select>
-            <select class="dropdown"><option>Link 1</option><option>Link 2</option></select>
+            <p><strong>Ambulance No:</strong> ${d.ambulanceNo || 'N/A'}</p>
+            <p><strong>Phone:</strong> ${d.phone || 'N/A'}</p>
+            <p><strong>Address:</strong> ${d.address || 'N/A'}</p>
           </div>
         `;
       });
@@ -60,4 +141,3 @@
 
 </body>
 </html>
-
