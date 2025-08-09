@@ -3,75 +3,105 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Driver Registration</title>
+<title>Join as Driver - Ambulance Service</title>
 <style>
-  body { font-family: Arial, sans-serif; padding: 10px; max-width: 480px; margin: auto; }
-  input, textarea, button, select { width: 100%; margin: 8px 0; padding: 8px; font-size: 16px; box-sizing: border-box; }
-  button {
-    background: #2a9df4;
-    color: white;
-    border: none;
+  body { font-family: Arial, sans-serif; padding: 20px; max-width: 480px; margin: auto; }
+  h1 { text-align: center; }
+  form > * { display: block; width: 100%; margin-bottom: 15px; }
+  input[type="text"], textarea {
+    padding: 8px;
+    font-size: 16px;
     border-radius: 6px;
-    box-shadow: 0 4px 6px #1976d2;
-    cursor: pointer;
-    font-weight: bold;
-    transition: box-shadow 0.2s ease;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
   }
-  button:hover {
-    box-shadow: 0 6px 10px #1565c0;
+  textarea { resize: vertical; }
+  label { margin-bottom: 5px; font-weight: bold; }
+  input[type="file"] {
+    border: none;
+    padding: 5px 0;
   }
-  video, canvas {
+  #video, #canvas {
     width: 100%;
-    max-height: 300px;
     border-radius: 8px;
     border: 1px solid #ccc;
   }
-  #selfieSection {
-    margin-top: 20px;
-  }
   #captureBtn {
-    width: auto;
-    margin-top: 6px;
+    background: #4CAF50;
+    border: none;
+    color: white;
+    font-size: 16px;
+    padding: 10px 0;
+    border-radius: 10px;
+    cursor: pointer;
+    box-shadow: 0 5px #388E3C;
+    transition: all 0.2s;
+  }
+  #captureBtn:active {
+    box-shadow: 0 2px #388E3C;
+    transform: translateY(3px);
+  }
+  button[type="submit"] {
+    background: #1976d2;
+    border: none;
+    color: white;
+    font-size: 18px;
+    padding: 12px 0;
+    border-radius: 12px;
+    cursor: pointer;
+    box-shadow: 0 6px #115293;
+    transition: all 0.3s;
+  }
+  button[type="submit"]:hover {
+    background: #1565c0;
+  }
+  button[type="submit"]:active {
+    box-shadow: 0 3px #115293;
+    transform: translateY(3px);
   }
 </style>
 </head>
 <body>
 
 <h1>Join as Driver</h1>
+
 <form id="driverForm">
+  <label for="name">Full Name</label>
+  <input type="text" id="name" required />
 
-  <input type="text" id="name" placeholder="Full Name" required />
-  <input type="text" id="ambulanceNo" placeholder="Ambulance No" required />
-  <input type="text" id="licenseNo" placeholder="Driving License No" required />
-  
-  <label>Upload Driving License:</label>
+  <label for="ambulanceNo">Ambulance No</label>
+  <input type="text" id="ambulanceNo" required />
+
+  <label for="licenseNo">Driving License No</label>
+  <input type="text" id="licenseNo" required />
+
+  <label for="licenseUpload">Upload Driving License</label>
   <input type="file" id="licenseUpload" accept="image/*,application/pdf" required />
-  
-  <label>Upload RC Book:</label>
-  <input type="file" id="rcBookUpload" accept="image/*,application/pdf" required />
-  
-  <label>Upload Aadhar Front:</label>
-  <input type="file" id="aadharFront" accept="image/*,application/pdf" required />
-  
-  <label>Upload Aadhar Back:</label>
-  <input type="file" id="aadharBack" accept="image/*,application/pdf" required />
-  
-  <label>Upload PAN Card:</label>
-  <input type="file" id="panUpload" accept="image/*,application/pdf" required />
-  
-  <div id="selfieSection">
-    <label>Live Selfie (Click Capture to take photo):</label>
-    <video id="video" autoplay playsinline></video>
-    <button type="button" id="captureBtn">Capture Selfie</button>
-    <canvas id="canvas" style="display:none;"></canvas>
-  </div>
 
-  <textarea id="address" placeholder="Full Address" required></textarea>
-  
+  <label for="rcBookUpload">Upload RC Book</label>
+  <input type="file" id="rcBookUpload" accept="image/*,application/pdf" required />
+
+  <label for="aadharFront">Upload Aadhar Card (Front)</label>
+  <input type="file" id="aadharFront" accept="image/*,application/pdf" required />
+
+  <label for="aadharBack">Upload Aadhar Card (Back)</label>
+  <input type="file" id="aadharBack" accept="image/*,application/pdf" required />
+
+  <label for="panUpload">Upload PAN Card</label>
+  <input type="file" id="panUpload" accept="image/*,application/pdf" required />
+
+  <label>Take Selfie (Camera)</label>
+  <video id="video" autoplay playsinline></video>
+  <button type="button" id="captureBtn">Capture Selfie</button>
+  <canvas id="canvas" style="display:none;"></canvas>
+
+  <label for="address">Full Address</label>
+  <textarea id="address" rows="3" required></textarea>
+
   <button type="submit">Submit</button>
 </form>
 
-<!-- Firebase SDKs -->
+<!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
@@ -89,15 +119,20 @@
   };
   firebase.initializeApp(firebaseConfig);
 
-  // Elements
+  // Auth check
+  firebase.auth().onAuthStateChanged(user => {
+    if (!user) {
+      alert("Please login first.");
+      window.location.href = "login.html";
+    }
+  });
+
+  // Camera setup
   const video = document.getElementById('video');
   const canvas = document.getElementById('canvas');
   const captureBtn = document.getElementById('captureBtn');
-  const driverForm = document.getElementById('driverForm');
-
   let selfieBlob = null;
 
-  // Start webcam stream
   async function startCamera() {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ video: true });
@@ -106,10 +141,8 @@
       alert("Cannot access camera: " + err.message);
     }
   }
-
   startCamera();
 
-  // Capture selfie on button click
   captureBtn.addEventListener('click', () => {
     const context = canvas.getContext('2d');
     canvas.width = video.videoWidth;
@@ -117,29 +150,25 @@
     context.drawImage(video, 0, 0, canvas.width, canvas.height);
     canvas.style.display = 'block';
 
+    // Convert canvas to blob for upload
     canvas.toBlob(blob => {
       selfieBlob = blob;
-      alert('Selfie captured! Now submit the form.');
-    }, 'image/jpeg', 0.9);
+      alert("Selfie captured!");
+    }, 'image/jpeg', 0.95);
   });
 
-  // Form submit handler
-  driverForm.addEventListener('submit', async (e) => {
+  // Form submit
+  document.getElementById('driverForm').addEventListener('submit', async e => {
     e.preventDefault();
+
     const user = firebase.auth().currentUser;
     if (!user) {
-      alert('Please login first.');
-      window.location.href = 'login.html';
-      return;
-    }
-    if (!selfieBlob) {
-      alert('Please capture your selfie before submitting.');
+      alert("Please login first.");
+      window.location.href = "login.html";
       return;
     }
 
-    // Disable submit button to prevent multiple submits
-    driverForm.querySelector('button[type="submit"]').disabled = true;
-
+    // Get all form data
     const name = document.getElementById('name').value.trim();
     const ambulanceNo = document.getElementById('ambulanceNo').value.trim();
     const licenseNo = document.getElementById('licenseNo').value.trim();
@@ -151,9 +180,8 @@
     const aadharBackFile = document.getElementById('aadharBack').files[0];
     const panFile = document.getElementById('panUpload').files[0];
 
-    if (!licenseFile || !rcBookFile || !aadharFrontFile || !aadharBackFile || !panFile) {
-      alert('Please upload all required documents.');
-      driverForm.querySelector('button[type="submit"]').disabled = false;
+    if (!selfieBlob) {
+      alert("Please capture your selfie.");
       return;
     }
 
@@ -161,64 +189,45 @@
     const uid = user.uid;
 
     try {
-      // Upload all files and get URLs
-      const licenseRef = storageRef.child(`drivers/${uid}/license.${licenseFile.name.split('.').pop()}`);
-      const rcBookRef = storageRef.child(`drivers/${uid}/rcbook.${rcBookFile.name.split('.').pop()}`);
-      const aadharFrontRef = storageRef.child(`drivers/${uid}/aadharFront.${aadharFrontFile.name.split('.').pop()}`);
-      const aadharBackRef = storageRef.child(`drivers/${uid}/aadharBack.${aadharBackFile.name.split('.').pop()}`);
-      const panRef = storageRef.child(`drivers/${uid}/pan.${panFile.name.split('.').pop()}`);
-      const selfieRef = storageRef.child(`drivers/${uid}/selfie.jpg`);
+      // Upload all files & selfie, get URLs
+      const uploadFile = async (file, path) => {
+        const ref = storageRef.child(path);
+        await ref.put(file);
+        return await ref.getDownloadURL();
+      };
 
-      const uploadPromises = [
-        licenseRef.put(licenseFile),
-        rcBookRef.put(rcBookFile),
-        aadharFrontRef.put(aadharFrontFile),
-        aadharBackRef.put(aadharBackFile),
-        panRef.put(panFile),
-        selfieRef.put(selfieBlob)
-      ];
+      const licenseURL = await uploadFile(licenseFile, `drivers/${uid}/license.${licenseFile.name.split('.').pop()}`);
+      const rcBookURL = await uploadFile(rcBookFile, `drivers/${uid}/rcbook.${rcBookFile.name.split('.').pop()}`);
+      const aadharFrontURL = await uploadFile(aadharFrontFile, `drivers/${uid}/aadhar-front.${aadharFrontFile.name.split('.').pop()}`);
+      const aadharBackURL = await uploadFile(aadharBackFile, `drivers/${uid}/aadhar-back.${aadharBackFile.name.split('.').pop()}`);
+      const panURL = await uploadFile(panFile, `drivers/${uid}/pan.${panFile.name.split('.').pop()}`);
+      const selfieURL = await uploadFile(selfieBlob, `drivers/${uid}/selfie.jpg`);
 
-      const uploadResults = await Promise.all(uploadPromises);
-
-      // Get download URLs
-      const licenseURL = await licenseRef.getDownloadURL();
-      const rcBookURL = await rcBookRef.getDownloadURL();
-      const aadharFrontURL = await aadharFrontRef.getDownloadURL();
-      const aadharBackURL = await aadharBackRef.getDownloadURL();
-      const panURL = await panRef.getDownloadURL();
-      const selfieURL = await selfieRef.getDownloadURL();
-
-      // Save data in Realtime Database
+      // Save to realtime database
       await firebase.database().ref('drivers/' + uid).set({
         name,
         ambulanceNo,
         licenseNo,
         address,
-        status: 'pending',
         licenseURL,
         rcBookURL,
         aadharFrontURL,
         aadharBackURL,
         panURL,
         selfieURL,
+        status: 'pending',
         wallet: 0,
-        phone: user.phoneNumber || user.email || 'N/A'
+        phone: user.phoneNumber || ''
       });
 
-      alert('Form submitted successfully! Please wait for approval.');
-      driverForm.reset();
+      alert('Form submitted successfully! Please wait for admin approval.');
+      document.getElementById('driverForm').reset();
       canvas.style.display = 'none';
       selfieBlob = null;
+
     } catch (error) {
       alert('Error uploading files: ' + error.message);
-      driverForm.querySelector('button[type="submit"]').disabled = false;
-    }
-  });
-
-  // Check auth state and redirect if not logged in
-  firebase.auth().onAuthStateChanged(user => {
-    if (!user) {
-      window.location.href = 'login.html';
+      console.error(error);
     }
   });
 </script>
