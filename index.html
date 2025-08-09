@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ambulance Service - Home</title>
+<style>
+  body { font-family: Arial, sans-serif; }
+  .card { border: 1px solid #ccc; border-radius: 8px; padding: 10px; margin: 10px; display: inline-block; width: 200px; vertical-align: top; }
+  .card h3 { margin: 5px 0; }
+  .dropdown { padding: 5px; font-size: 12px; }
+</style>
+</head>
+<body>
+
+<h1>Available Ambulances</h1>
+<div id="drivers-container"></div>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyCFgRQxK_W2T9S5QWZnxAd-kYV52Kzyb94",
+    authDomain: "zara-life-care.firebaseapp.com",
+    projectId: "zara-life-care",
+    storageBucket: "zara-life-care.appspot.com",
+    messagingSenderId: "307306937129",
+    appId: "1:307306937129:web:a949207fe64fe87dd3d538"
+  };
+  firebase.initializeApp(firebaseConfig);
+
+  firebase.auth().onAuthStateChanged(user => {
+    if (!user) {
+      window.location.href = "login.html";
+    } else {
+      loadApprovedDrivers();
+    }
+  });
+
+  function loadApprovedDrivers() {
+    const container = document.getElementById('drivers-container');
+    firebase.database().ref('drivers').orderByChild('status').equalTo('approved').on('value', snapshot => {
+      container.innerHTML = '';
+      snapshot.forEach(child => {
+        const d = child.val();
+        container.innerHTML += `
+          <div class="card">
+            <h3>${d.name || 'Unknown'}</h3>
+            <p>Ambulance No: ${d.ambulanceNo}</p>
+            <select class="dropdown"><option>Option 1</option><option>Option 2</option></select>
+            <select class="dropdown"><option>Link 1</option><option>Link 2</option></select>
+          </div>
+        `;
+      });
+    });
+  }
+</script>
+
+</body>
+</html>
+
