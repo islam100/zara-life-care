@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Driver Registration</title>
+</head>
+<body>
+<h1>Join as Driver</h1>
+<form id="driverForm">
+  <input type="text" id="name" placeholder="Full Name" required><br>
+  <input type="text" id="ambulanceNo" placeholder="Ambulance No" required><br>
+  <input type="text" id="licenseNo" placeholder="Driving License No" required><br>
+  <input type="file" id="licenseUpload" required><br>
+  <input type="file" id="rcBookUpload" required><br>
+  <input type="file" id="aadharFront" required><br>
+  <input type="file" id="aadharBack" required><br>
+  <input type="file" id="panUpload" required><br>
+  <input type="file" id="selfieUpload" required><br>
+  <textarea id="address" placeholder="Full Address"></textarea><br>
+  <button type="submit">Submit</button>
+</form>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-storage.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyCFgRQxK_W2T9S5QWZnxAd-kYV52Kzyb94",
+    authDomain: "zara-life-care.firebaseapp.com",
+    projectId: "zara-life-care",
+    storageBucket: "zara-life-care.appspot.com",
+    messagingSenderId: "307306937129",
+    appId: "1:307306937129:web:a949207fe64fe87dd3d538"
+  };
+  firebase.initializeApp(firebaseConfig);
+
+  firebase.auth().onAuthStateChanged(user => {
+    if (!user) {
+      window.location.href = "login.html";
+    }
+  });
+
+  document.getElementById('driverForm').addEventListener('submit', e => {
+    e.preventDefault();
+    const user = firebase.auth().currentUser;
+    firebase.database().ref('drivers/' + user.uid).set({
+      name: document.getElementById('name').value,
+      ambulanceNo: document.getElementById('ambulanceNo').value,
+      licenseNo: document.getElementById('licenseNo').value,
+      address: document.getElementById('address').value,
+      status: 'pending'
+    }).then(() => {
+      alert('Form submitted! Please wait for approval.');
+    });
+  });
+</script>
+</body>
+</html>

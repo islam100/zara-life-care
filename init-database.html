@@ -1,0 +1,86 @@
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+  import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
+
+  // आपका config
+  const firebaseConfig = {
+    apiKey: "AIzaSyCFgRQxK_W2T9S5QWZnxAd-kYV52Kzyb94",
+    authDomain: "zara-life-care.firebaseapp.com",
+    projectId: "zara-life-care",
+    storageBucket: "zara-life-care.appspot.com",
+    messagingSenderId: "307306937129",
+    appId: "1:307306937129:web:a949207fe64fe87dd3d538"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+
+  function setupDatabase() {
+    set(ref(db), {
+      admins: {
+        adminUID123: true
+      },
+      drivers: {
+        driverUID1: {
+          name: "Rajesh Kumar",
+          ambulanceNo: "RJ14AB1234",
+          licenseNo: "DL-4521345",
+          status: "pending",
+          address: "Jaipur, Rajasthan",
+          aadharFront: "uploads/aadhar-front.jpg",
+          aadharBack: "uploads/aadhar-back.jpg",
+          panCard: "uploads/pan.jpg",
+          selfie: "uploads/selfie.jpg",
+          wallet: 500,
+          phone: "9876543210"
+        },
+        driverUID2: {
+          name: "Amit Sharma",
+          ambulanceNo: "DL8CAF1234",
+          licenseNo: "DL-99887766",
+          status: "approved",
+          address: "Delhi, India",
+          aadharFront: "uploads/aadhar-front.jpg",
+          aadharBack: "uploads/aadhar-back.jpg",
+          panCard: "uploads/pan.jpg",
+          selfie: "uploads/selfie.jpg",
+          wallet: 1000,
+          phone: "9123456789"
+        }
+      },
+      patients: {
+        patientUID1: {
+          name: "Suresh Singh",
+          phone: "9876543210",
+          address: "Ajmer, Rajasthan"
+        },
+        patientUID2: {
+          name: "Anita Verma",
+          phone: "9988776655",
+          address: "Kota, Rajasthan"
+        }
+      },
+      bookings: {
+        bookingId1: {
+          driverId: "driverUID1",
+          driverName: "Rajesh Kumar",
+          patientId: "patientUID1",
+          patientName: "Suresh Singh",
+          status: "pending",
+          timestamp: Date.now()
+        }
+      },
+      wallets: {
+        driverUID1: 500,
+        driverUID2: 1000
+      }
+    }).then(() => {
+      alert("Database initialized successfully!");
+    }).catch(err => {
+      console.error("Error initializing database:", err);
+    });
+  }
+
+  // जब पेज खुले तो डाटा डाल दो
+  setupDatabase();
+</script>

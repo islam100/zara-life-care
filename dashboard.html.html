@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Driver Dashboard</title>
+</head>
+<body>
+<h1>Driver Dashboard</h1>
+<div id="bookings"></div>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyCFgRQxK_W2T9S5QWZnxAd-kYV52Kzyb94",
+    authDomain: "zara-life-care.firebaseapp.com",
+    projectId: "zara-life-care",
+    storageBucket: "zara-life-care.appspot.com",
+    messagingSenderId: "307306937129",
+    appId: "1:307306937129:web:a949207fe64fe87dd3d538"
+  };
+  firebase.initializeApp(firebaseConfig);
+
+  firebase.auth().onAuthStateChanged(user => {
+    if (!user) { window.location.href = "login.html"; }
+    else {
+      firebase.database().ref("drivers/" + user.uid).once("value").then(snap => {
+        if (!snap.exists() || snap.val().status !== 'approved') {
+          alert("Account not approved!");
+          window.location.href = "form.html";
+        } else { loadBookings(user.uid); }
+      });
+    }
+  });
+
+  function loadBookings(driverId) {
+    const container = document.getElementById('bookings');
+    firebase.database().ref('bookings').orderByChild('driverId').equalTo(driverId).on('value', snapshot => {
+      container.innerHTML = '';
+      snapshot.forEach(child => {
+        const b = child.val();
+        container.innerHTML += `
+          <div>
+            <p>Booking from: ${b.patientName}</p>
+            <button onclick="acceptBooking('${child.key}')">Accept</button>
+            <button onclick="rejectBooking('${child.key}')">Reject</button>
+          </div>
+        `;
+      });
+    });
+  }
+
+  function acceptBooking(bookingId) {
+    firebase.database().ref('bookings/' + bookingId).update({ status: 'accepted' });
+  }
+
+  function rejectBooking(bookingId) {
+    firebase.database().ref('bookings/' + bookingId).update({ status: 'rejected' });
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Patient Dashboard</title>
+</head>
+<body>
+<h1>Patient Dashboard</h1>
+<div id="accepted-drivers"></div>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyCFgRQxK_W2T9S5QWZnxAd-kYV52Kzyb94",
+    authDomain: "zara-life-care.firebaseapp.com",
+    projectId: "zara-life-care",
+    storageBucket: "zara-life-care.appspot.com",
+    messagingSenderId: "307306937129",
+    appId: "1:307306937129:web:a949207fe64fe87dd3d538"
+  };
+  firebase.initializeApp(firebaseConfig);
+
+  firebase.auth().onAuthStateChanged(user => {
+    if (!user) { window.location.href = "login.html"; }
+    else { loadAcceptedDrivers(user.uid); }
+  });
+
+  function loadAcceptedDrivers(patientId) {
+    const container = document.getElementById('accepted-drivers');
+    firebase.database().ref('bookings').orderByChild('patientId').equalTo(patientId).on('value', snapshot => {
+      container.innerHTML = '';
+      snapshot.forEach(child => {
+        const b = child.val();
+        if (b.status === 'accepted') {
+          container.innerHTML += `
+            <div>
+              <p>Driver: ${b.driverName}</p>
+              <button onclick="rejectDriver('${child.key}')">Reject</button>
+            </div>
+          `;
+        }
+      });
+    });
+  }
+
+  function rejectDriver(bookingId) {
+    firebase.database().ref('bookings/' + bookingId).update({ status: 'rejected' });
+  }
+</script>
+</body>
+</html>

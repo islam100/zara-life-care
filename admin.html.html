@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Admin Dashboard</title>
+<style>
+  .card { border: 1px solid #ccc; border-radius: 8px; padding: 10px; margin: 10px; display: inline-block; width: 200px; }
+  .led { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
+  .led-yellow { background: yellow; animation: blink 1s infinite; }
+  .led-green { background: green; }
+  @keyframes blink { 50% { opacity: 0; } }
+</style>
+</head>
+<body>
+<h1>Admin Dashboard</h1>
+<div id="drivers-container"></div>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyCFgRQxK_W2T9S5QWZnxAd-kYV52Kzyb94",
+    authDomain: "zara-life-care.firebaseapp.com",
+    projectId: "zara-life-care",
+    storageBucket: "zara-life-care.appspot.com",
+    messagingSenderId: "307306937129",
+    appId: "1:307306937129:web:a949207fe64fe87dd3d538"
+  };
+  firebase.initializeApp(firebaseConfig);
+
+  firebase.auth().onAuthStateChanged(user => {
+    if (!user) { window.location.href = "login.html"; }
+    else {
+      firebase.database().ref("admins/" + user.uid).once("value").then(snap => {
+        if (!snap.exists()) { alert("Access Denied"); window.location.href = "index.html"; }
+        else { loadRequests(); }
+      });
+    }
+  });
+
+  function loadRequests() {
+    const container = document.getElementById('drivers-container');
+    firebase.database().ref('drivers').on('value', snapshot => {
+      container.innerHTML = '';
+      snapshot.forEach(child => {
+        const d = child.val();
+        let ledClass = d.status === 'approved' ? 'led-green' : 'led-yellow';
+        container.innerHTML += `
+          <div class="card">
+            <h3>${d.name}</h3>
+            <p>Ambulance: ${d.ambulanceNo}</p>
+            <span class="led ${ledClass}"></span>
+            ${d.status !== 'approved' ? `<button onclick="approve('${child.key}')">Approve</button>` : ''}
+          </div>
+        `;
+      });
+    });
+  }
+
+  function approve(uid) {
+    firebase.database().ref('drivers/' + uid).update({ status: 'approved' });
+  }
+</script>
+</body>
+</html>
