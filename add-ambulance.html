@@ -1,22 +1,89 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta charset="UTF-8">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Driver Registration</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    padding: 20px;
+    background: #f9f9f9;
+  }
+  h1 {
+    text-align: center;
+    color: #007bff;
+  }
+  form {
+    max-width: 400px;
+    margin: 0 auto;
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 12px rgba(0,0,0,0.1);
+  }
+  input[type="text"], textarea, input[type="file"] {
+    width: 100%;
+    padding: 8px 10px;
+    margin: 10px 0;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+    box-sizing: border-box;
+  }
+  textarea {
+    resize: vertical;
+    min-height: 70px;
+  }
+  button {
+    width: 100%;
+    padding: 12px;
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    box-shadow: 0 4px 0 #0056b3;
+    transition: all 0.2s ease;
+  }
+  button:hover {
+    background: #0056b3;
+    box-shadow: 0 2px 0 #003d80;
+  }
+  button:active {
+    box-shadow: none;
+    transform: translateY(2px);
+  }
+</style>
 </head>
 <body>
+
 <h1>Join as Driver</h1>
 <form id="driverForm">
-  <input type="text" id="name" placeholder="Full Name" required><br>
-  <input type="text" id="ambulanceNo" placeholder="Ambulance No" required><br>
-  <input type="text" id="licenseNo" placeholder="Driving License No" required><br>
-  <input type="file" id="licenseUpload" required><br>
-  <input type="file" id="rcBookUpload" required><br>
-  <input type="file" id="aadharFront" required><br>
-  <input type="file" id="aadharBack" required><br>
-  <input type="file" id="panUpload" required><br>
-  <input type="file" id="selfieUpload" required><br>
-  <textarea id="address" placeholder="Full Address"></textarea><br>
+  <input type="text" id="name" placeholder="Full Name" required />
+  <input type="text" id="ambulanceNo" placeholder="Ambulance No" required />
+  <input type="text" id="licenseNo" placeholder="Driving License No" required />
+  
+  <label>Driving License Upload (PDF/JPG/PNG)</label>
+  <input type="file" id="licenseUpload" accept=".pdf, image/*" required />
+  
+  <label>RC Book Upload (PDF/JPG/PNG)</label>
+  <input type="file" id="rcBookUpload" accept=".pdf, image/*" required />
+  
+  <label>Aadhar Card Front (JPG/PNG)</label>
+  <input type="file" id="aadharFront" accept="image/*" required />
+  
+  <label>Aadhar Card Back (JPG/PNG)</label>
+  <input type="file" id="aadharBack" accept="image/*" required />
+  
+  <label>PAN Card Upload (PDF/JPG/PNG)</label>
+  <input type="file" id="panUpload" accept=".pdf, image/*" required />
+  
+  <label>Selfie with Documents (JPG/PNG)</label>
+  <input type="file" id="selfieUpload" accept="image/*" required />
+  
+  <textarea id="address" placeholder="Full Address" required></textarea>
   <button type="submit">Submit</button>
 </form>
 
@@ -25,6 +92,7 @@
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-storage.js"></script>
+
 <script>
   const firebaseConfig = {
     apiKey: "AIzaSyCFgRQxK_W2T9S5QWZnxAd-kYV52Kzyb94",
@@ -42,19 +110,65 @@
     }
   });
 
-  document.getElementById('driverForm').addEventListener('submit', e => {
+  const form = document.getElementById('driverForm');
+
+  form.addEventListener('submit', async e => {
     e.preventDefault();
+
     const user = firebase.auth().currentUser;
-    firebase.database().ref('drivers/' + user.uid).set({
-      name: document.getElementById('name').value,
-      ambulanceNo: document.getElementById('ambulanceNo').value,
-      licenseNo: document.getElementById('licenseNo').value,
-      address: document.getElementById('address').value,
-      status: 'pending'
-    }).then(() => {
+    if (!user) {
+      alert('Please login first');
+      return;
+    }
+
+    // Disable button to prevent multiple submits
+    const btn = form.querySelector('button');
+    btn.disabled = true;
+    btn.textContent = 'Submitting...';
+
+    // Helper function to upload file and get URL
+    async function uploadFile(file, path) {
+      const storageRef = firebase.storage().ref();
+      const fileRef = storageRef.child(path);
+      await fileRef.put(file);
+      return await fileRef.getDownloadURL();
+    }
+
+    try {
+      // Upload all files
+      const licenseUrl = await uploadFile(document.getElementById('licenseUpload').files[0], `drivers/${user.uid}/license`);
+      const rcBookUrl = await uploadFile(document.getElementById('rcBookUpload').files[0], `drivers/${user.uid}/rcBook`);
+      const aadharFrontUrl = await uploadFile(document.getElementById('aadharFront').files[0], `drivers/${user.uid}/aadharFront`);
+      const aadharBackUrl = await uploadFile(document.getElementById('aadharBack').files[0], `drivers/${user.uid}/aadharBack`);
+      const panUrl = await uploadFile(document.getElementById('panUpload').files[0], `drivers/${user.uid}/panCard`);
+      const selfieUrl = await uploadFile(document.getElementById('selfieUpload').files[0], `drivers/${user.uid}/selfie`);
+
+      // Save data in realtime database
+      await firebase.database().ref('drivers/' + user.uid).set({
+        name: document.getElementById('name').value,
+        ambulanceNo: document.getElementById('ambulanceNo').value,
+        licenseNo: document.getElementById('licenseNo').value,
+        address: document.getElementById('address').value,
+        status: 'pending',
+        licenseUpload: licenseUrl,
+        rcBookUpload: rcBookUrl,
+        aadharFront: aadharFrontUrl,
+        aadharBack: aadharBackUrl,
+        panCard: panUrl,
+        selfie: selfieUrl,
+        phone: user.phoneNumber || user.email || ''
+      });
+
       alert('Form submitted! Please wait for approval.');
-    });
+      form.reset();
+    } catch (err) {
+      alert('Error submitting form: ' + err.message);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Submit';
+    }
   });
 </script>
+
 </body>
 </html>
