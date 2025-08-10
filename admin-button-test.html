@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>4 Buttons with 3D Style</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    margin: 0; padding: 20px;
+    background: #f0f0f0;
+    display: flex;
+    justify-content: center;
+  }
+  .button-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit,minmax(140px,1fr));
+    gap: 20px;
+    max-width: 600px;
+    width: 100%;
+  }
+  .btn {
+    padding: 15px;
+    font-size: 1.1em;
+    font-weight: bold;
+    color: white;
+    border: none;
+    border-radius: 15px;
+    cursor: pointer;
+    text-align: center;
+    box-shadow:
+      0 6px 8px rgba(0,0,0,0.3),
+      inset 0 -4px 0 rgba(255,255,255,0.3);
+    transition: all 0.3s ease;
+    user-select: none;
+  }
+  .btn:hover {
+    filter: brightness(0.9);
+  }
+  #adminBtn { background: linear-gradient(145deg, #6a1b9a, #9c27b0); }
+  #rechargeBtn { background: linear-gradient(145deg, #0d47a1, #2196f3); }
+  #hospitalBtn { background: linear-gradient(145deg, #2e7d32, #4caf50); }
+  #noticeBtn { background: linear-gradient(145deg, #f57f17, #ffb300); }
+  
+  @media(max-width: 480px) {
+    .button-container {
+      grid-template-columns: 1fr;
+    }
+    .btn {
+      font-size: 1.2em;
+      padding: 18px;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="button-container">
+  <button id="adminBtn" class="btn" onclick="alert('Admin Panel clicked')">Admin Panel</button>
+  <button id="rechargeBtn" class="btn" onclick="alert('Recharge clicked')">Recharge</button>
+  <button id="hospitalBtn" class="btn" onclick="alert('Hospital clicked')">Hospital</button>
+  <button id="noticeBtn" class="btn" onclick="alert('Notice Board clicked')">Notice Board</button>
+</div>
+
+</body>
+</html>
