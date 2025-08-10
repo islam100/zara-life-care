@@ -16,6 +16,28 @@
     border: 1px solid #ccc;
     cursor: pointer;
   }
+
+  /* नया Hospital Post button */
+  #postHospitalBtn {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    background: #2196F3;
+    color: white;
+    border: none;
+    padding: 6px 14px;
+    border-radius: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 5px 8px rgba(33,150,243,0.4);
+    transition: box-shadow 0.3s ease;
+    z-index: 10000;
+    user-select: none;
+  }
+  #postHospitalBtn:hover {
+    box-shadow: 0 8px 15px rgba(33,150,243,0.7);
+  }
+
   #refreshBtn {
     position: fixed;
     top: 10px;
@@ -29,6 +51,7 @@
     cursor: pointer;
     box-shadow: 0 5px 8px rgba(76,175,80,0.4);
     transition: box-shadow 0.3s ease;
+    user-select: none;
   }
   #refreshBtn:hover {
     box-shadow: 0 8px 15px rgba(76,175,80,0.7);
@@ -139,6 +162,7 @@
 
 <div class="grid" id="hospitalGrid"></div>
 
+<button id="postHospitalBtn" title="Post a Hospital">Hospital Post</button>
 <button id="refreshBtn" title="Reload hospitals">Reload</button>
 
 <!-- Modal -->
@@ -174,10 +198,10 @@
   const modalClose = document.getElementById('modalClose');
   const modalImg = document.getElementById('modalImg');
   const refreshBtn = document.getElementById('refreshBtn');
+  const postHospitalBtn = document.getElementById('postHospitalBtn');
 
   let hospitals = [];
 
-  // हॉस्पिटल डेटा Firebase से लोड करें
   function loadHospitals() {
     hospitalGrid.innerHTML = '<p>Loading hospitals...</p>';
     db.ref('hospitals').orderByChild('approved').equalTo(true).once('value')
@@ -196,7 +220,6 @@
       });
   }
 
-  // यूनिक एरियाज dropdown में भरें
   function populateAreaDropdown() {
     const areas = [...new Set(hospitals.map(h => h.area.trim()).filter(a => a))].sort();
     areaSelect.innerHTML = '<option value="">-- Select Area --</option>';
@@ -208,7 +231,6 @@
     });
   }
 
-  // हॉस्पिटल्स दिखाएं area filter के हिसाब से
   function renderHospitals() {
     const selectedArea = areaSelect.value;
     hospitalGrid.innerHTML = '';
@@ -255,7 +277,11 @@
   areaSelect.addEventListener('change', renderHospitals);
   refreshBtn.addEventListener('click', loadHospitals);
 
-  // शुरू में डेटा लोड करें
+  postHospitalBtn.addEventListener('click', () => {
+    // अपना hospital post page URL यहां डालें
+    window.location.href = 'hospital_post.html';
+  });
+
   loadHospitals();
 </script>
 
