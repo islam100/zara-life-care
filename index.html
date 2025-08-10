@@ -3,199 +3,151 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Zara Life Care - Home</title>
+<title>Zara Life Care - Ambulance Booking</title>
 <style>
   body {
     font-family: Arial, sans-serif;
-    margin:0; padding:0;
+    margin:0; padding:20px;
     background: #f5f5f5;
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
   }
-  header {
-    background: #007BFF;
-    color: white;
-    padding: 10px 15px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    position: relative;
+  h1 {
+    text-align: center;
+    color: #333;
   }
-  .logo {
-    font-weight: bold;
-    font-size: 1.5em;
-  }
-  #loginBtn, #logoutBtn {
-    position: absolute;
-    right: 10px;
-    top: 10px;
-    padding: 5px 10px;
-    font-size: 0.8em;
-    border-radius: 10px;
-    border: none;
-    color: white;
-    cursor: pointer;
-    box-shadow:
-      0 4px 6px rgba(0,0,0,0.3),
-      inset 0 -3px 0 rgba(255,255,255,0.3);
-    transition: all 0.3s ease;
-  }
-  #loginBtn {
-    background: linear-gradient(145deg, #ffa500, #cc8400);
-  }
-  #loginBtn:hover {
-    background: linear-gradient(145deg, #cc8400, #995c00);
-  }
-  #logoutBtn {
-    background: linear-gradient(145deg, #ff4444, #cc0000);
-    display: none;
-  }
-  #logoutBtn:hover {
-    background: linear-gradient(145deg, #cc0000, #990000);
-  }
-
-  main {
-    flex-grow: 1;
-    padding: 20px;
-  }
-  .button-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 15px;
-    max-width: 400px;
+  form {
+    max-width: 450px;
     margin: 20px auto;
+    background: white;
+    padding: 25px;
+    border-radius: 15px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
   }
-  button.action-btn {
-    padding: 15px;
-    font-size: 1.1em;
-    font-weight: bold;
-    border-radius: 20px;
-    color: white;
-    border: none;
-    cursor: pointer;
-    box-shadow:
-      0 6px 8px rgba(0,0,0,0.35),
-      inset 0 -4px 0 rgba(255,255,255,0.3);
-    transition: all 0.3s ease;
+  label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+    color: #555;
   }
-  button#bookAmbulanceBtn {
+  input, select, textarea {
+    width: 100%;
+    padding: 10px 12px;
+    margin-bottom: 18px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 1em;
+    transition: border-color 0.3s ease;
+  }
+  input:focus, select:focus, textarea:focus {
+    border-color: #007bff;
+    outline: none;
+  }
+  textarea {
+    resize: vertical;
+    min-height: 80px;
+  }
+  .submit-btn {
     background: linear-gradient(145deg, #4caf50, #388e3c);
+    box-shadow:
+      0 5px 10px rgba(0,0,0,0.3),
+      inset 0 -3px 0 rgba(255,255,255,0.4);
+    color: white;
+    font-weight: bold;
+    font-size: 1.1em;
+    padding: 14px;
+    width: 100%;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    user-select: none;
   }
-  button#bookAmbulanceBtn:hover {
+  .submit-btn:hover {
     background: linear-gradient(145deg, #388e3c, #2e7030);
   }
-  button#hospitalListBtn {
-    background: linear-gradient(145deg, #2196f3, #1565c0);
+  .submit-btn:active {
+    box-shadow:
+      inset 0 3px 6px rgba(0,0,0,0.3),
+      0 1px 2px rgba(0,0,0,0.2);
   }
-  button#hospitalListBtn:hover {
-    background: linear-gradient(145deg, #1565c0, #0d3a7a);
+  #feedbackMsg {
+    text-align: center;
+    font-weight: 600;
+    margin-top: 12px;
   }
-  button#driverBtn {
-    background: linear-gradient(145deg, #ff5722, #d84315);
-  }
-  button#driverBtn:hover {
-    background: linear-gradient(145deg, #d84315, #a32c0c);
-  }
-  button#marijStatusBtn {
-    background: linear-gradient(145deg, #9c27b0, #6a1b9a);
-  }
-  button#marijStatusBtn:hover {
-    background: linear-gradient(145deg, #6a1b9a, #4a0d6a);
-  }
-
   /* Responsive */
-  @media(max-width:450px) {
-    .button-grid {
-      grid-template-columns: 1fr;
-      max-width: 90%;
-    }
-    button.action-btn {
-      font-size: 1em;
-      padding: 12px;
+  @media(max-width:500px) {
+    form {
+      padding: 18px;
+      margin: 15px;
     }
   }
 </style>
 </head>
 <body>
 
-<header>
-  <div class="logo">Zara Life Care</div>
-  <button id="loginBtn">Login</button>
-  <button id="logoutBtn">Logout</button>
-</header>
+<h1>Book Ambulance</h1>
+<form id="ambulanceForm" novalidate>
+  <label for="patientName">Your Name *</label>
+  <input type="text" id="patientName" name="patientName" placeholder="Enter your full name" required />
 
-<main>
-  <div class="button-grid">
-    <button id="bookAmbulanceBtn" class="action-btn">Book Ambulance</button>
-    <button id="hospitalListBtn" class="action-btn">Hospital List</button>
-    <button id="driverBtn" class="action-btn">Driver</button>
-    <button id="marijStatusBtn" class="action-btn">Marij Status</button>
-  </div>
-</main>
+  <label for="patientPhone">WhatsApp Number *</label>
+  <input type="tel" id="patientPhone" name="patientPhone" placeholder="10 digit number only" 
+         pattern="^\d{10}$" title="Enter 10 digit WhatsApp number" required />
 
-<!-- Firebase SDK -->
-<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+  <label for="patientAddress">Pickup Address *</label>
+  <textarea id="patientAddress" name="patientAddress" placeholder="Where should ambulance pick you up?" required></textarea>
+
+  <label for="destination">Destination *</label>
+  <input type="text" id="destination" name="destination" placeholder="Where to go?" required />
+
+  <label for="ambulanceCategory">Ambulance Category *</label>
+  <select id="ambulanceCategory" name="ambulanceCategory" required>
+    <option value="" disabled selected>Select Ambulance Category</option>
+    <option value="ICU">ICU</option>
+    <option value="Basic">Basic</option>
+    <option value="Non-ICU">Non-ICU</option>
+  </select>
+
+  <button type="submit" class="submit-btn">Submit Booking</button>
+  <div id="feedbackMsg" aria-live="polite"></div>
+</form>
 
 <script>
-  // Firebase configuration (अपना config डालें)
-  const firebaseConfig = {
-    apiKey: "AIzaSyCFgRQxK_W2T9S5QWZnxAd-kYV52Kzyb94",
-    authDomain: "zara-life-care.firebaseapp.com",
-    projectId: "zara-life-care",
-    storageBucket: "zara-life-care.appspot.com",
-    messagingSenderId: "307306937129",
-    appId: "1:307306937129:web:a949207fe64fe87dd3d538"
-  };
+  const form = document.getElementById('ambulanceForm');
+  const feedback = document.getElementById('feedbackMsg');
 
-  // Initialize Firebase
-  firebase.initializeApp(firebaseConfig);
-  const auth = firebase.auth();
+  form.addEventListener('submit', function(e) {
+    e.preventDefault();
 
-  const loginBtn = document.getElementById('loginBtn');
-  const logoutBtn = document.getElementById('logoutBtn');
+    // Clear previous feedback
+    feedback.textContent = '';
+    feedback.style.color = '';
 
-  loginBtn.addEventListener('click', () => {
-    const provider = new firebase.auth.GoogleAuthProvider();
-    auth.signInWithPopup(provider)
-      .catch(error => alert('Login failed: ' + error.message));
-  });
-
-  logoutBtn.addEventListener('click', () => {
-    auth.signOut();
-  });
-
-  auth.onAuthStateChanged(user => {
-    if(user){
-      loginBtn.style.display = 'none';
-      logoutBtn.style.display = 'inline-block';
-    } else {
-      loginBtn.style.display = 'inline-block';
-      logoutBtn.style.display = 'none';
+    // Check validity
+    if (!form.checkValidity()) {
+      feedback.style.color = 'red';
+      feedback.textContent = 'Please fill all fields correctly.';
+      form.reportValidity();
+      return;
     }
-  });
 
-  // बटन के लिंक (अपना लिंक यहाँ डालें)
-  const links = {
-    bookAmbulanceBtn: 'https://example.com/book-ambulance',
-    hospitalListBtn: 'https://example.com/hospital-list',
-    driverBtn: 'https://example.com/driver',
-    marijStatusBtn: 'https://example.com/marij-status'
-  };
+    // Prepare form data
+    const data = {
+      patientName: form.patientName.value.trim(),
+      patientPhone: form.patientPhone.value.trim(),
+      patientAddress: form.patientAddress.value.trim(),
+      destination: form.destination.value.trim(),
+      ambulanceCategory: form.ambulanceCategory.value
+    };
 
-  Object.keys(links).forEach(id => {
-    const btn = document.getElementById(id);
-    if(btn){
-      btn.addEventListener('click', () => {
-        // driver और marij status बटन पर login चाहिए
-        if((id === 'driverBtn' || id === 'marijStatusBtn') && !auth.currentUser){
-          alert('Please login first');
-          return;
-        }
-        window.location.href = links[id];
-      });
-    }
+    // For demo: just show success message
+    // You can replace this with Firebase or API call here
+    console.log('Booking Data:', data);
+
+    feedback.style.color = 'green';
+    feedback.textContent = 'Booking submitted successfully! Please wait for confirmation.';
+
+    form.reset();
   });
 </script>
 
