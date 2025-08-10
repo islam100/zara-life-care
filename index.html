@@ -205,13 +205,15 @@
     }
   });
 
-  const links = {
-    bookAmbulanceBtn: 'https://zara-life-care.vercel.app/booking.html',
-    hospitalListBtn: 'https://zara-life-care.vercel.app/hospital-list.html',
-    driverBtn: 'https://zara-life-care.vercel.app/driver-bottun.html',
-    adminBtn: 'https://zara-life-care.vercel.app/admin.html'
-       adminBtn: 'https://zara-life-care.vercel.app/admin.html'
-  };
+  // cache-busting version parameter (timestamp)
+const version = '?v=' + new Date().getTime();
+
+const links = {
+  bookAmbulanceBtn: 'https://zara-life-care.vercel.app/booking.html' + version,
+  hospitalListBtn: 'https://zara-life-care.vercel.app/hospital-list.html' + version,
+  driverBtn: 'https://zara-life-care.vercel.app/driver-bottun.html' + version,
+  adminBtn: 'https://zara-life-care.vercel.app/admin.html' + version
+};
 
   // Handle button clicks
   buttonIds.forEach(id => {
