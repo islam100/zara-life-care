@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Zara Life Care - Ambulance Booking</title>
+<title>Zara Life Care - Ambulance Booking & Driver Panel</title>
 <style>
   body {
     font-family: Arial, sans-serif;
@@ -34,6 +34,7 @@
     color: white;
     transition: all 0.2s ease;
     user-select: none;
+    margin-left: 10px;
   }
   button:hover {
     background: linear-gradient(145deg, #3ea0ff, #3388ff);
@@ -46,21 +47,20 @@
     outline: none;
   }
   main {
-    max-width: 600px;
+    max-width: 700px;
     margin: 30px auto;
     background: white;
     padding: 20px;
     border-radius: 15px;
     box-shadow: 3px 5px 15px rgba(0,0,0,0.1);
   }
-  #bookAmbBtn {
-    display: block;
-    margin: 0 auto 20px auto;
+  h2 {
+    text-align: center;
   }
-  #bookingForm {
-    display: none;
+  form {
+    margin-top: 15px;
   }
-  #bookingForm input, #bookingForm select, #bookingForm textarea {
+  input, select, textarea {
     width: 100%;
     padding: 8px 12px;
     margin: 10px 0;
@@ -69,7 +69,7 @@
     box-sizing: border-box;
     font-size: 1rem;
   }
-  #bookingForm textarea {
+  textarea {
     resize: vertical;
   }
   #statusMessage {
@@ -78,7 +78,7 @@
     color: #444;
     text-align: center;
   }
-  #driverInfo {
+  #driverInfo, #driverPanel, #patientPanel {
     margin-top: 20px;
     background: #dff0d8;
     padding: 15px;
@@ -93,6 +93,12 @@
   #driverInfo a:hover {
     text-decoration: underline;
   }
+  #driverPanel h3, #patientPanel h3 {
+    margin-top: 0;
+  }
+  .hidden {
+    display: none;
+  }
   @media (max-width: 480px) {
     header {
       flex-direction: column;
@@ -101,6 +107,11 @@
     main {
       margin: 15px;
       padding: 15px;
+    }
+    button {
+      margin-left: 0;
+      margin-top: 10px;
+      width: 100%;
     }
   }
 </style>
@@ -111,37 +122,69 @@
   <h1>Zara Life Care</h1>
   <div>
     <button id="loginBtn">Login with Google</button>
-    <button id="logoutBtn" style="display:none;">Logout</button>
+    <button id="logoutBtn" class="hidden">Logout</button>
   </div>
 </header>
 
 <main>
-  <button id="bookAmbBtn" disabled>Book Ambulance</button>
+  <div id="roleSelection" class="hidden">
+    <h2>Select Role</h2>
+    <button id="asPatientBtn">I am Patient</button>
+    <button id="asDriverBtn">I am Driver</button>
+  </div>
 
-  <form id="bookingForm">
-    <h2>Ambulance Booking Form</h2>
-    <input type="text" id="patientName" placeholder="Patient Name" required />
-    <textarea id="patientAddress" placeholder="Patient Address" rows="3" required></textarea>
-    <input type="text" id="destination" placeholder="Destination" required />
-    <select id="ambulanceCategory" required>
-      <option value="" disabled selected>Select Ambulance Category</option>
-      <option value="Basic">Basic</option>
-      <option value="AC">AC</option>
-      <option value="ICU">ICU</option>
-      <option value="ALS">ALS (Advanced Life Support)</option>
-    </select>
-    <input type="tel" id="whatsappNumber" placeholder="WhatsApp Number" pattern="[0-9]{10,15}" required />
-    <button type="submit">Submit Booking</button>
-  </form>
+  <!-- Patient Panel -->
+  <div id="patientPanel" class="hidden">
+    <button id="bookAmbBtn" style="display:block; margin: 20px auto 10px auto; width: 200px;">Book Ambulance</button>
 
-  <div id="statusMessage"></div>
+    <form id="bookingForm" class="hidden">
+      <h3>Ambulance Booking Form</h3>
+      <input type="text" id="patientName" placeholder="Patient Name" required />
+      <textarea id="patientAddress" placeholder="Patient Address" rows="3" required></textarea>
+      <input type="text" id="destination" placeholder="Destination" required />
+      <select id="ambulanceCategory" required>
+        <option value="" disabled selected>Select Ambulance Category</option>
+        <option value="Basic">Basic</option>
+        <option value="AC">AC</option>
+        <option value="ICU">ICU</option>
+        <option value="ALS">ALS (Advanced Life Support)</option>
+      </select>
+      <input type="tel" id="whatsappNumber" placeholder="WhatsApp Number" pattern="[0-9]{10,15}" required />
+      <button type="submit">Submit Booking</button>
+    </form>
 
-  <div id="driverInfo" style="display:none;">
-    <h2>Ambulance Assigned</h2>
-    <p><strong>Driver Name:</strong> <span id="driverName"></span></p>
-    <p><strong>Ambulance Category:</strong> <span id="driverAmbCategory"></span></p>
-    <p><strong>Ambulance Number:</strong> <span id="driverAmbNo"></span></p>
-    <p><strong>Driver WhatsApp:</strong> <a href="#" target="_blank" id="driverWhatsappLink"></a></p>
+    <div id="statusMessage"></div>
+
+    <div id="driverInfo" class="hidden">
+      <h3>Ambulance Assigned</h3>
+      <p><strong>Driver Name:</strong> <span id="driverName"></span></p>
+      <p><strong>Ambulance Category:</strong> <span id="driverAmbCategory"></span></p>
+      <p><strong>Ambulance Number:</strong> <span id="driverAmbNo"></span></p>
+      <p><strong>Driver WhatsApp:</strong> <a href="#" target="_blank" id="driverWhatsappLink"></a></p>
+    </div>
+  </div>
+
+  <!-- Driver Panel -->
+  <div id="driverPanel" class="hidden">
+    <h3>Driver Registration / Update</h3>
+    <form id="driverForm">
+      <input type="text" id="driverNameInput" placeholder="Full Name" required />
+      <input type="text" id="driverAmbNoInput" placeholder="Ambulance Number" required />
+      <select id="driverAmbCategoryInput" required>
+        <option value="" disabled selected>Select Ambulance Category</option>
+        <option value="Basic">Basic</option>
+        <option value="AC">AC</option>
+        <option value="ICU">ICU</option>
+        <option value="ALS">ALS (Advanced Life Support)</option>
+      </select>
+      <input type="tel" id="driverWhatsappInput" placeholder="Driver WhatsApp Number" pattern="[0-9]{10,15}" required />
+      <button type="submit">Save Driver Info</button>
+    </form>
+
+    <h3>Your Booking Notifications</h3>
+    <div id="driverNotifications">
+      <p>No notifications yet.</p>
+    </div>
   </div>
 </main>
 
@@ -151,7 +194,6 @@
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
 <script>
-  // Firebase config - सही अपने प्रोजेक्ट के अनुसार लगाएं
   const firebaseConfig = {
     apiKey: "AIzaSyCFgRQxK_W2T9S5QWZnxAd-kYV52Kzyb94",
     authDomain: "zara-life-care.firebaseapp.com",
@@ -166,9 +208,15 @@
   const auth = firebase.auth();
   const db = firebase.database();
 
-  // DOM Elements
+  // DOM elements
   const loginBtn = document.getElementById('loginBtn');
   const logoutBtn = document.getElementById('logoutBtn');
+  const roleSelection = document.getElementById('roleSelection');
+  const asPatientBtn = document.getElementById('asPatientBtn');
+  const asDriverBtn = document.getElementById('asDriverBtn');
+  const patientPanel = document.getElementById('patientPanel');
+  const driverPanel = document.getElementById('driverPanel');
+
   const bookAmbBtn = document.getElementById('bookAmbBtn');
   const bookingForm = document.getElementById('bookingForm');
   const statusMessage = document.getElementById('statusMessage');
@@ -178,158 +226,276 @@
   const driverAmbNoSpan = document.getElementById('driverAmbNo');
   const driverWhatsappLink = document.getElementById('driverWhatsappLink');
 
-  // लॉगिन बटन
+  const driverForm = document.getElementById('driverForm');
+  const driverNameInput = document.getElementById('driverNameInput');
+  const driverAmbNoInput = document.getElementById('driverAmbNoInput');
+  const driverAmbCategoryInput = document.getElementById('driverAmbCategoryInput');
+  const driverWhatsappInput = document.getElementById('driverWhatsappInput');
+  const driverNotifications = document.getElementById('driverNotifications');
+
+  let currentUser = null;
+  let currentRole = null; // "patient" or "driver"
+  let currentBookingKey = null;
+
+  // Login with Google
   loginBtn.addEventListener('click', () => {
     const provider = new firebase.auth.GoogleAuthProvider();
-    auth.signInWithPopup(provider).catch(e => alert('Login failed: ' + e.message));
+    auth.signInWithPopup(provider).catch(err => alert("Login failed: "+err.message));
   });
 
-  // लॉगआउट बटन
   logoutBtn.addEventListener('click', () => {
     auth.signOut();
   });
 
-  // Auth state change
   auth.onAuthStateChanged(user => {
-    if(user){
-      loginBtn.style.display = 'none';
-      logoutBtn.style.display = 'inline-block';
-      bookAmbBtn.disabled = false;
-      checkUserBooking(user.uid);
-      statusMessage.textContent = '';
+    currentUser = user;
+    if(user) {
+      loginBtn.classList.add('hidden');
+      logoutBtn.classList.remove('hidden');
+      roleSelection.classList.remove('hidden');
     } else {
-      loginBtn.style.display = 'inline-block';
-      logoutBtn.style.display = 'none';
-      bookAmbBtn.disabled = true;
-      bookingForm.style.display = 'none';
-      statusMessage.textContent = 'Please login to book ambulance.';
-      driverInfoDiv.style.display = 'none';
+      loginBtn.classList.remove('hidden');
+      logoutBtn.classList.add('hidden');
+      roleSelection.classList.add('hidden');
+      patientPanel.classList.add('hidden');
+      driverPanel.classList.add('hidden');
+      bookingForm.classList.add('hidden');
+      driverInfoDiv.classList.add('hidden');
+      statusMessage.textContent = '';
+      currentRole = null;
+      currentBookingKey = null;
     }
   });
 
-  // बुकिंग बटन से फॉर्म दिखाएं
-  bookAmbBtn.addEventListener('click', () => {
-    bookingForm.style.display = 'block';
+  // Role selection buttons
+  asPatientBtn.addEventListener('click', () => {
+    currentRole = "patient";
+    roleSelection.classList.add('hidden');
+    patientPanel.classList.remove('hidden');
+    driverPanel.classList.add('hidden');
+    driverNotifications.innerHTML = "";
+    driverInfoDiv.classList.add('hidden');
     statusMessage.textContent = '';
-    driverInfoDiv.style.display = 'none';
+    bookingForm.classList.add('hidden');
+    loadPatientBookingStatus();
   });
 
-  // फॉर्म सबमिट
+  asDriverBtn.addEventListener('click', () => {
+    currentRole = "driver";
+    roleSelection.classList.add('hidden');
+    driverPanel.classList.remove('hidden');
+    patientPanel.classList.add('hidden');
+    statusMessage.textContent = '';
+    driverInfoDiv.classList.add('hidden');
+    bookingForm.classList.add('hidden');
+    loadDriverInfo();
+    loadDriverNotifications();
+  });
+
+  // Book ambulance button (patient)
+  bookAmbBtn.addEventListener('click', () => {
+    bookingForm.classList.toggle('hidden');
+  });
+
+  // Submit booking form (patient)
   bookingForm.addEventListener('submit', e => {
     e.preventDefault();
-    const user = auth.currentUser;
-    if(!user){
-      alert('Please login first!');
-      return;
-    }
-    const patientName = document.getElementById('patientName').value.trim();
-    const patientAddress = document.getElementById('patientAddress').value.trim();
-    const destination = document.getElementById('destination').value.trim();
-    const ambulanceCategory = document.getElementById('ambulanceCategory').value;
-    const whatsappNumber = document.getElementById('whatsappNumber').value.trim();
+    if(!currentUser || currentRole !== "patient") return alert("Please login as patient");
 
-    if(!patientName || !patientAddress || !destination || !ambulanceCategory || !whatsappNumber){
-      alert('Please fill all fields!');
-      return;
-    }
-
-    const newBookingKey = db.ref().child('bookings').push().key;
     const bookingData = {
-      userId: user.uid,
-      patientName,
-      patientAddress,
-      destination,
-      ambulanceCategory,
-      whatsappNumber,
-      status: 'pending', // जब तक driver accept न करे
-      timestamp: Date.now()
+      userId: currentUser.uid,
+      patientName: document.getElementById('patientName').value,
+      patientAddress: document.getElementById('patientAddress').value,
+      destination: document.getElementById('destination').value,
+      ambulanceCategory: document.getElementById('ambulanceCategory').value,
+      whatsappNumber: document.getElementById('whatsappNumber').value,
+      status: "pending",
+      createdAt: firebase.database.ServerValue.TIMESTAMP
     };
 
-    let updates = {};
-    updates['/bookings/' + newBookingKey] = bookingData;
-
-    // Notify all approved drivers
-    db.ref('drivers').orderByChild('status').equalTo('approved').once('value')
-      .then(snapshot => {
-        snapshot.forEach(driverSnap => {
-          const driverId = driverSnap.key;
-          updates['/notifications/' + driverId + '/' + newBookingKey] = {
-            message: `New booking request from ${patientName}`,
-            bookingId: newBookingKey,
-            timestamp: Date.now()
-          };
-        });
-        return db.ref().update(updates);
-      })
-      .then(() => {
-        bookingForm.reset();
-        bookingForm.style.display = 'none';
-        statusMessage.textContent = 'Booking submitted. Waiting for ambulance acceptance.';
-        listenBookingStatus(newBookingKey, user.uid);
-      })
-      .catch(err => alert('Error submitting booking: ' + err.message));
+    // Save booking
+    const newBookingRef = db.ref('bookings').push();
+    newBookingRef.set(bookingData).then(() => {
+      alert("Booking submitted. Waiting for acceptance.");
+      bookingForm.reset();
+      bookingForm.classList.add('hidden');
+      currentBookingKey = newBookingRef.key;
+      listenBookingStatus(currentBookingKey);
+    }).catch(err => alert("Booking failed: "+err.message));
   });
 
-  // यूजर की बुकिंग देखे जो accepted हो या pending हो
-  function checkUserBooking(uid){
-    // केवल active booking (pending या accepted) देखे
-    db.ref('bookings').orderByChild('userId').equalTo(uid).once('value')
+  // Load patient booking status
+  function loadPatientBookingStatus() {
+    if(!currentUser) return;
+
+    // Query bookings by this userId where status = pending or accepted
+    db.ref('bookings').orderByChild('userId').equalTo(currentUser.uid).once('value')
       .then(snapshot => {
         let found = false;
         snapshot.forEach(childSnap => {
           const booking = childSnap.val();
-          if(booking.status === 'accepted'){
+          if(booking.status === 'accepted' || booking.status === 'pending') {
             found = true;
-            showDriverInfo(booking.driverInfo);
-            statusMessage.textContent = '';
-          } else if(booking.status === 'pending'){
-            found = true;
-            statusMessage.textContent = 'Waiting for ambulance acceptance.';
+            currentBookingKey = childSnap.key;
+            if(booking.status === 'accepted' && booking.driverInfo){
+              statusMessage.textContent = "Your ambulance booking accepted!";
+              showDriverInfo(booking.driverInfo);
+            } else {
+              statusMessage.textContent = "Waiting for ambulance acceptance.";
+              driverInfoDiv.classList.add('hidden');
+            }
+            listenBookingStatus(currentBookingKey);
           }
         });
         if(!found){
-          statusMessage.textContent = 'No active booking found. Please book ambulance.';
-          driverInfoDiv.style.display = 'none';
+          statusMessage.textContent = "No active booking found. Please book ambulance.";
+          driverInfoDiv.classList.add('hidden');
+          currentBookingKey = null;
         }
       });
   }
 
-  // ड्राइवर की जानकारी दिखाना
-  function showDriverInfo(driverInfo){
-    if(!driverInfo){
-      driverInfoDiv.style.display = 'none';
-      return;
-    }
-    driverNameSpan.textContent = driverInfo.driverName || 'N/A';
-    driverAmbCategorySpan.textContent = driverInfo.ambulanceCategory || 'N/A';
-    driverAmbNoSpan.textContent = driverInfo.ambulanceNumber || 'N/A';
-    if(driverInfo.whatsappNumber){
-      const whatsappUrl = `https://wa.me/${driverInfo.whatsappNumber.replace(/\D/g,'')}`;
-      driverWhatsappLink.href = whatsappUrl;
-      driverWhatsappLink.textContent = driverInfo.whatsappNumber;
-    } else {
-      driverWhatsappLink.href = '#';
-      driverWhatsappLink.textContent = 'N/A';
-    }
-    driverInfoDiv.style.display = 'block';
-  }
-
-  // बुकिंग स्टेटस बदलने पर रियलटाइम सुनना (यह optional है)
-  function listenBookingStatus(bookingKey, uid){
+  // Listen booking status realtime
+  function listenBookingStatus(bookingKey) {
+    if(!bookingKey) return;
     const bookingRef = db.ref('bookings/' + bookingKey);
     bookingRef.on('value', snapshot => {
       const booking = snapshot.val();
       if(!booking) return;
 
       if(booking.status === 'accepted' && booking.driverInfo){
-        statusMessage.textContent = 'Your ambulance booking accepted!';
+        statusMessage.textContent = "Your ambulance booking accepted!";
         showDriverInfo(booking.driverInfo);
       } else if(booking.status === 'pending'){
-        statusMessage.textContent = 'Waiting for ambulance acceptance.';
-        driverInfoDiv.style.display = 'none';
+        statusMessage.textContent = "Waiting for ambulance acceptance.";
+        driverInfoDiv.classList.add('hidden');
       }
     });
   }
+
+  // Show driver info (patient side)
+  function showDriverInfo(driverInfo) {
+    if(!driverInfo){
+      driverInfoDiv.classList.add('hidden');
+      return;
+    }
+    driverNameSpan.textContent = driverInfo.driverName || 'N/A';
+    driverAmbCategorySpan.textContent = driverInfo.ambulanceCategory || 'N/A';
+    driverAmbNoSpan.textContent = driverInfo.ambulanceNumber || 'N/A';
+    if(driverInfo.whatsappNumber){
+      const waNum = driverInfo.whatsappNumber.replace(/\D/g,'');
+      driverWhatsappLink.href = `https://wa.me/${waNum}`;
+      driverWhatsappLink.textContent = driverInfo.whatsappNumber;
+    } else {
+      driverWhatsappLink.href = '#';
+      driverWhatsappLink.textContent = 'N/A';
+    }
+    driverInfoDiv.classList.remove('hidden');
+  }
+
+  // Driver form submit (save/update driver info)
+  driverForm.addEventListener('submit', e => {
+    e.preventDefault();
+    if(!currentUser || currentRole !== "driver") return alert("Please login as driver");
+
+    const driverData = {
+      driverName: driverNameInput.value,
+      ambulanceNumber: driverAmbNoInput.value,
+      ambulanceCategory: driverAmbCategoryInput.value,
+      whatsappNumber: driverWhatsappInput.value,
+      userId: currentUser.uid,
+      createdAt: firebase.database.ServerValue.TIMESTAMP
+    };
+
+    db.ref('drivers/' + currentUser.uid).set(driverData)
+      .then(() => {
+        alert("Driver info saved.");
+        loadDriverInfo();
+      }).catch(err => alert("Error saving driver info: "+err.message));
+  });
+
+  // Load driver info into form
+  function loadDriverInfo() {
+    db.ref('drivers/' + currentUser.uid).once('value')
+      .then(snapshot => {
+        const d = snapshot.val();
+        if(d){
+          driverNameInput.value = d.driverName || '';
+          driverAmbNoInput.value = d.ambulanceNumber || '';
+          driverAmbCategoryInput.value = d.ambulanceCategory || '';
+          driverWhatsappInput.value = d.whatsappNumber || '';
+        } else {
+          driverNameInput.value = '';
+          driverAmbNoInput.value = '';
+          driverAmbCategoryInput.value = '';
+          driverWhatsappInput.value = '';
+        }
+      });
+  }
+
+  // Load driver booking notifications (bookings where status=pending and ambulanceCategory matches)
+  function loadDriverNotifications() {
+    driverNotifications.innerHTML = "";
+    db.ref('bookings').orderByChild('status').equalTo('pending').on('value', snapshot => {
+      let html = "";
+      snapshot.forEach(childSnap => {
+        const booking = childSnap.val();
+        const bookingKey = childSnap.key;
+
+        // Check if driver's ambulanceCategory matches booking ambulanceCategory
+        db.ref('drivers/' + currentUser.uid).once('value').then(driverSnap => {
+          const driver = driverSnap.val();
+          if(driver && driver.ambulanceCategory === booking.ambulanceCategory){
+            html += `
+              <div style="border:1px solid #ccc; padding:10px; margin-bottom:10px; border-radius:8px; background:#e8f5e9;">
+                <p><strong>Patient:</strong> ${booking.patientName}</p>
+                <p><strong>Address:</strong> ${booking.patientAddress}</p>
+                <p><strong>Destination:</strong> ${booking.destination}</p>
+                <p><strong>WhatsApp:</strong> <a href="https://wa.me/${booking.whatsappNumber.replace(/\D/g,'')}" target="_blank">${booking.whatsappNumber}</a></p>
+                <button onclick="acceptBooking('${bookingKey}')">Accept Booking</button>
+                <button onclick="rejectBooking('${bookingKey}')">Reject Booking</button>
+              </div>
+            `;
+            driverNotifications.innerHTML = html;
+          } else if(html === "") {
+            driverNotifications.innerHTML = "<p>No matching bookings available.</p>";
+          }
+        });
+      });
+    });
+  }
+
+  // Accept booking (driver)
+  function acceptBooking(bookingKey) {
+    if(!currentUser) return alert("Login required");
+
+    // Get driver info
+    db.ref('drivers/' + currentUser.uid).once('value').then(driverSnap => {
+      const driver = driverSnap.val();
+      if(!driver) return alert("Please save your driver info first.");
+
+      // Update booking
+      db.ref('bookings/' + bookingKey).update({
+        status: 'accepted',
+        driverInfo: driver,
+        acceptedBy: currentUser.uid,
+        acceptedAt: firebase.database.ServerValue.TIMESTAMP
+      }).then(() => {
+        alert("Booking accepted.");
+      }).catch(err => alert("Failed to accept booking: "+err.message));
+    });
+  }
+
+  // Reject booking (driver)
+  function rejectBooking(bookingKey) {
+    if(!currentUser) return alert("Login required");
+    db.ref('bookings/' + bookingKey).update({
+      status: 'rejected'
+    }).then(() => {
+      alert("Booking rejected.");
+    }).catch(err => alert("Failed to reject booking: "+err.message));
+  }
+
 </script>
 
 </body>
