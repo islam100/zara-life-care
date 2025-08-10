@@ -104,6 +104,13 @@
     background: linear-gradient(145deg, #6a1b9a, #4a0d6a);
   }
 
+  /* Disabled state styling */
+  button.action-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+
   /* Responsive */
   @media(max-width:450px) {
     .button-grid {
@@ -156,6 +163,16 @@
   const loginBtn = document.getElementById('loginBtn');
   const logoutBtn = document.getElementById('logoutBtn');
 
+  const buttonIds = ['bookAmbulanceBtn', 'hospitalListBtn', 'driverBtn', 'marijStatusBtn'];
+
+  // Initially disable all buttons
+  buttonIds.forEach(id => {
+    const btn = document.getElementById(id);
+    if(btn) {
+      btn.disabled = true;
+    }
+  });
+
   loginBtn.addEventListener('click', () => {
     const provider = new firebase.auth.GoogleAuthProvider();
     auth.signInWithPopup(provider)
@@ -170,13 +187,23 @@
     if(user){
       loginBtn.style.display = 'none';
       logoutBtn.style.display = 'inline-block';
+      // Enable all buttons on login
+      buttonIds.forEach(id => {
+        const btn = document.getElementById(id);
+        if(btn) btn.disabled = false;
+      });
     } else {
       loginBtn.style.display = 'inline-block';
       logoutBtn.style.display = 'none';
+      // Disable all buttons on logout
+      buttonIds.forEach(id => {
+        const btn = document.getElementById(id);
+        if(btn) btn.disabled = true;
+      });
     }
   });
 
-  // बटन के लिंक (अपना लिंक यहाँ डालें)
+  // Button click handling
   const links = {
     bookAmbulanceBtn: 'https://zara-life-care.vercel.app/booking.html',
     hospitalListBtn: 'https://example.com/hospital-list',
@@ -184,13 +211,12 @@
     marijStatusBtn: 'https://example.com/marij-status'
   };
 
-  Object.keys(links).forEach(id => {
+  buttonIds.forEach(id => {
     const btn = document.getElementById(id);
-    if(btn){
+    if(btn) {
       btn.addEventListener('click', () => {
-        // driver और marij status बटन पर login चाहिए
-        if((id === 'driverBtn' || id === 'marijStatusBtn') && !auth.currentUser){
-          alert('Please login first');
+        if(btn.disabled) {
+          alert('Please login first to use this feature.');
           return;
         }
         window.location.href = links[id];
