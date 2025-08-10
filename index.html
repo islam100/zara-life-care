@@ -3,153 +3,81 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Zara Life Care - Ambulance Booking</title>
+<title>Zara Life Care</title>
 <style>
   body {
     font-family: Arial, sans-serif;
-    margin:0; padding:0;
-    background: #f5f5f5;
+    margin: 0; padding: 20px;
+    background: #f0f4f8;
   }
   header {
-    background: #007BFF;
-    color: white;
-    padding: 15px 10px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
+    text-align: center;
+    margin-bottom: 25px;
   }
   header .logo {
+    font-size: 2rem;
     font-weight: bold;
-    font-size: 1.4em;
+    color: #007BFF;
+    text-shadow:
+      0 2px 3px rgba(0,123,255,0.7);
   }
-  header nav select, header nav button {
-    margin-left: 10px;
-    padding: 8px 12px;
-    border-radius: 10px;
-    border: none;
-    cursor: pointer;
-    font-size: 1em;
-    box-shadow:
-      0 2px 5px rgba(0,0,0,0.2),
-      inset 0 -3px 0 rgba(255,255,255,0.3);
-    background: linear-gradient(145deg, #4a8dff, #0061d5);
-    color: white;
-    transition: all 0.3s ease;
-  }
-  header nav button:hover, header nav select:hover {
-    background: linear-gradient(145deg, #0061d5, #004ea1);
-  }
-  main {
-    padding: 20px;
-  }
-  .booking-btn {
-    display: block;
-    width: 150px;
-    margin: 20px auto;
-    padding: 15px;
-    border-radius: 20px;
-    background: linear-gradient(145deg, #4caf50, #388e3c);
-    box-shadow:
-      0 5px 10px rgba(0,0,0,0.3),
-      inset 0 -3px 0 rgba(255,255,255,0.4);
-    font-size: 1.1em;
-    color: white;
-    border: none;
-    cursor: pointer;
-    transition: all 0.3s ease;
-  }
-  .booking-btn:hover {
-    background: linear-gradient(145deg, #388e3c, #2e7030);
-  }
-  #available-ambulances {
-    margin-top: 30px;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
+
+  .button-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
     gap: 15px;
-  }
-  .card {
-    background: white;
-    border-radius: 12px;
-    padding: 15px;
-    width: 250px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-  }
-  .card h3 {
-    margin: 0 0 10px 0;
-  }
-  .card p {
-    margin: 5px 0;
-  }
-  /* Modal styles */
-  .modal {
-    display: none;
-    position: fixed;
-    z-index: 1000;
-    left:0; top:0;
-    width: 100%;
-    height: 100%;
-    overflow:auto;
-    background: rgba(0,0,0,0.6);
-  }
-  .modal-content {
-    background: white;
-    margin: 10% auto;
-    padding: 20px;
-    border-radius: 15px;
-    width: 90%;
     max-width: 400px;
-    position: relative;
+    margin: 0 auto;
   }
-  .modal-content h2 {
-    margin-top: 0;
-  }
-  .close-btn {
-    position: absolute;
-    right: 15px;
-    top: 10px;
-    font-size: 1.5em;
-    cursor: pointer;
-    color: #333;
-  }
-  input, select, textarea {
-    width: 100%;
-    padding: 8px 10px;
-    margin: 8px 0 15px 0;
-    border-radius: 8px;
-    border: 1px solid #ccc;
-    font-size: 1em;
-  }
-  button.submit-btn {
-    background: #007BFF;
-    color: white;
-    border:none;
-    padding: 12px;
+
+  button {
+    padding: 15px 10px;
+    font-size: 1rem;
+    border: none;
     border-radius: 12px;
-    font-size: 1.1em;
+    color: white;
     cursor: pointer;
-    box-shadow: 0 3px 7px rgba(0,123,255,0.7);
-    transition: background 0.3s ease;
+    box-shadow:
+      0 5px 0 #333 inset,
+      0 8px 15px rgba(0,0,0,0.3);
+    transition: all 0.2s ease;
+    user-select: none;
   }
-  button.submit-btn:hover {
-    background: #0056b3;
+  button:active {
+    box-shadow:
+      0 2px 0 #333 inset,
+      0 4px 8px rgba(0,0,0,0.2);
+    transform: translateY(3px);
   }
+
+  /* अलग-अलग रंग */
+  #bookAmbulance {
+    background: linear-gradient(145deg, #28a745, #1e7e34);
+    box-shadow: 0 5px #1c7430 inset, 0 8px 15px rgba(40,167,69,0.6);
+  }
+  #hospitalList {
+    background: linear-gradient(145deg, #17a2b8, #117a8b);
+    box-shadow: 0 5px #0f6674 inset, 0 8px 15px rgba(23,162,184,0.6);
+  }
+  #driverPanel {
+    background: linear-gradient(145deg, #ffc107, #d39e00);
+    box-shadow: 0 5px #b38600 inset, 0 8px 15px rgba(255,193,7,0.6);
+    color: black;
+  }
+  #patientStatus {
+    background: linear-gradient(145deg, #dc3545, #a71d2a);
+    box-shadow: 0 5px #821421 inset, 0 8px 15px rgba(220,53,69,0.6);
+  }
+
   /* Responsive */
-  @media(max-width:600px) {
-    header {
-      flex-wrap: wrap;
-      justify-content: center;
+  @media(max-width: 480px) {
+    .button-grid {
+      max-width: 100%;
+      gap: 10px;
     }
-    header nav select, header nav button {
-      margin: 5px 5px 0 0;
-      width: 48%;
-    }
-    .booking-btn {
-      width: 90%;
-    }
-    .card {
-      width: 90%;
+    button {
+      font-size: 0.9rem;
+      padding: 12px 8px;
     }
   }
 </style>
@@ -158,275 +86,34 @@
 
 <header>
   <div class="logo">Zara Life Care</div>
-  <nav>
-    <select id="infoDropdown" aria-label="Information">
-      <option disabled selected>Info</option>
-      <option value="about">About Us</option>
-      <option value="privacy">Privacy Policy</option>
-      <option value="contact">Contact</option>
-    </select>
-    <select id="linksDropdown" aria-label="Quick Links">
-      <option disabled selected>Quick Links</option>
-    </select>
-    <button id="loginBtn">Login</button>
-    <button id="logoutBtn" style="display:none;">Logout</button>
-  </nav>
 </header>
 
-<main>
-  <button id="bookingBtn" class="booking-btn" style="display:none;">Book Ambulance</button>
-
-  <section>
-    <h2>Available Ambulances</h2>
-    <div id="available-ambulances">Please login to see ambulances.</div>
-  </section>
-
-  <section>
-    <h2>Your Booking Status</h2>
-    <div id="bookingStatus">No bookings yet.</div>
-  </section>
-</main>
-
-<!-- Booking Modal -->
-<div id="bookingModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="bookingModalTitle">
-  <div class="modal-content">
-    <span class="close-btn" id="closeModal">&times;</span>
-    <h2 id="bookingModalTitle">Book Ambulance</h2>
-    <form id="bookingForm">
-      <input type="text" id="patientName" placeholder="Your Name" required />
-      <input type="tel" id="patientPhone" placeholder="Your WhatsApp Number" required pattern="[0-9]{10}" />
-      <textarea id="patientAddress" placeholder="Pickup Address" required></textarea>
-      <input type="text" id="destination" placeholder="Destination" required />
-      <select id="ambulanceCategory" required>
-        <option value="" disabled selected>Select Ambulance Category</option>
-        <option value="ICU">ICU</option>
-        <option value="Basic">Basic</option>
-        <option value="Non-ICU">Non-ICU</option>
-      </select>
-      <button type="submit" class="submit-btn">Submit Booking</button>
-    </form>
-    <div id="bookingFormStatus" style="margin-top:15px;"></div>
-  </div>
+<div class="button-grid">
+  <button id="bookAmbulance">Book Ambulance</button>
+  <button id="hospitalList">Hospital List</button>
+  <button id="driverPanel">Driver Panel</button>
+  <button id="patientStatus">Patient Status</button>
 </div>
 
-<!-- Firebase SDK Modular v9 -->
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-  import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
-  import { getDatabase, ref, onValue, push, set, query, orderByChild, equalTo } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyCFgRQxK_W2T9S5QWZnxAd-kYV52Kzyb94",
-    authDomain: "zara-life-care.firebaseapp.com",
-    databaseURL: "https://zara-life-care-default-rtdb.firebaseio.com",
-    projectId: "zara-life-care",
-    storageBucket: "zara-life-care.appspot.com",
-    messagingSenderId: "307306937129",
-    appId: "1:307306937129:web:a949207fe64fe87dd3d538"
+<script>
+  // बटन क्लिक इवेंट - यहाँ आप अपनी फंक्शन कॉल करें या पेज नेविगेशन करें
+  document.getElementById('bookAmbulance').onclick = () => {
+    alert('Book Ambulance clicked');
+    // window.location.href = 'booking.html';
   };
-
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const db = getDatabase(app);
-
-  // Elements
-  const loginBtn = document.getElementById('loginBtn');
-  const logoutBtn = document.getElementById('logoutBtn');
-  const bookingBtn = document.getElementById('bookingBtn');
-  const availableAmbulancesDiv = document.getElementById('available-ambulances');
-  const bookingModal = document.getElementById('bookingModal');
-  const closeModalBtn = document.getElementById('closeModal');
-  const bookingForm = document.getElementById('bookingForm');
-  const bookingFormStatus = document.getElementById('bookingFormStatus');
-  const bookingStatusDiv = document.getElementById('bookingStatus');
-  const infoDropdown = document.getElementById('infoDropdown');
-  const linksDropdown = document.getElementById('linksDropdown');
-
-  // Info links
-  const infoLinks = {
-    about: "https://example.com/about",
-    privacy: "https://example.com/privacy",
-    contact: "https://example.com/contact"
+  document.getElementById('hospitalList').onclick = () => {
+    alert('Hospital List clicked');
+    // window.location.href = 'hospital-list.html';
   };
-
-  // Quick links
-  const quickLinksData = [
-    { name: "Zara Blog", url: "https://example.com/blog" },
-    { name: "Health Tips", url: "https://example.com/health-tips" }
-  ];
-
-  // Populate Quick Links dropdown
-  quickLinksData.forEach(link => {
-    const opt = document.createElement('option');
-    opt.value = link.url;
-    opt.textContent = link.name;
-    linksDropdown.appendChild(opt);
-  });
-
-  // Dropdown listeners
-  infoDropdown.addEventListener('change', e => {
-    const url = infoLinks[e.target.value];
-    if(url) window.open(url, '_blank');
-    e.target.selectedIndex = 0;
-  });
-  linksDropdown.addEventListener('change', e => {
-    if(e.target.value) window.open(e.target.value, '_blank');
-    e.target.selectedIndex = 0;
-  });
-
-  // Login and logout
-  loginBtn.addEventListener('click', async () => {
-    const provider = new GoogleAuthProvider();
-    try {
-      await signInWithPopup(auth, provider);
-    } catch (error) {
-      alert('Login failed: ' + error.message);
-    }
-  });
-
-  logoutBtn.addEventListener('click', () => {
-    signOut(auth);
-  });
-
-  onAuthStateChanged(auth, user => {
-    if (user) {
-      loginBtn.style.display = 'none';
-      logoutBtn.style.display = 'inline-block';
-      bookingBtn.style.display = 'block';
-      loadAvailableAmbulances();
-      listenForBookingStatus(user.uid);
-    } else {
-      loginBtn.style.display = 'inline-block';
-      logoutBtn.style.display = 'none';
-      bookingBtn.style.display = 'none';
-      availableAmbulancesDiv.textContent = 'Please login to see ambulances.';
-      bookingStatusDiv.textContent = 'No bookings yet.';
-    }
-  });
-
-  // Load approved ambulances
-  function loadAvailableAmbulances() {
-    availableAmbulancesDiv.textContent = 'Loading...';
-    const driversRef = query(ref(db, 'drivers'), orderByChild('isApproved'));
-    onValue(driversRef, snapshot => {
-      const ambulances = [];
-      snapshot.forEach(childSnap => {
-        const driver = childSnap.val();
-        if(driver.isApproved === true){
-          ambulances.push(driver);
-        }
-      });
-
-      if(ambulances.length === 0){
-        availableAmbulancesDiv.innerHTML = '<p>No ambulances available now.</p>';
-        return;
-      }
-
-      availableAmbulancesDiv.innerHTML = '';
-      ambulances.forEach(driver => {
-        const card = document.createElement('div');
-        card.classList.add('card');
-        card.innerHTML = `
-          <h3>${driver.driverName}</h3>
-          <p><strong>Ambulance No:</strong> ${driver.ambulanceNumber}</p>
-          <p><strong>Category:</strong> ${driver.ambulanceCategory}</p>
-          <p><strong>WhatsApp:</strong> <a href="https://wa.me/${driver.whatsappNumber}" target="_blank">${driver.whatsappNumber}</a></p>
-        `;
-        availableAmbulancesDiv.appendChild(card);
-      });
-    });
-  }
-
-  // Booking modal open/close
-  bookingBtn.addEventListener('click', () => {
-    bookingModal.style.display = 'block';
-    bookingFormStatus.textContent = '';
-    bookingForm.reset();
-  });
-  closeModalBtn.addEventListener('click', () => {
-    bookingModal.style.display = 'none';
-  });
-  window.onclick = e => {
-    if (e.target === bookingModal) bookingModal.style.display = 'none';
+  document.getElementById('driverPanel').onclick = () => {
+    alert('Driver Panel clicked');
+    // window.location.href = 'driver.html';
   };
-
-  // Submit booking
-  bookingForm.addEventListener('submit', e => {
-    e.preventDefault();
-    const user = auth.currentUser;
-    if (!user) {
-      alert('Please login first');
-      return;
-    }
-
-    const bookingData = {
-      patientId: user.uid,
-      patientName: bookingForm.patientName.value.trim(),
-      patientPhone: bookingForm.patientPhone.value.trim(),
-      patientAddress: bookingForm.patientAddress.value.trim(),
-      destination: bookingForm.destination.value.trim(),
-      ambulanceCategory: bookingForm.ambulanceCategory.value,
-      whatsappNumber: bookingForm.patientPhone.value.trim(),
-      status: 'pending',
-      driverId: null,
-      driverName: null,
-      driverWhatsapp: null,
-      createdAt: Date.now(),
-      confirmedBy: null
-    };
-
-    const newBookingRef = push(ref(db, 'bookings'));
-    set(newBookingRef, bookingData)
-      .then(() => {
-        bookingFormStatus.style.color = 'green';
-        bookingFormStatus.textContent = 'Booking submitted. Waiting for driver to accept...';
-        bookingForm.reset();
-        bookingModal.style.display = 'none';
-
-        // Notify approved drivers of this category
-        const driversRef = query(ref(db, 'drivers'), orderByChild('ambulanceCategory'));
-        onValue(driversRef, snap => {
-          const drivers = [];
-          snap.forEach(child => {
-            const d = child.val();
-            if(d.ambulanceCategory === bookingData.ambulanceCategory && d.isApproved === true){
-              drivers.push({id: child.key});
-            }
-          });
-          drivers.forEach(d => {
-            set(ref(db, `notifications/${d.id}/${newBookingRef.key}`), true);
-          });
-        }, {onlyOnce: true});
-      })
-      .catch(err => {
-        bookingFormStatus.style.color = 'red';
-        bookingFormStatus.textContent = 'Error submitting booking: ' + err.message;
-      });
-  });
-
-  // Listen for booking status updates for logged-in patient
-  function listenForBookingStatus(patientUid) {
-    const bookingsRef = query(ref(db, 'bookings'), orderByChild('patientId'), equalTo(patientUid));
-    onValue(bookingsRef, snapshot => {
-      const bookings = snapshot.val();
-      if (!bookings) {
-        bookingStatusDiv.textContent = 'No bookings yet.';
-        return;
-      }
-      // Find latest booking by createdAt
-      const latestBookingId = Object.keys(bookings).sort((a,b) => bookings[b].createdAt - bookings[a].createdAt)[0];
-      const booking = bookings[latestBookingId];
-      bookingStatusDiv.innerHTML = `
-        <strong>Status:</strong> ${booking.status}<br/>
-        ${booking.status === 'accepted' || booking.status === 'confirmed' ? `
-          Driver: ${booking.driverName} <br/>
-          Ambulance No: ${booking.driverId ? booking.driverId : '-'} <br/>
-          WhatsApp: <a href="https://wa.me/${booking.driverWhatsapp}" target="_blank">${booking.driverWhatsapp}</a>
-        ` : ''}
-      `;
-    });
-  }
-
+  document.getElementById('patientStatus').onclick = () => {
+    alert('Patient Status clicked');
+    // window.location.href = 'patient-status.html';
+  };
 </script>
+
 </body>
 </html>
