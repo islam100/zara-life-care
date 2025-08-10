@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>4 Button Mobile Layout</title>
+<style>
+  body {
+    margin: 0; padding: 20px;
+    font-family: Arial, sans-serif;
+    background: #f0f0f0;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .button-container {
+    width: 90%;
+    max-width: 400px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+
+  button {
+    padding: 12px;
+    font-size: 1em;
+    font-weight: bold;
+    color: white;
+    border: none;
+    border-radius: 15px;
+    cursor: pointer;
+    box-shadow:
+      0 5px 10px rgba(0,0,0,0.2),
+      inset 0 -3px 0 rgba(255,255,255,0.3);
+    transition: all 0.3s ease;
+  }
+  button:hover {
+    filter: brightness(0.9);
+  }
+
+  /* अलग-अलग रंग और 3D प्रभाव */
+  #adminBtn {
+    background: linear-gradient(145deg, #6a1b9a, #9c27b0);
+    box-shadow:
+      0 6px 8px rgba(106, 27, 154, 0.6),
+      inset 0 -4px 0 rgba(255,255,255,0.3);
+  }
+  #rechargeBtn {
+    background: linear-gradient(145deg, #0d47a1, #2196f3);
+    box-shadow:
+      0 6px 8px rgba(13, 71, 161, 0.6),
+      inset 0 -4px 0 rgba(255,255,255,0.3);
+  }
+  #hospitalBtn {
+    background: linear-gradient(145deg, #2e7d32, #4caf50);
+    box-shadow:
+      0 6px 8px rgba(46, 125, 50, 0.6),
+      inset 0 -4px 0 rgba(255,255,255,0.3);
+  }
+  #noticeBtn {
+    background: linear-gradient(145deg, #f57f17, #ffb300);
+    box-shadow:
+      0 6px 8px rgba(245, 127, 23, 0.6),
+      inset 0 -4px 0 rgba(255,255,255,0.3);
+  }
+  
+  /* Responsive मोबाइल के लिए */
+  @media(max-width: 480px) {
+    .button-container {
+      grid-template-columns: 1fr;
+    }
+    button {
+      font-size: 1.1em;
+      padding: 15px;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="button-container">
+  <button id="adminBtn" onclick="window.location.href='https://example.com/admin'">Admin Panel</button>
+  <button id="rechargeBtn" onclick="window.location.href='https://example.com/recharge'">Recharge</button>
+  <button id="hospitalBtn" onclick="window.location.href='https://example.com/hospital'">Hospital</button>
+  <button id="noticeBtn" onclick="window.location.href='https://example.com/notice'">Notice Board</button>
+</div>
+
+</body>
+</html>
