@@ -165,7 +165,7 @@
 
   const buttonIds = ['bookAmbulanceBtn', 'hospitalListBtn', 'driverBtn', 'marijStatusBtn'];
 
-  // Initially disable all buttons
+  // Disable all buttons initially
   buttonIds.forEach(id => {
     const btn = document.getElementById(id);
     if(btn) {
@@ -187,7 +187,8 @@
     if(user){
       loginBtn.style.display = 'none';
       logoutBtn.style.display = 'inline-block';
-      // Enable all buttons on login
+
+      // Enable buttons when logged in
       buttonIds.forEach(id => {
         const btn = document.getElementById(id);
         if(btn) btn.disabled = false;
@@ -195,7 +196,8 @@
     } else {
       loginBtn.style.display = 'inline-block';
       logoutBtn.style.display = 'none';
-      // Disable all buttons on logout
+
+      // Disable buttons when logged out
       buttonIds.forEach(id => {
         const btn = document.getElementById(id);
         if(btn) btn.disabled = true;
@@ -203,7 +205,6 @@
     }
   });
 
-  // Button click handling
   const links = {
     bookAmbulanceBtn: 'https://zara-life-care.vercel.app/booking.html',
     hospitalListBtn: 'https://example.com/hospital-list',
@@ -211,11 +212,12 @@
     marijStatusBtn: 'https://example.com/marij-status'
   };
 
+  // Handle button clicks
   buttonIds.forEach(id => {
     const btn = document.getElementById(id);
-    if(btn) {
+    if(btn){
       btn.addEventListener('click', () => {
-        if(btn.disabled) {
+        if(btn.disabled){
           alert('Please login first to use this feature.');
           return;
         }
