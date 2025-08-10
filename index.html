@@ -1,242 +1,123 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Ambulance Booking Service</title>
-<style>
-  body {
-    font-family: Arial, sans-serif;
-    margin: 0; padding: 20px;
-    background: #f0f0f0;
-  }
-  h1 {
-    text-align: center;
-    color: #222;
-  }
-  #login-btn, #logout-btn {
-    background: #4285f4;
-    color: white;
-    border: none;
-    padding: 12px 25px;
-    font-size: 16px;
-    border-radius: 8px;
-    cursor: pointer;
-    margin: 10px auto;
-    display: block;
-    box-shadow: 0 4px #357ae8;
-    transition: all 0.2s ease;
-  }
-  #login-btn:hover, #logout-btn:hover {
-    background: #357ae8;
-  }
-  #login-btn:active, #logout-btn:active {
-    box-shadow: 0 2px #357ae8;
-    transform: translateY(2px);
-  }
-  #drivers-container {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 15px;
-    margin-top: 20px;
-  }
-  .card {
-    background: white;
-    border-radius: 12px;
-    padding: 15px;
-    box-shadow: 0 6px 15px rgba(0,0,0,0.1);
-    width: 220px;
-    text-align: center;
-    position: relative;
-  }
-  .card h3 {
-    margin: 10px 0 6px;
-    color: #333;
-  }
-  .card p {
-    margin: 6px 0;
-    color: #555;
-    font-size: 14px;
-  }
-  .dropdown {
-    width: 90%;
-    padding: 6px;
-    margin: 8px 0;
-    font-size: 14px;
-    border-radius: 6px;
-    border: 1px solid #ccc;
-  }
-  /* 3D Booking button style */
-  .btn-book {
-    background: linear-gradient(145deg, #4caf50, #45a049);
-    color: white;
-    font-weight: bold;
-    padding: 10px 25px;
-    border: none;
-    border-radius: 12px;
-    cursor: pointer;
-    box-shadow:
-      0 5px #3e8e41,
-      inset 0 -3px 5px rgba(0,0,0,0.2);
-    transition: all 0.2s ease;
-    font-size: 16px;
-    user-select: none;
-  }
-  .btn-book:hover {
-    background: linear-gradient(145deg, #45a049, #4caf50);
-  }
-  .btn-book:active {
-    box-shadow: 0 2px #3e8e41;
-    transform: translateY(3px);
-  }
-  #status-msg {
-    text-align: center;
-    margin-top: 15px;
-    font-weight: bold;
-    color: #d9534f;
-  }
-  /* Responsive */
-  @media(max-width: 600px) {
-    #drivers-container {
-      flex-direction: column;
-      align-items: center;
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ambulance Service - Home</title>
+  <style>
+    body { font-family: Arial, sans-serif; }
+    .card { 
+      border: 1px solid #ccc; 
+      border-radius: 8px; 
+      padding: 10px; 
+      margin: 10px; 
+      display: inline-block; 
+      width: 200px; 
+      vertical-align: top; 
     }
-    .card {
-      width: 90%;
+    .card h3 { margin: 5px 0; }
+    .dropdown { padding: 5px; font-size: 12px; }
+    button {
+      padding: 10px 20px; 
+      font-size: 16px; 
+      margin: 10px; 
+      cursor: pointer; 
+      border-radius: 10px;
+      border: none;
+      background: linear-gradient(145deg, #6cc1ff, #3a8dff);
+      box-shadow: 3px 3px 6px #2e7ad1, -3px -3px 6px #78bbff;
+      color: white;
+      transition: 0.3s ease;
     }
-  }
-</style>
+    button:hover {
+      box-shadow: inset 3px 3px 6px #2e7ad1, inset -3px -3px 6px #78bbff;
+    }
+  </style>
 </head>
 <body>
 
-<h1>Available Ambulances</h1>
+  <h1>Available Ambulances</h1>
+  <button id="loginBtn">Login with Google</button>
+  <button id="logoutBtn" style="display:none;">Logout</button>
 
-<button id="login-btn">Login with Google</button>
-<button id="logout-btn" style="display:none;">Logout</button>
+  <div id="drivers-container">Loading...</div>
 
-<div id="status-msg"></div>
+  <!-- Firebase Compat SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
 
-<div id="drivers-container">
-  <p>Loading ambulances...</p>
-</div>
+  <script>
+    // Your Firebase config
+    const firebaseConfig = {
+      apiKey: "AIzaSyCFgRQxK_W2T9S5QWZnxAd-kYV52Kzyb94",
+      authDomain: "zara-life-care.firebaseapp.com",
+      projectId: "zara-life-care",
+      storageBucket: "zara-life-care.appspot.com",
+      messagingSenderId: "307306937129",
+      appId: "1:307306937129:web:a949207fe87dd3d538"
+    };
 
-<!-- Firebase SDKs -->
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
 
-<script>
-  // Firebase Config
-  const firebaseConfig = {
-    apiKey: "AIzaSyCFgRQxK_W2T9S5QWZnxAd-kYV52Kzyb94",
-    authDomain: "zara-life-care.firebaseapp.com",
-    projectId: "zara-life-care",
-    storageBucket: "zara-life-care.appspot.com",
-    messagingSenderId: "307306937129",
-    appId: "1:307306937129:web:a949207fe64fe87dd3d538"
-  };
-  firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const database = firebase.database();
 
-  const auth = firebase.auth();
-  const db = firebase.database();
+    const loginBtn = document.getElementById('loginBtn');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const driversContainer = document.getElementById('drivers-container');
 
-  const loginBtn = document.getElementById('login-btn');
-  const logoutBtn = document.getElementById('logout-btn');
-  const driversContainer = document.getElementById('drivers-container');
-  const statusMsg = document.getElementById('status-msg');
+    loginBtn.onclick = () => {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      auth.signInWithPopup(provider).catch(e => alert(e.message));
+    };
 
-  // Login handler
-  loginBtn.addEventListener('click', () => {
-    const provider = new firebase.auth.GoogleAuthProvider();
-    auth.signInWithPopup(provider).catch(e => {
-      alert('Login failed: ' + e.message);
-    });
-  });
+    logoutBtn.onclick = () => {
+      auth.signOut();
+    };
 
-  // Logout handler
-  logoutBtn.addEventListener('click', () => {
-    auth.signOut();
-  });
-
-  // Check auth state and UI
-  auth.onAuthStateChanged(user => {
-    if (user) {
-      loginBtn.style.display = 'none';
-      logoutBtn.style.display = 'block';
-      statusMsg.textContent = `Logged in as ${user.displayName}`;
-      loadApprovedDrivers();
-    } else {
-      loginBtn.style.display = 'block';
-      logoutBtn.style.display = 'none';
-      statusMsg.textContent = 'Please login to book ambulance.';
-      driversContainer.innerHTML = '<p>Please login to see ambulances.</p>';
-    }
-  });
-
-  // Load approved drivers from Firebase
-  function loadApprovedDrivers() {
-    driversContainer.innerHTML = '<p>Loading ambulances...</p>';
-    db.ref('drivers').orderByChild('status').equalTo('approved').on('value', snapshot => {
-      driversContainer.innerHTML = ''; // Clear previous
-
-      if (!snapshot.exists()) {
-        driversContainer.innerHTML = '<p>No ambulances available now.</p>';
-        return;
+    auth.onAuthStateChanged(user => {
+      if (user) {
+        loginBtn.style.display = 'none';
+        logoutBtn.style.display = 'inline-block';
+        loadApprovedDrivers();
+      } else {
+        loginBtn.style.display = 'inline-block';
+        logoutBtn.style.display = 'none';
+        driversContainer.innerHTML = 'Please login to see available ambulances.';
       }
+    });
 
-      snapshot.forEach(child => {
-        const d = child.val();
-        const card = document.createElement('div');
-        card.classList.add('card');
-
-        card.innerHTML = `
-          <h3>${d.name || 'Unknown'}</h3>
-          <p>Ambulance No: ${d.ambulanceNo || '-'}</p>
-          <select class="dropdown">
-            <option disabled selected>Options</option>
-            <option value="details">View Details</option>
-            <option value="contact">Contact Driver</option>
-          </select>
-          <select class="dropdown">
-            <option disabled selected>Links</option>
-            <option value="route">Route Info</option>
-            <option value="reviews">Driver Reviews</option>
-          </select>
-          <button class="btn-book" data-driverid="${child.key}">Book Ambulance</button>
-        `;
-
-        // Book button click event
-        card.querySelector('.btn-book').addEventListener('click', e => {
-          bookAmbulance(e.target.dataset.driverid);
+    function loadApprovedDrivers() {
+      driversContainer.innerHTML = 'Loading...';
+      database.ref('drivers').orderByChild('status').equalTo('approved').on('value', snapshot => {
+        driversContainer.innerHTML = '';
+        if (!snapshot.exists()) {
+          driversContainer.innerHTML = 'No approved drivers found.';
+          return;
+        }
+        snapshot.forEach(child => {
+          const d = child.val();
+          driversContainer.innerHTML += `
+            <div class="card">
+              <h3>${d.name || 'Unknown'}</h3>
+              <p>Ambulance No: ${d.ambulanceNo}</p>
+              <select class="dropdown">
+                <option>Option 1</option>
+                <option>Option 2</option>
+              </select>
+              <select class="dropdown">
+                <option>Link 1</option>
+                <option>Link 2</option>
+              </select>
+              <button>Book Ambulance</button>
+            </div>
+          `;
         });
-
-        driversContainer.appendChild(card);
       });
-    });
-  }
-
-  // Book ambulance function
-  function bookAmbulance(driverId) {
-    const user = auth.currentUser;
-    if (!user) {
-      alert('Please login first!');
-      return;
     }
-
-    const bookingRef = db.ref('bookings').push();
-    bookingRef.set({
-      driverId: driverId,
-      userId: user.uid,
-      status: 'pending',
-      timestamp: Date.now()
-    }).then(() => {
-      alert('Booking request sent successfully!');
-    }).catch(err => {
-      alert('Booking failed: ' + err.message);
-    });
-  }
-</script>
+  </script>
 
 </body>
 </html>
