@@ -3,95 +3,114 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Zara Life Care</title>
+<title>Zara Life Care - Ambulance Service</title>
 <style>
-  /* Reset & basic */
-  * {
-    box-sizing: border-box;
-  }
   body {
-    margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: Arial, sans-serif;
+    margin: 0; padding: 10px;
     background: #f9f9f9;
   }
   header {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
-    background: #004aad;
-    color: white;
-    padding: 10px 15px;
-    flex-wrap: wrap;
+    margin-bottom: 20px;
   }
   .logo {
-    font-weight: 700;
-    font-size: 1.4rem;
-    user-select: none;
+    font-weight: bold;
+    font-size: 1.5rem;
+    color: #2c3e50;
   }
   nav {
     display: flex;
-    align-items: center;
     gap: 10px;
     flex-wrap: wrap;
+    align-items: center;
   }
   select {
-    padding: 6px 10px;
-    border-radius: 8px;
-    border: none;
+    padding: 8px 12px;
     font-size: 0.9rem;
-    cursor: pointer;
-    outline: none;
+    border-radius: 5px;
+    border: 1.5px solid #ccc;
     background: white;
-    color: #333;
-    box-shadow:
-      0 2px 5px rgba(0,0,0,0.15),
-      inset 0 -3px 5px rgba(0,0,0,0.1);
-    transition: box-shadow 0.3s ease;
+    cursor: pointer;
   }
-  select:hover, select:focus {
-    box-shadow:
-      0 4px 8px rgba(0,0,0,0.25),
-      inset 0 -3px 7px rgba(0,0,0,0.15);
+  select:focus {
+    outline: none;
+    border-color: #3498db;
   }
   button {
-    background: linear-gradient(145deg, #1e90ff, #1c78d8);
+    background: #3498db;
     border: none;
-    border-radius: 12px;
     color: white;
+    padding: 10px 20px;
     font-weight: 600;
     font-size: 1rem;
-    padding: 10px 25px;
-    cursor: pointer;
+    border-radius: 10px;
     box-shadow:
-      0 4px 6px #1a6fd2,
-      inset 0 -3px 5px #2f8cff;
-    transition: box-shadow 0.3s ease, background 0.3s ease;
-    user-select: none;
+      0 4px 6px rgba(52, 152, 219, 0.4),
+      0 0 10px rgba(52, 152, 219, 0.7);
+    cursor: pointer;
+    transition: all 0.3s ease;
   }
   button:hover {
-    background: linear-gradient(145deg, #3aa0ff, #2679e5);
     box-shadow:
-      0 6px 10px #1762bb,
-      inset 0 -5px 8px #3f95ff;
+      0 6px 8px rgba(52, 152, 219, 0.7),
+      0 0 14px rgba(52, 152, 219, 1);
   }
-  button:active {
-    box-shadow:
-      inset 0 3px 5px #1a6fd2;
-    background: linear-gradient(145deg, #1762bb, #1c78d8);
+  #bookingBtn {
+    display: block;
+    margin: 30px auto 20px auto; /* center horizontally */
+    max-width: 200px;
+    width: 90%;
   }
-  .header-left, .header-right {
+  #authBtn {
+    min-width: 100px;
+  }
+
+  /* Cards Container */
+  #drivers-container {
     display: flex;
-    align-items: center;
-    gap: 12px;
+    flex-wrap: wrap;
+    gap: 15px;
+    justify-content: center;
   }
+  .card {
+    background: white;
+    border-radius: 12px;
+    padding: 15px;
+    width: 220px;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+    text-align: center;
+  }
+  .card h3 {
+    margin-top: 0;
+    margin-bottom: 8px;
+    color: #2c3e50;
+  }
+  .card p {
+    margin: 5px 0;
+    font-size: 0.9rem;
+  }
+  .card .dropdown {
+    margin-top: 10px;
+    width: 100%;
+  }
+
   /* Responsive */
-  @media (max-width: 600px) {
+  @media (max-width: 480px) {
     header {
-      justify-content: center;
-      gap: 12px;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 10px;
     }
-    .header-left, .header-right {
-      flex-basis: 100%;
-      justify-content: center;
+    #bookingBtn {
+      width: 100%;
+      max-width: none;
+    }
+    .card {
+      width: 100%;
     }
   }
 </style>
@@ -99,31 +118,36 @@
 <body>
 
 <header>
-  <div class="header-left">
-    <div class="logo">Zara Life Care</div>
-    <select id="infoDropdown" aria-label="Info Dropdown">
+  <div class="logo">Zara Life Care</div>
+  <nav>
+    <select id="infoDropdown" aria-label="Information">
       <option disabled selected>Info</option>
       <option value="about.html">About</option>
-      <option value="contact.html">Contact</option>
       <option value="privacy.html">Privacy Policy</option>
+      <option value="contact.html">Contact</option>
     </select>
-    <select id="linksDropdown" aria-label="Links Dropdown">
-      <option disabled selected>Links</option>
-      <!-- Dynamically add links here -->
+
+    <select id="linkDropdown" aria-label="Links">
+      <option disabled selected>Quick Links</option>
+      <option value="https://example.com/link1">Link 1</option>
+      <option value="https://example.com/link2">Link 2</option>
     </select>
-  </div>
 
-  <button id="bookingBtn" title="Go to Booking Page">Booking</button>
-
-  <div class="header-right">
-    <button id="authBtn">Login</button>
-  </div>
+    <button id="authBtn" title="Login / Logout">Loading...</button>
+  </nav>
 </header>
 
+<button id="bookingBtn" title="Book Ambulance">Book Ambulance</button>
+
+<h1 style="text-align:center; color:#34495e;">Available Ambulances</h1>
+<div id="drivers-container">Loading...</div>
+
+<!-- Firebase SDKs -->
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
+
 <script>
-  // Firebase config
   const firebaseConfig = {
     apiKey: "AIzaSyCFgRQxK_W2T9S5QWZnxAd-kYV52Kzyb94",
     authDomain: "zara-life-care.firebaseapp.com",
@@ -132,60 +156,102 @@
     messagingSenderId: "307306937129",
     appId: "1:307306937129:web:a949207fe64fe87dd3d538"
   };
-  // Initialize Firebase
-  const app = firebase.initializeApp(firebaseConfig);
-  const auth = firebase.auth();
 
-  // Elements
+  // Initialize Firebase
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.database();
+
   const authBtn = document.getElementById('authBtn');
   const bookingBtn = document.getElementById('bookingBtn');
-  const infoDropdown = document.getElementById('infoDropdown');
-  const linksDropdown = document.getElementById('linksDropdown');
 
-  // Example links you can edit or add dynamically
-  const customLinks = [
-    { name: "Zara Blog", url: "https://zara-blog.example.com" },
-    { name: "Help Center", url: "https://help.zara-life-care.com" }
-  ];
-
-  // Populate Links dropdown
-  function populateLinksDropdown() {
-    customLinks.forEach(link => {
-      const opt = document.createElement('option');
-      opt.value = link.url;
-      opt.textContent = link.name;
-      linksDropdown.appendChild(opt);
-    });
-  }
-  populateLinksDropdown();
-
-  // Dropdown change handlers
-  infoDropdown.addEventListener('change', e => {
-    if(e.target.value) window.location.href = e.target.value;
+  // Dropdown navigation
+  document.getElementById('infoDropdown').addEventListener('change', e => {
+    if (e.target.value) window.location.href = e.target.value;
   });
-  linksDropdown.addEventListener('change', e => {
-    if(e.target.value) window.open(e.target.value, '_blank');
+  document.getElementById('linkDropdown').addEventListener('change', e => {
+    if (e.target.value) window.open(e.target.value, '_blank');
   });
 
-  // Booking button link - change as needed
+  // Booking button click
   bookingBtn.addEventListener('click', () => {
-    window.location.href = "booking.html";  // अपने booking page का लिंक दें
-  });
-
-  // Auth button logic
-  auth.onAuthStateChanged(user => {
-    if(user) {
-      authBtn.textContent = "Logout";
-      authBtn.onclick = () => {
-        auth.signOut();
-      };
+    if(auth.currentUser) {
+      window.location.href = 'booking.html'; // Booking page link
     } else {
-      authBtn.textContent = "Login";
-      authBtn.onclick = () => {
-        window.location.href = "login.html"; // अपने login page का लिंक दें
-      };
+      alert('Please login to book ambulance.');
+      authBtn.focus();
     }
   });
+
+  // Auth button logic: login/logout toggle
+  auth.onAuthStateChanged(user => {
+    if (user) {
+      authBtn.textContent = 'Logout';
+      authBtn.onclick = () => {
+        auth.signOut().then(() => {
+          location.reload();
+        });
+      };
+      loadApprovedDrivers();
+    } else {
+      authBtn.textContent = 'Login';
+      authBtn.onclick = () => {
+        window.location.href = 'login.html'; // Login page link
+      };
+      document.getElementById('drivers-container').innerHTML = 'Please login to see ambulances.';
+    }
+  });
+
+  function loadApprovedDrivers() {
+    const container = document.getElementById('drivers-container');
+    container.innerHTML = 'Loading ambulances...';
+
+    db.ref('drivers').orderByChild('status').equalTo('approved').on('value', snapshot => {
+      container.innerHTML = '';
+      if (!snapshot.exists()) {
+        container.innerHTML = '<p>No ambulances available currently.</p>';
+        return;
+      }
+      snapshot.forEach(child => {
+        const d = child.val();
+        const card = document.createElement('div');
+        card.classList.add('card');
+        card.innerHTML = `
+          <h3>${d.name || 'Unknown'}</h3>
+          <p>Ambulance No: ${d.ambulanceNo || 'N/A'}</p>
+          <select class="dropdown" aria-label="Options">
+            <option selected disabled>Options</option>
+            <option>Call</option>
+            <option>Details</option>
+          </select>
+          <select class="dropdown" aria-label="Links">
+            <option selected disabled>Links</option>
+            <option value="https://example.com">Website</option>
+            <option value="https://example2.com">More Info</option>
+          </select>
+        `;
+        // Dropdown events inside card
+        const selects = card.querySelectorAll('select');
+        selects[0].addEventListener('change', e => {
+          if(e.target.value === 'Call') {
+            if(d.phone) window.open(`tel:${d.phone}`);
+            e.target.selectedIndex = 0;
+          } else if (e.target.value === 'Details') {
+            alert(`Driver: ${d.name}\nAmbulance No: ${d.ambulanceNo}\nAddress: ${d.address || 'N/A'}`);
+            e.target.selectedIndex = 0;
+          }
+        });
+        selects[1].addEventListener('change', e => {
+          if (e.target.value) {
+            window.open(e.target.value, '_blank');
+            e.target.selectedIndex = 0;
+          }
+        });
+
+        container.appendChild(card);
+      });
+    });
+  }
 </script>
 
 </body>
