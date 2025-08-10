@@ -17,21 +17,27 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-wrap: wrap;
   }
   header .logo {
     font-weight: bold;
     font-size: 1.4em;
   }
+  header nav {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
   header nav select, header nav button {
-    margin-left: 10px;
     padding: 8px 12px;
-    border-radius: 10px;
+    border-radius: 12px;
     border: none;
     cursor: pointer;
     font-size: 1em;
     box-shadow:
-      0 2px 5px rgba(0,0,0,0.2),
-      inset 0 -3px 0 rgba(255,255,255,0.3);
+      0 5px 10px rgba(0,0,0,0.3),
+      inset 0 -3px 0 rgba(255,255,255,0.4);
     background: linear-gradient(145deg, #4a8dff, #0061d5);
     color: white;
     transition: all 0.3s ease;
@@ -44,15 +50,15 @@
   }
   .booking-btn {
     display: block;
-    width: 150px;
+    width: 160px;
     margin: 20px auto;
     padding: 15px;
-    border-radius: 20px;
+    border-radius: 25px;
     background: linear-gradient(145deg, #4caf50, #388e3c);
     box-shadow:
-      0 5px 10px rgba(0,0,0,0.3),
-      inset 0 -3px 0 rgba(255,255,255,0.4);
-    font-size: 1.1em;
+      0 8px 15px rgba(0,0,0,0.3),
+      inset 0 -4px 0 rgba(255,255,255,0.4);
+    font-size: 1.2em;
     color: white;
     border: none;
     cursor: pointer;
@@ -72,15 +78,24 @@
     background: white;
     border-radius: 12px;
     padding: 15px;
-    width: 250px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    width: 260px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.15);
   }
   .card h3 {
     margin: 0 0 10px 0;
   }
   .card p {
     margin: 5px 0;
+    word-wrap: break-word;
   }
+  .card a {
+    color: #007BFF;
+    text-decoration: none;
+  }
+  .card a:hover {
+    text-decoration: underline;
+  }
+
   /* Modal styles */
   .modal {
     display: none;
@@ -94,61 +109,82 @@
   }
   .modal-content {
     background: white;
-    margin: 10% auto;
-    padding: 20px;
+    margin: 8% auto;
+    padding: 20px 25px;
     border-radius: 15px;
     width: 90%;
-    max-width: 400px;
+    max-width: 420px;
     position: relative;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.3);
   }
   .modal-content h2 {
     margin-top: 0;
+    text-align: center;
   }
   .close-btn {
     position: absolute;
     right: 15px;
     top: 10px;
-    font-size: 1.5em;
+    font-size: 1.7em;
     cursor: pointer;
-    color: #333;
+    color: #555;
   }
   input, select, textarea {
     width: 100%;
-    padding: 8px 10px;
-    margin: 8px 0 15px 0;
+    padding: 10px 12px;
+    margin: 10px 0 20px 0;
     border-radius: 8px;
-    border: 1px solid #ccc;
+    border: 1.5px solid #ccc;
     font-size: 1em;
+    box-sizing: border-box;
+    transition: border-color 0.3s ease;
+  }
+  input:focus, select:focus, textarea:focus {
+    border-color: #007BFF;
+    outline: none;
   }
   button.submit-btn {
     background: #007BFF;
     color: white;
     border:none;
-    padding: 12px;
-    border-radius: 12px;
-    font-size: 1.1em;
+    padding: 14px;
+    border-radius: 20px;
+    font-size: 1.2em;
     cursor: pointer;
-    box-shadow: 0 3px 7px rgba(0,123,255,0.7);
+    width: 100%;
+    box-shadow: 0 5px 12px rgba(0,123,255,0.7);
     transition: background 0.3s ease;
   }
   button.submit-btn:hover {
     background: #0056b3;
   }
+  #bookingStatus {
+    text-align: center;
+    font-weight: bold;
+    margin-top: 12px;
+  }
+
   /* Responsive */
   @media(max-width:600px) {
     header {
-      flex-wrap: wrap;
       justify-content: center;
     }
+    header nav {
+      width: 100%;
+      justify-content: center;
+      gap: 8px;
+    }
     header nav select, header nav button {
-      margin: 5px 5px 0 0;
-      width: 48%;
+      width: 45%;
+      font-size: 0.9em;
+      padding: 10px;
     }
     .booking-btn {
       width: 90%;
+      font-size: 1.1em;
     }
     .card {
-      width: 90%;
+      width: 95%;
     }
   }
 </style>
@@ -166,7 +202,7 @@
     </select>
     <select id="linksDropdown" aria-label="Quick Links">
       <option disabled selected>Quick Links</option>
-      <!-- Dynamically add links here -->
+      <!-- Links will be added dynamically -->
     </select>
     <button id="loginBtn">Login</button>
     <button id="logoutBtn" style="display:none;">Logout</button>
@@ -178,7 +214,7 @@
 
   <section>
     <h2>Available Ambulances</h2>
-    <div id="available-ambulances">Loading...</div>
+    <div id="available-ambulances">Please login to see ambulances.</div>
   </section>
 </main>
 
@@ -200,25 +236,26 @@
       </select>
       <button type="submit" class="submit-btn">Submit Booking</button>
     </form>
-    <div id="bookingStatus" style="margin-top:15px;"></div>
+    <div id="bookingStatus"></div>
   </div>
 </div>
 
-<!-- Firebase SDK -->
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
+<!-- Firebase SDK v8 -->
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
 <script>
-const firebaseConfig = {
-  apiKey: "AIzaSyCFgRQxK_W2T9S5QWZnxAd-kYV52Kzyb94",
-  authDomain: "zara-life-care.firebaseapp.com",
-  projectId: "zara-life-care",
-  storageBucket: "zara-life-care.appspot.com",   
-  messagingSenderId: "307306937129",
-  appId: "1:307306937129:web:a949207fe64fe87dd3d538"
-};
-
+  const firebaseConfig = {
+    apiKey: "AIzaSyCFgRQxK_W2T9S5QWZnxAd-kYV52Kzyb94",
+    authDomain: "zara-life-care.firebaseapp.com",
+    databaseURL: "https://zara-life-care-default-rtdb.firebaseio.com",
+    projectId: "zara-life-care",
+    storageBucket: "zara-life-care.appspot.com",   
+    messagingSenderId: "307306937129",
+    appId: "1:307306937129:web:a949207fe64fe87dd3d538"
+  };
+  
   firebase.initializeApp(firebaseConfig);
   const auth = firebase.auth();
   const db = firebase.database();
@@ -240,7 +277,7 @@ const firebaseConfig = {
     contact: "https://example.com/contact"
   };
 
-  // Quick links - add your own links here dynamically
+  // Quick links data
   const quickLinksData = [
     { name: "Zara Blog", url: "https://example.com/blog" },
     { name: "Health Tips", url: "https://example.com/health-tips" }
@@ -255,27 +292,29 @@ const firebaseConfig = {
     linksDropdown.appendChild(opt);
   });
 
-  // Navigation Dropdown Listeners
+  // Dropdown navigation handlers
   document.getElementById('infoDropdown').addEventListener('change', e => {
     const url = infoLinks[e.target.value];
     if(url) window.open(url, '_blank');
-    e.target.selectedIndex = 0; // Reset to default
+    e.target.selectedIndex = 0; // Reset
   });
   linksDropdown.addEventListener('change', e => {
     if(e.target.value) window.open(e.target.value, '_blank');
     e.target.selectedIndex = 0;
   });
 
-  // Authentication
+  // Login with Google
   loginBtn.addEventListener('click', () => {
     const provider = new firebase.auth.GoogleAuthProvider();
-    auth.signInWithPopup(provider).catch(e => alert(e.message));
+    auth.signInWithPopup(provider).catch(e => alert("Login Failed: " + e.message));
   });
 
+  // Logout
   logoutBtn.addEventListener('click', () => {
     auth.signOut();
   });
 
+  // Auth state listener
   auth.onAuthStateChanged(user => {
     if (user) {
       loginBtn.style.display = 'none';
@@ -288,13 +327,14 @@ const firebaseConfig = {
       logoutBtn.style.display = 'none';
       bookingBtn.style.display = 'none';
       availableAmbulancesDiv.innerHTML = 'Please login to see ambulances.';
+      bookingStatus.textContent = '';
     }
   });
 
   // Load approved ambulances
   function loadAvailableAmbulances() {
     availableAmbulancesDiv.innerHTML = 'Loading...';
-    db.ref('drivers').orderByChild('isApproved').equalTo(true).on('value', snapshot => {
+    db.ref('drivers').orderByChild('isApproved').equalTo(true).once('value', snapshot => {
       const ambulances = snapshot.val();
       if (!ambulances) {
         availableAmbulancesDiv.innerHTML = '<p>No ambulances available now.</p>';
@@ -308,42 +348,49 @@ const firebaseConfig = {
           <h3>${driver.driverName}</h3>
           <p><strong>Ambulance No:</strong> ${driver.ambulanceNumber}</p>
           <p><strong>Category:</strong> ${driver.ambulanceCategory}</p>
-          <p><strong>WhatsApp:</strong> <a href="https://wa.me/${driver.whatsappNumber}" target="_blank">${driver.whatsappNumber}</a></p>
+          <p><strong>WhatsApp:</strong> <a href="https://wa.me/${driver.whatsappNumber}" target="_blank" rel="noopener">${driver.whatsappNumber}</a></p>
         `;
         availableAmbulancesDiv.appendChild(card);
       });
     });
   }
 
-  // Booking Modal open/close
+  // Open booking modal
   bookingBtn.addEventListener('click', () => {
     bookingModal.style.display = 'block';
-    bookingStatus.innerHTML = '';
+    bookingStatus.textContent = '';
     bookingForm.reset();
   });
+
+  // Close booking modal
   closeModalBtn.addEventListener('click', () => {
     bookingModal.style.display = 'none';
   });
-  window.onclick = e => {
-    if (e.target == bookingModal) bookingModal.style.display = 'none';
+
+  window.onclick = (event) => {
+    if (event.target == bookingModal) {
+      bookingModal.style.display = 'none';
+    }
   };
 
-  // Submit Booking
+  // Submit booking form
   bookingForm.addEventListener('submit', e => {
     e.preventDefault();
     const user = auth.currentUser;
     if (!user) {
-      alert('Please login first');
+      alert('Please login first.');
       return;
     }
+
+    // Get form values
     const bookingData = {
       patientId: user.uid,
-      patientName: document.getElementById('patientName').value.trim(),
-      patientPhone: document.getElementById('patientPhone').value.trim(),
-      patientAddress: document.getElementById('patientAddress').value.trim(),
-      destination: document.getElementById('destination').value.trim(),
-      ambulanceCategory: document.getElementById('ambulanceCategory').value,
-      whatsappNumber: document.getElementById('patientPhone').value.trim(),
+      patientName: bookingForm.patientName.value.trim(),
+      patientPhone: bookingForm.patientPhone.value.trim(),
+      patientAddress: bookingForm.patientAddress.value.trim(),
+      destination: bookingForm.destination.value.trim(),
+      ambulanceCategory: bookingForm.ambulanceCategory.value,
+      whatsappNumber: bookingForm.patientPhone.value.trim(),
       status: 'pending',
       driverId: null,
       driverName: null,
@@ -352,51 +399,53 @@ const firebaseConfig = {
       confirmedBy: null
     };
 
-    // Push booking
+    // Push booking to Firebase
     const newBookingRef = db.ref('bookings').push();
-    newBookingRef.set(bookingData).then(() => {
-      bookingStatus.style.color = 'green';
-      bookingStatus.textContent = 'Booking submitted. Waiting for driver to accept...';
-      bookingForm.reset();
+    newBookingRef.set(bookingData)
+      .then(() => {
+        bookingStatus.style.color = 'green';
+        bookingStatus.textContent = 'Booking submitted. Waiting for driver to accept...';
+        bookingForm.reset();
 
-      // Notify approved drivers of this category
-      db.ref('drivers').orderByChild('ambulanceCategory').equalTo(bookingData.ambulanceCategory).once('value', snap => {
-        const drivers = snap.val();
-        if (drivers) {
-          Object.keys(drivers).forEach(driverId => {
-            if(drivers[driverId].isApproved) {
-              db.ref('notifications/' + driverId + '/' + newBookingRef.key).set(true);
-            }
-          });
-        }
+        // Notify approved drivers in this category
+        db.ref('drivers').orderByChild('ambulanceCategory').equalTo(bookingData.ambulanceCategory).once('value', snap => {
+          const drivers = snap.val();
+          if (drivers) {
+            Object.keys(drivers).forEach(driverId => {
+              if (drivers[driverId].isApproved) {
+                db.ref('notifications/' + driverId + '/' + newBookingRef.key).set(true);
+              }
+            });
+          }
+        });
+      })
+      .catch(err => {
+        bookingStatus.style.color = 'red';
+        bookingStatus.textContent = 'Error submitting booking: ' + err.message;
       });
-    }).catch(err => {
-      bookingStatus.style.color = 'red';
-      bookingStatus.textContent = 'Error submitting booking: ' + err.message;
-    });
   });
 
-  // Listen for booking status updates for logged-in patient
+  // Listen to booking status for logged in user
   function listenForBookingStatus(patientUid) {
-    db.ref('bookings').orderByChild('patientId').equalTo(patientUid).on('value', snap => {
+    db.ref('bookings').orderByChild('patientId').equalTo(patientUid).limitToLast(1).on('value', snap => {
       const bookings = snap.val();
-      if (!bookings) return;
-
-      // Show booking status for latest booking
-      const latestBookingId = Object.keys(bookings).sort((a,b) => bookings[b].createdAt - bookings[a].createdAt)[0];
+      if (!bookings) {
+        bookingStatus.textContent = '';
+        return;
+      }
+      const latestBookingId = Object.keys(bookings)[0];
       const booking = bookings[latestBookingId];
-
-      bookingStatus.innerHTML = `
-        <strong>Booking Status:</strong> ${booking.status} <br/>
-        ${booking.status === 'accepted' || booking.status === 'confirmed' ? `
-          Driver: ${booking.driverName} <br/>
-          Ambulance No: ${booking.driverId ? booking.driverId : '-'} <br/>
-          WhatsApp: <a href="https://wa.me/${booking.driverWhatsapp}" target="_blank">${booking.driverWhatsapp}</a>
-        ` : ''}
-      `;
+      let html = `<strong>Booking Status:</strong> ${booking.status}<br/>`;
+      if (booking.status === 'accepted' || booking.status === 'confirmed') {
+        html += `
+          Driver: ${booking.driverName || '-'}<br/>
+          Ambulance No: ${booking.ambulanceNumber || '-'}<br/>
+          WhatsApp: <a href="https://wa.me/${booking.driverWhatsapp}" target="_blank" rel="noopener">${booking.driverWhatsapp}</a>
+        `;
+      }
+      bookingStatus.innerHTML = html;
     });
   }
-
 </script>
 
 </body>
