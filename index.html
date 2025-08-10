@@ -3,47 +3,19 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Ambulance Service - Home</title>
-<style>
-  body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
-  header { background: #007bff; color: white; padding: 10px; text-align: center; }
-  .hidden { display: none; }
-  #drivers-container { padding: 10px; }
-  .card {
-    border: 1px solid #ccc; border-radius: 8px; padding: 10px;
-    margin: 10px; display: inline-block; width: 220px; vertical-align: top;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-  }
-  .card h3 { margin: 5px 0; }
-  .dropdown { margin: 5px 0; width: 100%; padding: 5px; font-size: 14px; }
-  button { background: #28a745; color: white; border: none; padding: 8px 12px; cursor: pointer; border-radius: 5px; }
-  button:hover { background: #218838; }
-  #logoutBtn { background: #dc3545; margin: 10px; }
-</style>
+<title>Simple Google Login</title>
 </head>
 <body>
 
-<header>
-  <h1>Ambulance Service</h1>
-  <div>
-    <span id="userName"></span> (<span id="userRole"></span>)
-    <button id="logoutBtn" class="hidden">Logout</button>
-  </div>
-</header>
+<h2>Google Login Demo</h2>
 
-<div id="loginSection">
-  <button id="googleLoginBtn">Login with Google</button>
-</div>
+<button id="loginBtn">Login with Google</button>
+<button id="logoutBtn" style="display:none;">Logout</button>
 
-<div id="mainSection" class="hidden">
-  <h2>Available Ambulances</h2>
-  <div id="drivers-container"></div>
-</div>
+<p id="userInfo"></p>
 
-<!-- Firebase SDKs -->
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
 
 <script>
   // Firebase config
@@ -58,86 +30,47 @@
 
   // Initialize Firebase
   firebase.initializeApp(firebaseConfig);
+
   const auth = firebase.auth();
-  const db = firebase.database();
 
-  const loginSection = document.getElementById('loginSection');
-  const mainSection = document.getElementById('mainSection');
-  const googleLoginBtn = document.getElementById('googleLoginBtn');
+  const loginBtn = document.getElementById('loginBtn');
   const logoutBtn = document.getElementById('logoutBtn');
-  const userNameSpan = document.getElementById('userName');
-  const userRoleSpan = document.getElementById('userRole');
-  const driversContainer = document.getElementById('drivers-container');
+  const userInfo = document.getElementById('userInfo');
 
-  googleLoginBtn.addEventListener('click', () => {
+  loginBtn.onclick = () => {
     const provider = new firebase.auth.GoogleAuthProvider();
     auth.signInWithPopup(provider)
       .then((result) => {
-        // लॉगिन सफल
-        console.log("User signed in:", result.user.displayName);
+        // Login success
+        userInfo.textContent = `Hello, ${result.user.displayName} (${result.user.email})`;
+        loginBtn.style.display = 'none';
+        logoutBtn.style.display = 'inline-block';
       })
       .catch((error) => {
-        alert("Login failed: " + error.message);
+        alert('Login failed: ' + error.message);
         console.error(error);
       });
-  });
+  };
 
-  logoutBtn.addEventListener('click', () => {
-    auth.signOut();
-  });
+  logoutBtn.onclick = () => {
+    auth.signOut().then(() => {
+      userInfo.textContent = '';
+      loginBtn.style.display = 'inline-block';
+      logoutBtn.style.display = 'none';
+    });
+  };
 
   auth.onAuthStateChanged(user => {
-    if (user) {
-      loginSection.classList.add('hidden');
-      mainSection.classList.remove('hidden');
-      logoutBtn.classList.remove('hidden');
-      userNameSpan.textContent = user.displayName || user.email;
-      userRoleSpan.textContent = 'User';
-
-      loadApprovedDrivers();
+    if(user){
+      userInfo.textContent = `Hello, ${user.displayName} (${user.email})`;
+      loginBtn.style.display = 'none';
+      logoutBtn.style.display = 'inline-block';
     } else {
-      loginSection.classList.remove('hidden');
-      mainSection.classList.add('hidden');
-      logoutBtn.classList.add('hidden');
-      userNameSpan.textContent = '';
-      userRoleSpan.textContent = '';
-      driversContainer.innerHTML = '';
+      userInfo.textContent = '';
+      loginBtn.style.display = 'inline-block';
+      logoutBtn.style.display = 'none';
     }
   });
-
-  function loadApprovedDrivers() {
-    driversContainer.innerHTML = 'Loading...';
-    db.ref('drivers').orderByChild('status').equalTo('approved').on('value', snapshot => {
-      if (!snapshot.exists()) {
-        driversContainer.innerHTML = '<p>No ambulances available.</p>';
-        return;
-      }
-      driversContainer.innerHTML = '';
-      snapshot.forEach(child => {
-        const d = child.val();
-        const card = document.createElement('div');
-        card.className = 'card';
-        card.innerHTML = `
-          <h3>${d.name || 'Unknown'}</h3>
-          <p><strong>Ambulance No:</strong> ${d.ambulanceNo}</p>
-          <p><strong>Contact:</strong> ${d.phone || 'N/A'}</p>
-          <select class="dropdown">
-            <option value="">Select Option</option>
-            <option value="about">About</option>
-            <option value="privacy">Privacy Policy</option>
-            <option value="contact">Contact</option>
-          </select>
-          <select class="dropdown">
-            <option value="">Select Link</option>
-            <option value="link1">Link 1</option>
-            <option value="link2">Link 2</option>
-          </select>
-          <button onclick="alert('Booking feature coming soon!')">Book Ambulance</button>
-        `;
-        driversContainer.appendChild(card);
-      });
-    });
-  }
 </script>
 
 </body>
