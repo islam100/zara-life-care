@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Admin Approval</title>
+<style>
+  body { font-family: Arial; max-width: 700px; margin: auto; padding: 20px; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+  th { background: #eee; }
+  button.approve { background: #4caf50; color: white; border: none; padding: 5px 10px; cursor: pointer; border-radius: 5px; }
+  button.reject { background: #f44336; color: white; border: none; padding: 5px 10px; cursor: pointer; border-radius: 5px; }
+</style>
+</head>
+<body>
+
+<h2>Admin Hospital Approval Panel</h2>
+<table>
+  <thead>
+    <tr>
+      <th>Hospital Name</th>
+      <th>Area</th>
+      <th>WhatsApp</th>
+      <th>Image</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody id="hospitalTableBody"></tbody>
+</table>
+
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+
+<script>
+  // Firebase config अपने प्रोजेक्ट के अनुसार भरें
+  const firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_PROJECT.firebaseapp.com",
+    databaseURL: "https://YOUR_PROJECT-default-rtdb.firebaseio.com",
+    projectId: "YOUR_PROJECT",
+    storageBucket: "YOUR_PROJECT.appspot.com",
+    messagingSenderId: "YOUR_SENDER_ID",
+    appId: "YOUR_APP_ID"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+
+  const tableBody = document.getElementById('hospitalTableBody');
+
+  // हॉस्पिटल्स लोड करें जिनका approved=false है
+  db.ref('hospitals').orderByChild('approved').equalTo(false).on('value', snapshot => {
+    tableBody.innerHTML = '';
+    if(!snapshot.exists()){
+      tableBody.innerHTML = '<tr><td colspan="5">कोई अप्रूव के लिए पोस्ट नहीं है।</td></tr>';
+      return;
+    }
+    snapshot.forEach(childSnap => {
+      const id = childSnap.key;
+      const h = childSnap.val();
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>${h.name}</td>
+        <td>${h.area}</td>
+        <td>${h.whatsapp}</td>
+        <td><img src="${h.imageUrl}" width="60" alt="${h.name}"/></td>
+        <td>
+          <button class="approve" onclick="approveHospital('${id}')">Approve</button>
+          <button class="reject" onclick="rejectHospital('${id}')">Reject</button>
+        </td>
+      `;
+      tableBody.appendChild(row);
+    });
+  });
+
+  function approveHospital(id){
+    db.ref('hospitals/' + id).update({ approved: true })
+      .then(() => alert('Hospital approved!'))
+      .catch(err => alert('Error: ' + err.message));
+  }
+
+  function rejectHospital(id){
+    db.ref('hospitals/' + id).remove()
+      .then(() => alert('Hospital rejected and removed!'))
+      .catch(err => alert('Error: ' + err.message));
+  }
+</script>
+
+</body>
+</html>
