@@ -3,234 +3,373 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Join as Driver - Ambulance Service</title>
+<title>Driver Dashboard - Zara Life Care</title>
 <style>
-  body { font-family: Arial, sans-serif; padding: 20px; max-width: 480px; margin: auto; }
-  h1 { text-align: center; }
-  form > * { display: block; width: 100%; margin-bottom: 15px; }
-  input[type="text"], textarea {
-    padding: 8px;
-    font-size: 16px;
-    border-radius: 6px;
-    border: 1px solid #ccc;
-    box-sizing: border-box;
+  body {
+    font-family: Arial, sans-serif;
+    background: #f5f5f5;
+    margin: 0; padding: 20px;
+    min-height: 100vh;
   }
-  textarea { resize: vertical; }
-  label { margin-bottom: 5px; font-weight: bold; }
-  input[type="file"] {
-    border: none;
-    padding: 5px 0;
-  }
-  #video, #canvas {
-    width: 100%;
+  header {
+    background: #ff5722;
+    color: white;
+    padding: 12px 20px;
+    font-weight: bold;
+    font-size: 1.3em;
+    text-align: center;
     border-radius: 8px;
-    border: 1px solid #ccc;
+    margin-bottom: 20px;
   }
-  #captureBtn {
-    background: #4CAF50;
-    border: none;
+  main {
+    max-width: 600px;
+    margin: 0 auto;
+  }
+  form, #dashboard {
+    background: white;
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  }
+  form input, form select {
+    width: 100%;
+    padding: 12px;
+    margin: 12px 0;
+    font-size: 1em;
+    border-radius: 8px;
+    border: 1.5px solid #ccc;
+    box-sizing: border-box;
+    transition: border-color 0.3s ease;
+  }
+  form input:focus, form select:focus {
+    border-color: #ff5722;
+    outline: none;
+  }
+  button {
+    background: linear-gradient(145deg, #ff5722, #d84315);
     color: white;
-    font-size: 16px;
-    padding: 10px 0;
-    border-radius: 10px;
+    font-weight: 700;
+    font-size: 1.1em;
+    padding: 14px;
+    border: none;
+    border-radius: 20px;
     cursor: pointer;
-    box-shadow: 0 5px #388E3C;
-    transition: all 0.2s;
+    width: 100%;
+    box-shadow:
+      0 6px 8px rgba(0,0,0,0.35),
+      inset 0 -4px 0 rgba(255,255,255,0.3);
+    transition: all 0.3s ease;
   }
-  #captureBtn:active {
-    box-shadow: 0 2px #388E3C;
-    transform: translateY(3px);
+  button:hover {
+    background: linear-gradient(145deg, #d84315, #a32c0c);
   }
-  button[type="submit"] {
-    background: #1976d2;
-    border: none;
-    color: white;
-    font-size: 18px;
-    padding: 12px 0;
+  #logoutBtn {
+    background: #ff4444 !important;
+    margin-top: 15px;
+  }
+  .status-message {
+    font-size: 1.1em;
+    margin-bottom: 15px;
+    color: #bf360c;
+    font-weight: 600;
+    text-align: center;
+  }
+  #wallet {
+    font-weight: bold;
+    margin-bottom: 15px;
+    font-size: 1.2em;
+    color: #2e7d32;
+  }
+  .booking-card {
+    background: #fff3e0;
+    border-radius: 15px;
+    box-shadow:
+      6px 6px 10px #d3b68d,
+      -6px -6px 10px #fff6db;
+    padding: 15px 20px;
+    margin-bottom: 15px;
+  }
+  .booking-info p {
+    margin: 6px 0;
+  }
+  .btn-row {
+    margin-top: 12px;
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .btn-row button {
+    flex: 1;
+    padding: 10px;
+    font-weight: 700;
+    font-size: 1em;
     border-radius: 12px;
+    box-shadow:
+      6px 6px 10px #d3b68d,
+      -6px -6px 10px #fff6db;
+  }
+  .btn-accept {
+    background: linear-gradient(145deg, #4caf50, #388e3c);
+    color: white;
+    border: none;
     cursor: pointer;
-    box-shadow: 0 6px #115293;
-    transition: all 0.3s;
   }
-  button[type="submit"]:hover {
-    background: #1565c0;
+  .btn-accept:hover {
+    background: linear-gradient(145deg, #388e3c, #2e7030);
   }
-  button[type="submit"]:active {
-    box-shadow: 0 3px #115293;
-    transform: translateY(3px);
+  .btn-whatsapp {
+    background: linear-gradient(145deg, #25d366, #128c44);
+    color: white;
+    border: none;
+    cursor: pointer;
+  }
+  .btn-whatsapp:hover {
+    background: linear-gradient(145deg, #128c44, #0f6c39);
+  }
+  @media (max-width: 480px) {
+    .btn-row {
+      flex-direction: column;
+    }
   }
 </style>
 </head>
 <body>
 
-<h1>Join as Driver</h1>
+<header>Driver Dashboard - Zara Life Care</header>
 
-<form id="driverForm">
-  <label for="name">Full Name</label>
-  <input type="text" id="name" required />
+<main>
+  <!-- Driver Registration Form -->
+  <form id="driverForm" style="display:none;">
+    <input type="text" id="driverName" placeholder="Driver Name" required />
+    <input type="tel" id="whatsappNumber" placeholder="WhatsApp Number (10 digits)" pattern="[0-9]{10}" required />
+    <input type="text" id="ambulanceNumber" placeholder="Ambulance Number" required />
+    <select id="ambulanceCategory" required>
+      <option value="" disabled selected>Select Ambulance Category</option>
+      <option value="ICU">ICU</option>
+      <option value="Basic">Basic</option>
+      <option value="Non-ICU">Non-ICU</option>
+    </select>
+    <input type="email" id="email" placeholder="Email Address" required />
+    <button type="submit">Register / Update Details</button>
+  </form>
 
-  <label for="ambulanceNo">Ambulance No</label>
-  <input type="text" id="ambulanceNo" required />
+  <!-- After registration / approval -->
+  <div id="dashboard" style="display:none;">
+    <div id="statusMessage" class="status-message"></div>
+    <div id="wallet">Wallet Balance: ₹<span id="walletBalance">0</span></div>
 
-  <label for="licenseNo">Driving License No</label>
-  <input type="text" id="licenseNo" required />
+    <div id="bookingsList"></div>
 
-  <label for="licenseUpload">Upload Driving License</label>
-  <input type="file" id="licenseUpload" accept="image/*,application/pdf" required />
-
-  <label for="rcBookUpload">Upload RC Book</label>
-  <input type="file" id="rcBookUpload" accept="image/*,application/pdf" required />
-
-  <label for="aadharFront">Upload Aadhar Card (Front)</label>
-  <input type="file" id="aadharFront" accept="image/*,application/pdf" required />
-
-  <label for="aadharBack">Upload Aadhar Card (Back)</label>
-  <input type="file" id="aadharBack" accept="image/*,application/pdf" required />
-
-  <label for="panUpload">Upload PAN Card</label>
-  <input type="file" id="panUpload" accept="image/*,application/pdf" required />
-
-  <label>Take Selfie (Camera)</label>
-  <video id="video" autoplay playsinline></video>
-  <button type="button" id="captureBtn">Capture Selfie</button>
-  <canvas id="canvas" style="display:none;"></canvas>
-
-  <label for="address">Full Address</label>
-  <textarea id="address" rows="3" required></textarea>
-
-  <button type="submit">Submit</button>
-</form>
+    <button id="logoutBtn">Logout</button>
+  </div>
+</main>
 
 <!-- Firebase SDK -->
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-storage.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
 
 <script>
-  // Firebase config
   const firebaseConfig = {
     apiKey: "AIzaSyCFgRQxK_W2T9S5QWZnxAd-kYV52Kzyb94",
     authDomain: "zara-life-care.firebaseapp.com",
+    databaseURL: "https://zara-life-care-default-rtdb.firebaseio.com",
     projectId: "zara-life-care",
     storageBucket: "zara-life-care.appspot.com",
     messagingSenderId: "307306937129",
     appId: "1:307306937129:web:a949207fe64fe87dd3d538"
   };
+
   firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.database();
 
-  // Auth check
-  firebase.auth().onAuthStateChanged(user => {
-    if (!user) {
-      alert("Please login first.");
-      window.location.href = "login.html";
-    }
-  });
+  const driverForm = document.getElementById('driverForm');
+  const dashboard = document.getElementById('dashboard');
+  const statusMessage = document.getElementById('statusMessage');
+  const walletBalance = document.getElementById('walletBalance');
+  const bookingsList = document.getElementById('bookingsList');
+  const logoutBtn = document.getElementById('logoutBtn');
 
-  // Camera setup
-  const video = document.getElementById('video');
-  const canvas = document.getElementById('canvas');
-  const captureBtn = document.getElementById('captureBtn');
-  let selfieBlob = null;
-
-  async function startCamera() {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-      video.srcObject = stream;
-    } catch (err) {
-      alert("Cannot access camera: " + err.message);
+  // Show driver data or form based on approval
+  function showDriverDashboard(driverData) {
+    if (!driverData.isApproved) {
+      statusMessage.textContent = "Please wait for admin approval.";
+      walletBalance.textContent = driverData.wallet || 0;
+      bookingsList.innerHTML = '';
+      driverForm.style.display = 'none';
+      dashboard.style.display = 'block';
+    } else {
+      statusMessage.textContent = "Welcome! Here are your bookings.";
+      walletBalance.textContent = driverData.wallet || 0;
+      driverForm.style.display = 'none';
+      dashboard.style.display = 'block';
+      loadBookings();
     }
   }
-  startCamera();
 
-  captureBtn.addEventListener('click', () => {
-    const context = canvas.getContext('2d');
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    context.drawImage(video, 0, 0, canvas.width, canvas.height);
-    canvas.style.display = 'block';
+  // Load bookings assigned to this driver
+  function loadBookings() {
+    bookingsList.innerHTML = "Loading bookings...";
+    const user = auth.currentUser;
+    if (!user) return;
 
-    // Convert canvas to blob for upload
-    canvas.toBlob(blob => {
-      selfieBlob = blob;
-      alert("Selfie captured!");
-    }, 'image/jpeg', 0.95);
+    // Fetch bookings where driverId = current user id
+    db.ref('bookings').orderByChild('driverId').equalTo(user.uid).on('value', snapshot => {
+      const bookings = snapshot.val();
+      if (!bookings) {
+        bookingsList.innerHTML = "<p>No bookings assigned yet.</p>";
+        return;
+      }
+      // Create cards
+      bookingsList.innerHTML = '';
+      Object.entries(bookings).forEach(([key, booking]) => {
+        const card = document.createElement('div');
+        card.className = 'booking-card';
+
+        card.innerHTML = `
+          <div class="booking-info">
+            <p><strong>Patient Name:</strong> ${booking.patientName}</p>
+            <p><strong>WhatsApp:</strong> ${booking.patientPhone}</p>
+            <p><strong>Pickup:</strong> ${booking.patientAddress}</p>
+            <p><strong>Destination:</strong> ${booking.destination}</p>
+            <p><strong>Category:</strong> ${booking.ambulanceCategory}</p>
+            <p><strong>Status:</strong> ${booking.status}</p>
+            <p><small>Booked On: ${new Date(booking.createdAt).toLocaleString()}</small></p>
+          </div>
+          <div class="btn-row"></div>
+        `;
+
+        const btnRow = card.querySelector('.btn-row');
+
+        // If not accepted yet, show accept button
+        if(booking.status === 'pending') {
+          const acceptBtn = document.createElement('button');
+          acceptBtn.className = 'btn-accept';
+          acceptBtn.textContent = 'Accept Booking';
+          acceptBtn.onclick = () => acceptBooking(key);
+          btnRow.appendChild(acceptBtn);
+        }
+
+        // If accepted or confirmed, show WhatsApp button
+        if(booking.status === 'accepted' || booking.status === 'confirmed') {
+          const waBtn = document.createElement('button');
+          waBtn.className = 'btn-whatsapp';
+          waBtn.textContent = 'WhatsApp Patient';
+          waBtn.onclick = () => {
+            // Open WhatsApp chat with patient number (assuming country code +91)
+            window.open(`https://wa.me/91${booking.patientPhone}`, '_blank');
+          };
+          btnRow.appendChild(waBtn);
+        }
+
+        bookingsList.appendChild(card);
+      });
+    });
+  }
+
+  // Accept booking function
+  function acceptBooking(bookingKey) {
+    const user = auth.currentUser;
+    if (!user) {
+      alert('Please login first.');
+      return;
+    }
+    // Update booking status to accepted, driverId, driverName and driverWhatsapp
+    db.ref('bookings/' + bookingKey).once('value')
+      .then(snap => {
+        const booking = snap.val();
+        if(booking.status !== 'pending'){
+          alert('Booking is already processed.');
+          return;
+        }
+        // Get driver data to update driverName and whatsapp
+        db.ref('drivers/' + user.uid).once('value')
+          .then(driverSnap => {
+            const driver = driverSnap.val();
+            db.ref('bookings/' + bookingKey).update({
+              status: 'accepted',
+              driverId: user.uid,
+              driverName: driver.driverName,
+              driverWhatsapp: driver.whatsappNumber
+            })
+            .then(() => {
+              alert('Booking accepted!');
+            })
+            .catch(err => {
+              alert('Error accepting booking: ' + err.message);
+            });
+          });
+      });
+  }
+
+  // Driver Registration or update
+  driverForm.addEventListener('submit', e => {
+    e.preventDefault();
+    const user = auth.currentUser;
+    if (!user) {
+      alert('Please login first.');
+      return;
+    }
+
+    const driverData = {
+      driverName: driverForm.driverName.value.trim(),
+      whatsappNumber: driverForm.whatsappNumber.value.trim(),
+      ambulanceNumber: driverForm.ambulanceNumber.value.trim(),
+      ambulanceCategory: driverForm.ambulanceCategory.value,
+      email: driverForm.email.value.trim(),
+      isApproved: false,
+      wallet: 0
+    };
+
+    if (!/^\d{10}$/.test(driverData.whatsappNumber)) {
+      alert('Please enter a valid 10-digit WhatsApp number');
+      return;
+    }
+
+    db.ref('drivers/' + user.uid).once('value').then(snap => {
+      if (snap.exists()) {
+        // Update existing
+        db.ref('drivers/' + user.uid).update(driverData)
+          .then(() => {
+            alert('Details updated. Wait for admin approval.');
+            showDriverDashboard({...driverData, isApproved: false});
+          });
+      } else {
+        // New entry
+        db.ref('drivers/' + user.uid).set(driverData)
+          .then(() => {
+            alert('Registered successfully. Wait for admin approval.');
+            showDriverDashboard(driverData);
+          });
+      }
+    }).catch(err => alert(err.message));
   });
 
-  // Form submit
-  document.getElementById('driverForm').addEventListener('submit', async e => {
-    e.preventDefault();
+  logoutBtn.addEventListener('click', () => {
+    auth.signOut();
+  });
 
-    const user = firebase.auth().currentUser;
-    if (!user) {
-      alert("Please login first.");
-      window.location.href = "login.html";
-      return;
-    }
-
-    // Get all form data
-    const name = document.getElementById('name').value.trim();
-    const ambulanceNo = document.getElementById('ambulanceNo').value.trim();
-    const licenseNo = document.getElementById('licenseNo').value.trim();
-    const address = document.getElementById('address').value.trim();
-
-    const licenseFile = document.getElementById('licenseUpload').files[0];
-    const rcBookFile = document.getElementById('rcBookUpload').files[0];
-    const aadharFrontFile = document.getElementById('aadharFront').files[0];
-    const aadharBackFile = document.getElementById('aadharBack').files[0];
-    const panFile = document.getElementById('panUpload').files[0];
-
-    if (!selfieBlob) {
-      alert("Please capture your selfie.");
-      return;
-    }
-
-    const storageRef = firebase.storage().ref();
-    const uid = user.uid;
-
-    try {
-      // Upload all files & selfie, get URLs
-      const uploadFile = async (file, path) => {
-        const ref = storageRef.child(path);
-        await ref.put(file);
-        return await ref.getDownloadURL();
-      };
-
-      const licenseURL = await uploadFile(licenseFile, `drivers/${uid}/license.${licenseFile.name.split('.').pop()}`);
-      const rcBookURL = await uploadFile(rcBookFile, `drivers/${uid}/rcbook.${rcBookFile.name.split('.').pop()}`);
-      const aadharFrontURL = await uploadFile(aadharFrontFile, `drivers/${uid}/aadhar-front.${aadharFrontFile.name.split('.').pop()}`);
-      const aadharBackURL = await uploadFile(aadharBackFile, `drivers/${uid}/aadhar-back.${aadharBackFile.name.split('.').pop()}`);
-      const panURL = await uploadFile(panFile, `drivers/${uid}/pan.${panFile.name.split('.').pop()}`);
-      const selfieURL = await uploadFile(selfieBlob, `drivers/${uid}/selfie.jpg`);
-
-      // Save to realtime database
-      await firebase.database().ref('drivers/' + uid).set({
-        name,
-        ambulanceNo,
-        licenseNo,
-        address,
-        licenseURL,
-        rcBookURL,
-        aadharFrontURL,
-        aadharBackURL,
-        panURL,
-        selfieURL,
-        status: 'pending',
-        wallet: 0,
-        phone: user.phoneNumber || ''
+  // Auth state changed
+  auth.onAuthStateChanged(user => {
+    if (user) {
+      // Check if driver data exists
+      db.ref('drivers/' + user.uid).once('value').then(snap => {
+        if (snap.exists()) {
+          const data = snap.val();
+          showDriverDashboard(data);
+        } else {
+          // Show registration form for new driver
+          dashboard.style.display = 'none';
+          driverForm.style.display = 'block';
+        }
       });
-
-      alert('Form submitted successfully! Please wait for admin approval.');
-      document.getElementById('driverForm').reset();
-      canvas.style.display = 'none';
-      selfieBlob = null;
-
-    } catch (error) {
-      alert('Error uploading files: ' + error.message);
-      console.error(error);
+    } else {
+      dashboard.style.display = 'none';
+      driverForm.style.display = 'none';
+      alert('Please login first.');
     }
   });
 </script>
-
 </body>
 </html>
