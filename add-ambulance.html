@@ -145,7 +145,6 @@
   <input type="text" id="ambulanceNumber" placeholder="Ambulance Number" required />
   <input type="text" id="ambulanceCategory" placeholder="Ambulance Category (ICU/Basic/Non-ICU)" required />
   <input type="tel" id="whatsappNumber" placeholder="WhatsApp Number (10 digits)" pattern="\d{10}" required />
-  <input type="email" id="email" placeholder="Email Address" required />
   <button type="submit" class="submitBtn">Submit Registration</button>
 </form>
 
@@ -206,7 +205,6 @@
       ambulanceNumber: document.getElementById('ambulanceNumber').value.trim(),
       ambulanceCategory: document.getElementById('ambulanceCategory').value.trim(),
       whatsappNumber: document.getElementById('whatsappNumber').value.trim(),
-      email: document.getElementById('email').value.trim(),
       isApproved: false,
       wallet: 0
     };
@@ -255,8 +253,6 @@
     dashboard.style.display = 'block';
     showMessage('');
 
-    // Show wallet info (you can add wallet display somewhere if want)
-    // Load and display bookings for this driver
     loadBookings();
   }
 
@@ -268,7 +264,6 @@
       return;
     }
 
-    // Fetch bookings where driverId = current user uid
     db.ref('bookings').orderByChild('driverId').equalTo(user.uid).on('value', snapshot => {
       const data = snapshot.val();
       if(!data){
@@ -285,100 +280,91 @@
             <p><strong>Category:</strong> ${booking.ambulanceCategory}</p>
             <p><strong>Status:</strong> ${booking.status}</p>
             <div class="booking-actions">
+              ${booking.status === 'pending' ? `<button class="acceptBtn" data-key="${key}">Accept Booking</button>` : ''}
+              ${booking.status === 'accepted' ? `<button class="whatsappBtn" data-whatsapp="${booking.driverWhatsapp || booking.whatsappNumber}">WhatsApp Patient</button>` : ''}
+            </div>
+          </div>
         `;
-
-        if(booking.status === 'pending'){
-          html += `<button class="acceptBtn" data-key="${key}">Accept Booking</button>`;
-        }
-
-        if(booking.status === 'accepted'){
-          html += `<button class="whatsappBtn" data-whatsapp="${booking.patientPhone}">Chat on WhatsApp</button>`;
-        }
-
-        html += '</div></div>';
       });
       bookingsList.innerHTML = html;
 
-      // Add event listeners to buttons
+      // Add event listeners for Accept buttons
       document.querySelectorAll('.acceptBtn').forEach(btn => {
-        btn.addEventListener('click', acceptBooking);
+        btn.addEventListener('click', e => {
+          const bookingKey = e.target.getAttribute('data-key');
+          acceptBooking(bookingKey);
+        });
       });
+
+      // Add event listeners for WhatsApp buttons
       document.querySelectorAll('.whatsappBtn').forEach(btn => {
-        btn.addEventListener('click', openWhatsApp);
+        btn.addEventListener('click', e => {
+          const whatsappNum = e.target.getAttribute('data-whatsapp');
+          if(whatsappNum){
+            const url = `https://wa.me/${whatsappNum}`;
+            window.open(url, '_blank');
+          }
+        });
       });
     });
   }
 
-  function acceptBooking(e){
-    const bookingKey = e.target.getAttribute('data-key');
-    if(!bookingKey) return;
-
-    // Confirm once
-    if(!confirm('Are you sure you want to accept this booking?')) return;
-
+  function acceptBooking(key){
     const user = auth.currentUser;
     if(!user){
-      alert('Please login first.');
+      alert('Please login first');
       return;
     }
-
-    const bookingRef = db.ref('bookings/' + bookingKey);
-    bookingRef.once('value').then(snapshot => {
+    // Update booking status in Firebase
+    db.ref('bookings/' + key).once('value').then(snapshot => {
       const booking = snapshot.val();
-      if(!booking) {
-        alert('Booking not found.');
+      if(!booking){
+        alert('Booking not found');
         return;
       }
       if(booking.status !== 'pending'){
-        alert('This booking is already accepted or completed.');
-        loadBookings();
+        alert('Booking already accepted or processed');
         return;
       }
-      // Update booking status and assign driver info
-      bookingRef.update({
+      // Update booking
+      const updates = {
         status: 'accepted',
         driverId: user.uid,
-        driverName: booking.driverName || 'You',
-        driverWhatsapp: booking.driverWhatsapp || '' // Optionally fill driver whatsapp if needed
-      }).then(() => {
-        alert('Booking accepted successfully.');
-      }).catch(err => {
-        alert('Error: ' + err.message);
+        driverName: '', // You can update with driver's name if you want
+        driverWhatsapp: '' // You can update with driver's whatsapp if you want
+      };
+      db.ref('drivers/' + user.uid).once('value').then(driverSnap => {
+        const driver = driverSnap.val();
+        if(driver){
+          updates.driverName = driver.driverName || '';
+          updates.driverWhatsapp = driver.whatsappNumber || '';
+        }
+        db.ref('bookings/' + key).update(updates)
+          .then(() => {
+            alert('Booking accepted!');
+          })
+          .catch(err => alert('Error: ' + err.message));
       });
     });
   }
 
-  function openWhatsApp(e){
-    const whatsappNumber = e.target.getAttribute('data-whatsapp');
-    if(!whatsappNumber){
-      alert('WhatsApp number not available.');
-      return;
-    }
-    // Open whatsapp chat in new tab
-    const url = `https://wa.me/${whatsappNumber}`;
-    window.open(url, '_blank');
-  }
-
-  // Auth state change handler
   auth.onAuthStateChanged(user => {
     if(user){
       logoutBtn.style.display = 'inline-block';
-      showMessage('');
-      // Check if driver registered
-      db.ref('drivers/' + user.uid).once('value').then(snap => {
-        if(snap.exists()){
-          const data = snap.val();
-          if(data.isApproved){
-            showDriverDashboard(data);
+      // Check if driver info exists
+      db.ref('drivers/' + user.uid).once('value').then(snapshot => {
+        if(snapshot.exists()){
+          const driverData = snapshot.val();
+          if(driverData.isApproved){
+            showDriverDashboard(driverData);
           } else {
-            // Show waiting approval message
             showWaitingApproval();
           }
         } else {
-          // Show form for new driver registration
           driverForm.style.display = 'block';
           dashboard.style.display = 'none';
           waitingApproval.style.display = 'none';
+          showMessage('');
         }
       });
     } else {
@@ -386,7 +372,7 @@
       driverForm.style.display = 'none';
       dashboard.style.display = 'none';
       waitingApproval.style.display = 'none';
-      showMessage('Please login first.', true);
+      showMessage('Please login first to continue.', true);
     }
   });
 </script>
