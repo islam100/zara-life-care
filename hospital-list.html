@@ -3,15 +3,75 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Hospital Gallery</title>
+<title>Hospital Gallery (Firebase)</title>
 <style>
   body { font-family: Arial; max-width: 700px; margin: auto; padding: 10px; }
-  #searchArea { width: 100%; padding: 8px; margin-bottom: 15px; font-size: 1em; box-sizing: border-box; }
-  .grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(150px,1fr)); gap: 15px; }
-  .card { background: #fff; border-radius: 12px; padding: 10px; box-shadow: 0 3px 6px rgba(0,0,0,0.16); cursor: pointer; text-align: center; }
-  .card img { width: 100%; border-radius: 8px; max-height: 120px; object-fit: cover; }
-  .card h4 { margin: 8px 0 5px; }
-  .whatsapp-btn { background: #25D366; color: white; border: none; padding: 6px 10px; border-radius: 20px; font-weight: bold; cursor: pointer; font-size: 0.9em; }
+  #areaSelect {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 15px;
+    font-size: 1em;
+    box-sizing: border-box;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    cursor: pointer;
+  }
+  #refreshBtn {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    background: #4caf50;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 5px 8px rgba(76,175,80,0.4);
+    transition: box-shadow 0.3s ease;
+  }
+  #refreshBtn:hover {
+    box-shadow: 0 8px 15px rgba(76,175,80,0.7);
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill,minmax(150px,1fr));
+    gap: 15px;
+  }
+  .card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 10px;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.16);
+    cursor: pointer;
+    text-align: center;
+    user-select: none;
+    transition: transform 0.2s ease;
+  }
+  .card:hover {
+    transform: translateY(-5px);
+  }
+  .card img {
+    width: 100%;
+    border-radius: 8px;
+    max-height: 120px;
+    object-fit: cover;
+  }
+  .card h4 {
+    margin: 8px 0 5px;
+    font-size: 1em;
+  }
+  .whatsapp-btn {
+    background: #25D366;
+    color: white;
+    border: none;
+    padding: 6px 10px;
+    border-radius: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 0.9em;
+  }
 
   /* Modal Styles */
   .modal {
@@ -22,13 +82,13 @@
     background: rgba(0,0,0,0.7);
     justify-content: center;
     align-items: center;
-    overflow: auto; /* Scroll if needed */
+    overflow: auto;
     padding: 10px;
   }
   .modal-content {
     position: relative;
-    max-width: 95vw;  /* viewport width से थोड़ा छोटा */
-    max-height: 90vh; /* viewport height का 90% */
+    max-width: 95vw;
+    max-height: 90vh;
     border-radius: 10px;
     overflow: hidden;
   }
@@ -37,7 +97,7 @@
     width: auto;
     max-width: 100%;
     height: auto;
-    max-height: 90vh; /* viewport height का 90% */
+    max-height: 90vh;
     margin: 0 auto;
   }
   .modal-close {
@@ -72,35 +132,90 @@
 <body>
 
 <h2>Hospital Gallery</h2>
-<input type="text" id="searchArea" placeholder="Search by Area..." />
+
+<select id="areaSelect">
+  <option value="">-- Select Area --</option>
+</select>
 
 <div class="grid" id="hospitalGrid"></div>
 
+<button id="refreshBtn" title="Reload hospitals">Reload</button>
+
 <!-- Modal -->
-<div class="modal" id="imageModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle" tabindex="-1">
+<div class="modal" id="imageModal" role="dialog" aria-modal="true" tabindex="-1">
   <div class="modal-content">
     <button class="modal-close" id="modalClose" aria-label="Close modal">&times;</button>
     <img id="modalImg" src="" alt="Large View" />
   </div>
 </div>
 
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+
 <script>
-  // डेमो के लिए sample data, आप इसे Firebase से replace करें
-  let hospitals = [
-    { name: "City Hospital", area: "Mumbai", whatsapp: "+919876543210", imageUrl: "https://i.imgur.com/0rVeh4a.jpg", approved: true },
-    { name: "Green Clinic", area: "Pune", whatsapp: "+919123456789", imageUrl: "https://i.imgur.com/bG2Xw3W.jpg", approved: true },
-    { name: "Care Center", area: "Mumbai", whatsapp: "+919876543211", imageUrl: "https://i.imgur.com/ntf5pRk.jpg", approved: true }
-  ];
+  // Firebase config (अपना config डालें)
+  const firebaseConfig = {
+    apiKey: "AIzaSyCFgRQxK_W2T9S5QWZnxAd-kYV52Kzyb94",
+    authDomain: "zara-life-care.firebaseapp.com",
+    databaseURL: "https://zara-life-care-default-rtdb.firebaseio.com",
+    projectId: "zara-life-care",
+    storageBucket: "zara-life-care.appspot.com",
+    messagingSenderId: "307306937129",
+    appId: "1:307306937129:web:a949207fe64fe87dd3d538"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
 
   const hospitalGrid = document.getElementById('hospitalGrid');
-  const searchInput = document.getElementById('searchArea');
+  const areaSelect = document.getElementById('areaSelect');
   const imageModal = document.getElementById('imageModal');
   const modalClose = document.getElementById('modalClose');
   const modalImg = document.getElementById('modalImg');
+  const refreshBtn = document.getElementById('refreshBtn');
 
-  function renderHospitals(filter='') {
+  let hospitals = [];
+
+  // हॉस्पिटल डेटा Firebase से लोड करें
+  function loadHospitals() {
+    hospitalGrid.innerHTML = '<p>Loading hospitals...</p>';
+    db.ref('hospitals').orderByChild('approved').equalTo(true).once('value')
+      .then(snapshot => {
+        hospitals = [];
+        snapshot.forEach(childSnap => {
+          const hospital = childSnap.val();
+          hospital.id = childSnap.key;
+          hospitals.push(hospital);
+        });
+        populateAreaDropdown();
+        renderHospitals();
+      })
+      .catch(err => {
+        hospitalGrid.innerHTML = `<p>Error loading hospitals: ${err.message}</p>`;
+      });
+  }
+
+  // यूनिक एरियाज dropdown में भरें
+  function populateAreaDropdown() {
+    const areas = [...new Set(hospitals.map(h => h.area.trim()).filter(a => a))].sort();
+    areaSelect.innerHTML = '<option value="">-- Select Area --</option>';
+    areas.forEach(area => {
+      const opt = document.createElement('option');
+      opt.value = area;
+      opt.textContent = area;
+      areaSelect.appendChild(opt);
+    });
+  }
+
+  // हॉस्पिटल्स दिखाएं area filter के हिसाब से
+  function renderHospitals() {
+    const selectedArea = areaSelect.value;
     hospitalGrid.innerHTML = '';
-    const filtered = hospitals.filter(h => h.approved && h.area.toLowerCase().includes(filter.toLowerCase()));
+    let filtered = hospitals;
+    if(selectedArea) {
+      filtered = hospitals.filter(h => h.area.toLowerCase() === selectedArea.toLowerCase());
+    }
     if(filtered.length === 0){
       hospitalGrid.innerHTML = '<p>No hospitals found for this area.</p>';
       return;
@@ -126,27 +241,22 @@
     imageModal.style.display = 'none';
     modalImg.src = '';
   };
-
-  // Modal पर click outside image बंद करना
   imageModal.onclick = (e) => {
     if(e.target === imageModal) {
       modalClose.onclick();
     }
   };
-
-  // Keyboard से modal बंद करना (Escape key)
   document.addEventListener('keydown', (e) => {
     if(e.key === "Escape" && imageModal.style.display === 'flex') {
       modalClose.onclick();
     }
   });
 
-  searchInput.addEventListener('input', () => {
-    renderHospitals(searchInput.value);
-  });
+  areaSelect.addEventListener('change', renderHospitals);
+  refreshBtn.addEventListener('click', loadHospitals);
 
-  // Initial render
-  renderHospitals();
+  // शुरू में डेटा लोड करें
+  loadHospitals();
 </script>
 
 </body>
