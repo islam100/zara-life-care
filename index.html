@@ -1,123 +1,192 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Ambulance Service - Home</title>
-  <style>
-    body { font-family: Arial, sans-serif; }
-    .card { 
-      border: 1px solid #ccc; 
-      border-radius: 8px; 
-      padding: 10px; 
-      margin: 10px; 
-      display: inline-block; 
-      width: 200px; 
-      vertical-align: top; 
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Zara Life Care</title>
+<style>
+  /* Reset & basic */
+  * {
+    box-sizing: border-box;
+  }
+  body {
+    margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #f9f9f9;
+  }
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #004aad;
+    color: white;
+    padding: 10px 15px;
+    flex-wrap: wrap;
+  }
+  .logo {
+    font-weight: 700;
+    font-size: 1.4rem;
+    user-select: none;
+  }
+  nav {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  select {
+    padding: 6px 10px;
+    border-radius: 8px;
+    border: none;
+    font-size: 0.9rem;
+    cursor: pointer;
+    outline: none;
+    background: white;
+    color: #333;
+    box-shadow:
+      0 2px 5px rgba(0,0,0,0.15),
+      inset 0 -3px 5px rgba(0,0,0,0.1);
+    transition: box-shadow 0.3s ease;
+  }
+  select:hover, select:focus {
+    box-shadow:
+      0 4px 8px rgba(0,0,0,0.25),
+      inset 0 -3px 7px rgba(0,0,0,0.15);
+  }
+  button {
+    background: linear-gradient(145deg, #1e90ff, #1c78d8);
+    border: none;
+    border-radius: 12px;
+    color: white;
+    font-weight: 600;
+    font-size: 1rem;
+    padding: 10px 25px;
+    cursor: pointer;
+    box-shadow:
+      0 4px 6px #1a6fd2,
+      inset 0 -3px 5px #2f8cff;
+    transition: box-shadow 0.3s ease, background 0.3s ease;
+    user-select: none;
+  }
+  button:hover {
+    background: linear-gradient(145deg, #3aa0ff, #2679e5);
+    box-shadow:
+      0 6px 10px #1762bb,
+      inset 0 -5px 8px #3f95ff;
+  }
+  button:active {
+    box-shadow:
+      inset 0 3px 5px #1a6fd2;
+    background: linear-gradient(145deg, #1762bb, #1c78d8);
+  }
+  .header-left, .header-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  /* Responsive */
+  @media (max-width: 600px) {
+    header {
+      justify-content: center;
+      gap: 12px;
     }
-    .card h3 { margin: 5px 0; }
-    .dropdown { padding: 5px; font-size: 12px; }
-    button {
-      padding: 10px 20px; 
-      font-size: 16px; 
-      margin: 10px; 
-      cursor: pointer; 
-      border-radius: 10px;
-      border: none;
-      background: linear-gradient(145deg, #6cc1ff, #3a8dff);
-      box-shadow: 3px 3px 6px #2e7ad1, -3px -3px 6px #78bbff;
-      color: white;
-      transition: 0.3s ease;
+    .header-left, .header-right {
+      flex-basis: 100%;
+      justify-content: center;
     }
-    button:hover {
-      box-shadow: inset 3px 3px 6px #2e7ad1, inset -3px -3px 6px #78bbff;
-    }
-  </style>
+  }
+</style>
 </head>
 <body>
 
-  <h1>Available Ambulances</h1>
-  <button id="loginBtn">Login with Google</button>
-  <button id="logoutBtn" style="display:none;">Logout</button>
+<header>
+  <div class="header-left">
+    <div class="logo">Zara Life Care</div>
+    <select id="infoDropdown" aria-label="Info Dropdown">
+      <option disabled selected>Info</option>
+      <option value="about.html">About</option>
+      <option value="contact.html">Contact</option>
+      <option value="privacy.html">Privacy Policy</option>
+    </select>
+    <select id="linksDropdown" aria-label="Links Dropdown">
+      <option disabled selected>Links</option>
+      <!-- Dynamically add links here -->
+    </select>
+  </div>
 
-  <div id="drivers-container">Loading...</div>
+  <button id="bookingBtn" title="Go to Booking Page">Booking</button>
 
-  <!-- Firebase Compat SDK -->
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+  <div class="header-right">
+    <button id="authBtn">Login</button>
+  </div>
+</header>
 
-  <script>
-    // Your Firebase config
-    const firebaseConfig = {
-      apiKey: "AIzaSyCFgRQxK_W2T9S5QWZnxAd-kYV52Kzyb94",
-      authDomain: "zara-life-care.firebaseapp.com",
-      projectId: "zara-life-care",
-      storageBucket: "zara-life-care.appspot.com",
-      messagingSenderId: "307306937129",
-      appId: "1:307306937129:web:a949207fe87dd3d538"
-    };
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
+<script>
+  // Firebase config
+  const firebaseConfig = {
+    apiKey: "AIzaSyCFgRQxK_W2T9S5QWZnxAd-kYV52Kzyb94",
+    authDomain: "zara-life-care.firebaseapp.com",
+    projectId: "zara-life-care",
+    storageBucket: "zara-life-care.appspot.com",
+    messagingSenderId: "307306937129",
+    appId: "1:307306937129:web:a949207fe64fe87dd3d538"
+  };
+  // Initialize Firebase
+  const app = firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
 
-    // Initialize Firebase
-    firebase.initializeApp(firebaseConfig);
+  // Elements
+  const authBtn = document.getElementById('authBtn');
+  const bookingBtn = document.getElementById('bookingBtn');
+  const infoDropdown = document.getElementById('infoDropdown');
+  const linksDropdown = document.getElementById('linksDropdown');
 
-    const auth = firebase.auth();
-    const database = firebase.database();
+  // Example links you can edit or add dynamically
+  const customLinks = [
+    { name: "Zara Blog", url: "https://zara-blog.example.com" },
+    { name: "Help Center", url: "https://help.zara-life-care.com" }
+  ];
 
-    const loginBtn = document.getElementById('loginBtn');
-    const logoutBtn = document.getElementById('logoutBtn');
-    const driversContainer = document.getElementById('drivers-container');
-
-    loginBtn.onclick = () => {
-      const provider = new firebase.auth.GoogleAuthProvider();
-      auth.signInWithPopup(provider).catch(e => alert(e.message));
-    };
-
-    logoutBtn.onclick = () => {
-      auth.signOut();
-    };
-
-    auth.onAuthStateChanged(user => {
-      if (user) {
-        loginBtn.style.display = 'none';
-        logoutBtn.style.display = 'inline-block';
-        loadApprovedDrivers();
-      } else {
-        loginBtn.style.display = 'inline-block';
-        logoutBtn.style.display = 'none';
-        driversContainer.innerHTML = 'Please login to see available ambulances.';
-      }
+  // Populate Links dropdown
+  function populateLinksDropdown() {
+    customLinks.forEach(link => {
+      const opt = document.createElement('option');
+      opt.value = link.url;
+      opt.textContent = link.name;
+      linksDropdown.appendChild(opt);
     });
+  }
+  populateLinksDropdown();
 
-    function loadApprovedDrivers() {
-      driversContainer.innerHTML = 'Loading...';
-      database.ref('drivers').orderByChild('status').equalTo('approved').on('value', snapshot => {
-        driversContainer.innerHTML = '';
-        if (!snapshot.exists()) {
-          driversContainer.innerHTML = 'No approved drivers found.';
-          return;
-        }
-        snapshot.forEach(child => {
-          const d = child.val();
-          driversContainer.innerHTML += `
-            <div class="card">
-              <h3>${d.name || 'Unknown'}</h3>
-              <p>Ambulance No: ${d.ambulanceNo}</p>
-              <select class="dropdown">
-                <option>Option 1</option>
-                <option>Option 2</option>
-              </select>
-              <select class="dropdown">
-                <option>Link 1</option>
-                <option>Link 2</option>
-              </select>
-              <button>Book Ambulance</button>
-            </div>
-          `;
-        });
-      });
+  // Dropdown change handlers
+  infoDropdown.addEventListener('change', e => {
+    if(e.target.value) window.location.href = e.target.value;
+  });
+  linksDropdown.addEventListener('change', e => {
+    if(e.target.value) window.open(e.target.value, '_blank');
+  });
+
+  // Booking button link - change as needed
+  bookingBtn.addEventListener('click', () => {
+    window.location.href = "booking.html";  // अपने booking page का लिंक दें
+  });
+
+  // Auth button logic
+  auth.onAuthStateChanged(user => {
+    if(user) {
+      authBtn.textContent = "Logout";
+      authBtn.onclick = () => {
+        auth.signOut();
+      };
+    } else {
+      authBtn.textContent = "Login";
+      authBtn.onclick = () => {
+        window.location.href = "login.html"; // अपने login page का लिंक दें
+      };
     }
-  </script>
+  });
+</script>
 
 </body>
 </html>
