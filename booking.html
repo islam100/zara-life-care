@@ -3,362 +3,160 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Zara Life Care - Ambulance Booking</title>
+<title>Zara Life Care - Book Ambulance</title>
 <style>
   body {
     font-family: Arial, sans-serif;
-    margin:0; padding:0;
+    padding: 20px;
     background: #f5f5f5;
   }
-  header {
-    background: #007BFF;
-    color: white;
-    padding: 15px 10px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  header .logo {
-    font-weight: bold;
-    font-size: 1.4em;
-  }
-  header nav button {
-    margin-left: 10px;
-    padding: 8px 12px;
-    border-radius: 10px;
-    border: none;
-    cursor: pointer;
-    font-size: 1em;
-    box-shadow:
-      0 2px 5px rgba(0,0,0,0.2),
-      inset 0 -3px 0 rgba(255,255,255,0.3);
-    background: linear-gradient(145deg, #4a8dff, #0061d5);
-    color: white;
-    transition: all 0.3s ease;
-  }
-  header nav button:hover {
-    background: linear-gradient(145deg, #0061d5, #004ea1);
-  }
-  main {
+  form, #statusSection {
+    background: white;
     padding: 20px;
+    border-radius: 12px;
+    max-width: 400px;
+    margin: auto;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
   }
-  .booking-btn {
-    display: none;
-    width: 150px;
-    margin: 20px auto;
-    padding: 15px;
-    border-radius: 20px;
+  input, select, textarea, button {
+    width: 100%;
+    margin: 10px 0;
+    padding: 10px;
+    font-size: 1em;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+  }
+  button {
+    cursor: pointer;
     background: linear-gradient(145deg, #4caf50, #388e3c);
+    color: white;
+    border: none;
+    font-weight: bold;
     box-shadow:
       0 5px 10px rgba(0,0,0,0.3),
       inset 0 -3px 0 rgba(255,255,255,0.4);
-    font-size: 1.1em;
-    color: white;
-    border: none;
-    cursor: pointer;
-    transition: all 0.3s ease;
-  }
-  .booking-btn:hover {
-    background: linear-gradient(145deg, #388e3c, #2e7030);
-  }
-  #available-ambulances {
-    margin-top: 30px;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 15px;
-  }
-  .card {
-    background: white;
-    border-radius: 12px;
-    padding: 15px;
-    width: 250px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-  }
-  .card h3 {
-    margin: 0 0 10px 0;
-  }
-  .card p {
-    margin: 5px 0;
-  }
-  /* Modal styles */
-  .modal {
-    display: none;
-    position: fixed;
-    z-index: 1000;
-    left:0; top:0;
-    width: 100%;
-    height: 100%;
-    overflow:auto;
-    background: rgba(0,0,0,0.6);
-  }
-  .modal-content {
-    background: white;
-    margin: 10% auto;
-    padding: 20px;
-    border-radius: 15px;
-    width: 90%;
-    max-width: 400px;
-    position: relative;
-  }
-  .modal-content h2 {
-    margin-top: 0;
-  }
-  .close-btn {
-    position: absolute;
-    right: 15px;
-    top: 10px;
-    font-size: 1.5em;
-    cursor: pointer;
-    color: #333;
-  }
-  input, select, textarea {
-    width: 100%;
-    padding: 8px 10px;
-    margin: 8px 0 15px 0;
-    border-radius: 8px;
-    border: 1px solid #ccc;
-    font-size: 1em;
-  }
-  button.submit-btn {
-    background: #007BFF;
-    color: white;
-    border:none;
-    padding: 12px;
-    border-radius: 12px;
-    font-size: 1.1em;
-    cursor: pointer;
-    box-shadow: 0 3px 7px rgba(0,123,255,0.7);
     transition: background 0.3s ease;
   }
-  button.submit-btn:hover {
-    background: #0056b3;
+  button:hover {
+    background: linear-gradient(145deg, #388e3c, #2e7030);
   }
-  /* Responsive */
-  @media(max-width:600px) {
-    header {
-      flex-wrap: wrap;
-      justify-content: center;
-    }
-    header nav button {
-      margin: 5px 5px 0 0;
-      width: 48%;
-    }
-    .booking-btn {
-      width: 90%;
-    }
-    .card {
-      width: 90%;
-    }
+  #bookingStatus {
+    margin-top: 15px;
+    font-weight: bold;
+    color: #333;
   }
 </style>
 </head>
 <body>
 
-<header>
-  <div class="logo">Zara Life Care</div>
-  <nav>
-    <button id="loginBtn">Login with Google</button>
-    <button id="logoutBtn" style="display:none;">Logout</button>
-  </nav>
-</header>
+<h2 style="text-align:center;">Book Ambulance</h2>
 
-<main>
-  <button id="bookingBtn" class="booking-btn">Book Ambulance</button>
+<form id="bookingForm">
+  <input type="text" id="patientName" placeholder="Your Name" required />
+  <input type="tel" id="patientPhone" placeholder="Your WhatsApp Number" pattern="[0-9]{10}" required />
+  <textarea id="patientAddress" placeholder="Pickup Address" required></textarea>
+  <input type="text" id="destination" placeholder="Destination" required />
+  <select id="ambulanceCategory" required>
+    <option value="" disabled selected>Select Ambulance Category</option>
+    <option value="ICU">ICU</option>
+    <option value="Basic">Basic</option>
+    <option value="Non-ICU">Non-ICU</option>
+  </select>
+  <button type="submit">Submit Booking</button>
+</form>
 
-  <section>
-    <h2>Available Ambulances</h2>
-    <div id="available-ambulances">Please login to see ambulances.</div>
-  </section>
-</main>
-
-<!-- Booking Modal -->
-<div id="bookingModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="bookingModalTitle">
-  <div class="modal-content">
-    <span class="close-btn" id="closeModal">&times;</span>
-    <h2 id="bookingModalTitle">Book Ambulance</h2>
-    <form id="bookingForm">
-      <input type="text" id="patientName" placeholder="Your Name" required />
-      <input type="tel" id="patientPhone" placeholder="Your WhatsApp Number" required pattern="[0-9]{10}" />
-      <textarea id="patientAddress" placeholder="Pickup Address" required></textarea>
-      <input type="text" id="destination" placeholder="Destination" required />
-      <select id="ambulanceCategory" required>
-        <option value="" disabled selected>Select Ambulance Category</option>
-        <option value="ICU">ICU</option>
-        <option value="Basic">Basic</option>
-        <option value="Non-ICU">Non-ICU</option>
-      </select>
-      <button type="submit" class="submit-btn">Submit Booking</button>
-    </form>
-    <div id="bookingStatus" style="margin-top:15px;"></div>
-  </div>
+<!-- Booking Status Section -->
+<div id="statusSection" style="display:none;">
+  <button id="checkStatusBtn">Check Booking Status</button>
+  <div id="bookingStatus"></div>
 </div>
 
 <!-- Firebase SDK -->
-<script type="module">
-  // Import Firebase modules from CDN
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-  import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
-  import { getDatabase, ref, onValue, push, set, orderByChild, equalTo, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
 
+<script>
+  // Your Firebase config here
   const firebaseConfig = {
     apiKey: "AIzaSyCFgRQxK_W2T9S5QWZnxAd-kYV52Kzyb94",
     authDomain: "zara-life-care.firebaseapp.com",
     projectId: "zara-life-care",
-    storageBucket: "zara-life-care.appspot.com",   
+    storageBucket: "zara-life-care.appspot.com",
     messagingSenderId: "307306937129",
     appId: "1:307306937129:web:a949207fe64fe87dd3d538"
   };
 
-  // Initialize Firebase
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const db = getDatabase(app);
-  const provider = new GoogleAuthProvider();
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.database();
 
-  // Elements
-  const loginBtn = document.getElementById('loginBtn');
-  const logoutBtn = document.getElementById('logoutBtn');
-  const bookingBtn = document.getElementById('bookingBtn');
-  const availableAmbulancesDiv = document.getElementById('available-ambulances');
-  const bookingModal = document.getElementById('bookingModal');
-  const closeModalBtn = document.getElementById('closeModal');
-  const bookingForm = document.getElementById('bookingForm');
-  const bookingStatus = document.getElementById('bookingStatus');
+  // Simulate login for demo (replace with actual login flow)
+  // For production, implement proper login using firebase.auth()
+  // Here, we'll use a dummy UID for testing
+  const demoUserUid = 'demoUser123';
 
-  // Login
-  loginBtn.addEventListener('click', () => {
-    signInWithPopup(auth, provider).catch(err => alert('Login Failed: ' + err.message));
-  });
+  // Show status section only after booking is done or user logs in
+  const statusSection = document.getElementById('statusSection');
+  const bookingStatusDiv = document.getElementById('bookingStatus');
+  const checkStatusBtn = document.getElementById('checkStatusBtn');
 
-  // Logout
-  logoutBtn.addEventListener('click', () => {
-    signOut(auth);
-  });
-
-  // Auth State Change
-  onAuthStateChanged(auth, user => {
-    if(user){
-      loginBtn.style.display = 'none';
-      logoutBtn.style.display = 'inline-block';
-      bookingBtn.style.display = 'block';
-      loadAvailableAmbulances();
-      listenForBookingStatus(user.uid);
-    } else {
-      loginBtn.style.display = 'inline-block';
-      logoutBtn.style.display = 'none';
-      bookingBtn.style.display = 'none';
-      availableAmbulancesDiv.innerHTML = 'Please login to see ambulances.';
-      bookingStatus.innerHTML = '';
-    }
-  });
-
-  // Load Ambulances approved by admin
-  function loadAvailableAmbulances(){
-    availableAmbulancesDiv.innerHTML = 'Loading...';
-    const ambulancesRef = ref(db, 'drivers');
-    onValue(ambulancesRef, snapshot => {
-      const data = snapshot.val();
-      if(!data){
-        availableAmbulancesDiv.innerHTML = '<p>No ambulances available currently.</p>';
-        return;
-      }
-      availableAmbulancesDiv.innerHTML = '';
-      Object.values(data).forEach(driver => {
-        if(driver.isApproved){
-          const card = document.createElement('div');
-          card.className = 'card';
-          card.innerHTML = `
-            <h3>${driver.driverName}</h3>
-            <p><strong>Ambulance No:</strong> ${driver.ambulanceNumber}</p>
-            <p><strong>Category:</strong> ${driver.ambulanceCategory}</p>
-            <p><strong>WhatsApp:</strong> <a href="https://wa.me/${driver.whatsappNumber}" target="_blank">${driver.whatsappNumber}</a></p>
-          `;
-          availableAmbulancesDiv.appendChild(card);
-        }
-      });
-    });
-  }
-
-  // Booking modal open/close
-  bookingBtn.addEventListener('click', () => {
-    bookingModal.style.display = 'block';
-    bookingStatus.innerHTML = '';
-    bookingForm.reset();
-  });
-  closeModalBtn.addEventListener('click', () => {
-    bookingModal.style.display = 'none';
-  });
-  window.onclick = e => {
-    if(e.target === bookingModal){
-      bookingModal.style.display = 'none';
-    }
-  };
-
-  // Booking form submit
-  bookingForm.addEventListener('submit', e => {
+  // Submit booking form
+  document.getElementById('bookingForm').addEventListener('submit', e => {
     e.preventDefault();
-    const user = auth.currentUser;
-    if(!user){
-      alert('Please login first');
-      return;
-    }
+
+    // Here use actual logged in user UID in production
+    const userUid = demoUserUid;
 
     const bookingData = {
-      patientId: user.uid,
-      patientName: bookingForm.patientName.value.trim(),
-      patientPhone: bookingForm.patientPhone.value.trim(),
-      patientAddress: bookingForm.patientAddress.value.trim(),
-      destination: bookingForm.destination.value.trim(),
-      ambulanceCategory: bookingForm.ambulanceCategory.value,
+      patientId: userUid,
+      patientName: document.getElementById('patientName').value.trim(),
+      patientPhone: document.getElementById('patientPhone').value.trim(),
+      patientAddress: document.getElementById('patientAddress').value.trim(),
+      destination: document.getElementById('destination').value.trim(),
+      ambulanceCategory: document.getElementById('ambulanceCategory').value,
       status: 'pending',
-      createdAt: serverTimestamp()
+      driverName: null,
+      driverWhatsapp: null,
+      createdAt: firebase.database.ServerValue.TIMESTAMP
     };
 
-    const bookingsRef = ref(db, 'bookings');
-    const newBookingRef = push(bookingsRef);
-    set(newBookingRef, bookingData).then(() => {
-      bookingStatus.style.color = 'green';
-      bookingStatus.textContent = 'Booking submitted. Waiting for driver acceptance...';
-      bookingForm.reset();
-      bookingModal.style.display = 'none';
+    db.ref('bookings').push(bookingData)
+      .then(() => {
+        alert('Booking submitted! Please wait for approval.');
+        statusSection.style.display = 'block';
+        bookingStatusDiv.textContent = '';
+        document.getElementById('bookingForm').reset();
+      })
+      .catch(err => {
+        alert('Error: ' + err.message);
+      });
+  });
 
-      // TODO: Notify drivers of this ambulance category (can implement notifications here)
-    }).catch(err => {
-      bookingStatus.style.color = 'red';
-      bookingStatus.textContent = 'Booking failed: ' + err.message;
+  // Check booking status button click
+  checkStatusBtn.addEventListener('click', () => {
+    const userUid = demoUserUid;
+    bookingStatusDiv.textContent = 'Loading...';
+
+    db.ref('bookings').orderByChild('patientId').equalTo(userUid).once('value', snapshot => {
+      const bookings = snapshot.val();
+      if (!bookings) {
+        bookingStatusDiv.textContent = 'No bookings found.';
+        return;
+      }
+      // Get latest booking by createdAt
+      const latestBookingId = Object.keys(bookings).sort((a,b) => bookings[b].createdAt - bookings[a].createdAt)[0];
+      const booking = bookings[latestBookingId];
+
+      let statusHtml = `Status: ${booking.status}<br/>`;
+      if(booking.status === 'accepted') {
+        statusHtml += `Driver: ${booking.driverName || '-'}<br/>`;
+        statusHtml += `WhatsApp: <a href="https://wa.me/${booking.driverWhatsapp}" target="_blank">${booking.driverWhatsapp}</a><br/>`;
+      }
+      bookingStatusDiv.innerHTML = statusHtml;
     });
   });
 
-  // Listen booking status for logged-in patient
-  function listenForBookingStatus(patientUid){
-    const bookingsRef = ref(db, 'bookings');
-    onValue(bookingsRef, snapshot => {
-      const data = snapshot.val();
-      if(!data) return;
-
-      // Find latest booking of this patient
-      const bookings = Object.entries(data)
-        .filter(([key, val]) => val.patientId === patientUid)
-        .sort((a,b) => b[1].createdAt - a[1].createdAt);
-
-      if(bookings.length === 0) {
-        bookingStatus.innerHTML = '';
-        return;
-      }
-
-      const latestBooking = bookings[0][1];
-      let statusHTML = `<strong>Booking Status:</strong> ${latestBooking.status}<br>`;
-      if(latestBooking.status === 'accepted' || latestBooking.status === 'confirmed'){
-        statusHTML += `
-          Driver: ${latestBooking.driverName || '-'}<br>
-          Ambulance No: ${latestBooking.driverNumber || '-'}<br>
-          WhatsApp: <a href="https://wa.me/${latestBooking.driverWhatsapp || ''}" target="_blank">${latestBooking.driverWhatsapp || '-'}</a>
-        `;
-      }
-      bookingStatus.innerHTML = statusHTML;
-    });
-  }
 </script>
 
 </body>
