@@ -135,11 +135,11 @@
 </main>
 
 <!-- Firebase SDK -->
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
 
 <script>
-  // Your Firebase config
+  // Firebase configuration (अपना config डालें)
   const firebaseConfig = {
     apiKey: "AIzaSyCFgRQxK_W2T9S5QWZnxAd-kYV52Kzyb94",
     authDomain: "zara-life-care.firebaseapp.com",
@@ -156,20 +156,16 @@
   const loginBtn = document.getElementById('loginBtn');
   const logoutBtn = document.getElementById('logoutBtn');
 
-  // Login with Google popup
   loginBtn.addEventListener('click', () => {
     const provider = new firebase.auth.GoogleAuthProvider();
-    auth.signInWithPopup(provider).catch(error => {
-      alert('Login failed: ' + error.message);
-    });
+    auth.signInWithPopup(provider)
+      .catch(error => alert('Login failed: ' + error.message));
   });
 
-  // Logout
   logoutBtn.addEventListener('click', () => {
     auth.signOut();
   });
 
-  // Listen for auth state changes
   auth.onAuthStateChanged(user => {
     if(user){
       loginBtn.style.display = 'none';
@@ -180,7 +176,7 @@
     }
   });
 
-  // Button links
+  // बटन के लिंक (अपना लिंक यहाँ डालें)
   const links = {
     bookAmbulanceBtn: 'https://example.com/book-ambulance',
     hospitalListBtn: 'https://example.com/hospital-list',
@@ -189,15 +185,13 @@
   };
 
   Object.keys(links).forEach(id => {
-    const el = document.getElementById(id);
-    if(el){
-      el.addEventListener('click', () => {
-        if(id === 'driverBtn' || id === 'marijStatusBtn'){
-          // Require login for driver and marij status pages
-          if(!auth.currentUser){
-            alert('Please login first');
-            return;
-          }
+    const btn = document.getElementById(id);
+    if(btn){
+      btn.addEventListener('click', () => {
+        // driver और marij status बटन पर login चाहिए
+        if((id === 'driverBtn' || id === 'marijStatusBtn') && !auth.currentUser){
+          alert('Please login first');
+          return;
         }
         window.location.href = links[id];
       });
