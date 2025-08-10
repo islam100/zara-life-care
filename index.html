@@ -3,22 +3,43 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Simple Google Login</title>
+<title>Available Ambulances</title>
+<style>
+  body { font-family: Arial, sans-serif; padding: 20px; }
+  h1 { text-align: center; }
+  #drivers-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 15px;
+  }
+  .card {
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 15px;
+    width: 220px;
+    box-shadow: 2px 2px 8px #aaa;
+    text-align: center;
+  }
+  .dropdown {
+    margin-top: 10px;
+    width: 100%;
+    padding: 5px;
+    font-size: 14px;
+  }
+</style>
 </head>
 <body>
 
-<h2>Google Login Demo</h2>
+<h1>Available Ambulances</h1>
+<div id="drivers-container">Loading...</div>
 
-<button id="loginBtn">Login with Google</button>
-<button id="logoutBtn" style="display:none;">Logout</button>
-
-<p id="userInfo"></p>
-
+<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
 
 <script>
-  // Firebase config
   const firebaseConfig = {
     apiKey: "AIzaSyCFgRQxK_W2T9S5QWZnxAd-kYV52Kzyb94",
     authDomain: "zara-life-care.firebaseapp.com",
@@ -30,47 +51,51 @@
 
   // Initialize Firebase
   firebase.initializeApp(firebaseConfig);
-
   const auth = firebase.auth();
+  const db = firebase.database();
 
-  const loginBtn = document.getElementById('loginBtn');
-  const logoutBtn = document.getElementById('logoutBtn');
-  const userInfo = document.getElementById('userInfo');
-
-  loginBtn.onclick = () => {
-    const provider = new firebase.auth.GoogleAuthProvider();
-    auth.signInWithPopup(provider)
-      .then((result) => {
-        // Login success
-        userInfo.textContent = `Hello, ${result.user.displayName} (${result.user.email})`;
-        loginBtn.style.display = 'none';
-        logoutBtn.style.display = 'inline-block';
-      })
-      .catch((error) => {
-        alert('Login failed: ' + error.message);
-        console.error(error);
-      });
-  };
-
-  logoutBtn.onclick = () => {
-    auth.signOut().then(() => {
-      userInfo.textContent = '';
-      loginBtn.style.display = 'inline-block';
-      logoutBtn.style.display = 'none';
-    });
-  };
-
+  // Check if user logged in
   auth.onAuthStateChanged(user => {
-    if(user){
-      userInfo.textContent = `Hello, ${user.displayName} (${user.email})`;
-      loginBtn.style.display = 'none';
-      logoutBtn.style.display = 'inline-block';
+    if (!user) {
+      // Not logged in, redirect to login page
+      window.location.href = "login.html";
     } else {
-      userInfo.textContent = '';
-      loginBtn.style.display = 'inline-block';
-      logoutBtn.style.display = 'none';
+      // Logged in, load approved drivers
+      loadApprovedDrivers();
     }
   });
+
+  function loadApprovedDrivers() {
+    const container = document.getElementById('drivers-container');
+    container.innerHTML = "Loading...";
+
+    db.ref('drivers').orderByChild('status').equalTo('approved').on('value', snapshot => {
+      container.innerHTML = '';
+      if (!snapshot.exists()) {
+        container.innerHTML = '<p>No approved drivers found.</p>';
+        return;
+      }
+      snapshot.forEach(child => {
+        const d = child.val();
+        container.innerHTML += `
+          <div class="card">
+            <h3>${d.name || 'Unknown'}</h3>
+            <p><strong>Ambulance No:</strong> ${d.ambulanceNo || 'N/A'}</p>
+            <select class="dropdown">
+              <option>Select Option</option>
+              <option>Option 1</option>
+              <option>Option 2</option>
+            </select>
+            <select class="dropdown">
+              <option>Select Link</option>
+              <option>Link 1</option>
+              <option>Link 2</option>
+            </select>
+          </div>
+        `;
+      });
+    });
+  }
 </script>
 
 </body>
