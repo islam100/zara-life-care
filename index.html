@@ -69,23 +69,28 @@
   const userRoleSpan = document.getElementById('userRole');
   const driversContainer = document.getElementById('drivers-container');
 
-  googleLoginBtn.onclick = () => {
+  // Google login बटन का काम
+  googleLoginBtn.addEventListener('click', () => {
     const provider = new firebase.auth.GoogleAuthProvider();
     auth.signInWithPopup(provider).catch(e => alert(e.message));
-  };
+  });
 
-  logoutBtn.onclick = () => {
+  logoutBtn.addEventListener('click', () => {
     auth.signOut();
-  };
+  });
 
   auth.onAuthStateChanged(user => {
     if (user) {
+      // लॉगिन हो गया है
       loginSection.classList.add('hidden');
       mainSection.classList.remove('hidden');
       logoutBtn.classList.remove('hidden');
-      userNameSpan.textContent = user.displayName;
-      checkUserRole(user.uid);
+      userNameSpan.textContent = user.displayName || user.email;
+      userRoleSpan.textContent = 'User';
+
+      loadApprovedDrivers();
     } else {
+      // लॉग आउट या लॉगिन नहीं है
       loginSection.classList.remove('hidden');
       mainSection.classList.add('hidden');
       logoutBtn.classList.add('hidden');
@@ -94,25 +99,6 @@
       driversContainer.innerHTML = '';
     }
   });
-
-  function checkUserRole(uid) {
-    db.ref('admins/' + uid).once('value').then(snap => {
-      if (snap.exists()) {
-        userRoleSpan.textContent = 'Admin';
-        alert('Admin UI coming soon!');
-      } else {
-        db.ref('drivers/' + uid).once('value').then(drvSnap => {
-          if (drvSnap.exists() && drvSnap.val().status === 'approved') {
-            userRoleSpan.textContent = 'Driver';
-            alert('Driver UI coming soon!');
-          } else {
-            userRoleSpan.textContent = 'Patient';
-            loadApprovedDrivers();
-          }
-        });
-      }
-    });
-  }
 
   function loadApprovedDrivers() {
     driversContainer.innerHTML = 'Loading...';
@@ -141,32 +127,13 @@
             <option value="link1">Link 1</option>
             <option value="link2">Link 2</option>
           </select>
-          <button onclick="bookAmbulance('${child.key}', '${d.name}')">Book Ambulance</button>
+          <button onclick="alert('Booking feature coming soon!')">Book Ambulance</button>
         `;
         driversContainer.appendChild(card);
       });
     });
   }
-
-  function bookAmbulance(driverId, driverName) {
-    const patient = auth.currentUser;
-    if (!patient) {
-      alert('Please login first.');
-      return;
-    }
-    if (!confirm(`Confirm booking ambulance driven by ${driverName}? ₹20 will be deducted from your wallet.`)) return;
-
-    db.ref('bookings').push({
-      driverId,
-      driverName,
-      patientId: patient.uid,
-      patientName: patient.displayName,
-      status: 'pending',
-      timestamp: Date.now()
-    }).then(() => {
-      alert('Booking requested! Please wait for approval.');
-    });
-  }
 </script>
+
 </body>
 </html>
