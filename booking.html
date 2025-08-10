@@ -5,85 +5,32 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Zara Life Care - Book Ambulance</title>
 <style>
-  body {
-    font-family: Arial, sans-serif;
-    background: #f5f5f5;
-    padding: 20px;
-  }
-  form {
-    max-width: 400px;
-    margin: 0 auto;
-    background: white;
-    padding: 20px;
-    border-radius: 15px;
-    box-shadow:
-      0 4px 15px rgba(0,0,0,0.2);
-  }
-  input, select, textarea, button {
-    width: 100%;
-    margin-top: 10px;
-    padding: 10px;
-    font-size: 1em;
-    border-radius: 10px;
-    border: 1px solid #ccc;
-    box-sizing: border-box;
-  }
-  button {
-    cursor: pointer;
-    box-shadow:
-      0 5px 8px rgba(0,0,0,0.25),
-      inset 0 -3px 0 rgba(255,255,255,0.3);
+  body { font-family: Arial; background:#f5f5f5; padding:20px; }
+  /* ... (उपर वाला CSS जैसा ही) ... */
+  button { cursor: pointer; }
+  #loginBtn, #logoutBtn {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    padding: 8px 12px;
     border: none;
+    border-radius: 8px;
+    background: #007bff;
     color: white;
-    background: linear-gradient(145deg, #4caf50, #388e3c);
-    transition: background 0.3s ease;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+    transition: background 0.3s;
   }
-  button:hover {
-    background: linear-gradient(145deg, #388e3c, #2e7030);
-  }
-  #statusBtn {
-    background: linear-gradient(145deg, #2196f3, #1565c0);
-    margin-top: 10px;
-  }
-  #bookingStatus {
-    max-width: 400px;
-    margin: 20px auto;
-    background: white;
-    border-radius: 15px;
-    padding: 15px;
-    box-shadow:
-      0 4px 15px rgba(0,0,0,0.1);
-  }
-  .booking-card {
-    border: 1px solid #ddd;
-    padding: 10px;
-    margin-bottom: 10px;
-    border-radius: 10px;
-  }
-  .booking-card strong {
-    display: block;
-    margin-bottom: 5px;
-  }
-  .accepted {
-    background-color: #d4edda;
-  }
-  .pending {
-    background-color: #fff3cd;
-  }
-  .rejected {
-    background-color: #f8d7da;
-  }
-  a.whatsapp-link {
-    color: #075e54;
-    font-weight: bold;
-    text-decoration: none;
+  #loginBtn:hover, #logoutBtn:hover {
+    background: #0056b3;
   }
 </style>
 </head>
 <body>
 
-<h2>Book Ambulance</h2>
+<button id="loginBtn">Login with Google</button>
+<button id="logoutBtn" style="display:none;">Logout</button>
 
+<h2>Book Ambulance</h2>
 <form id="bookingForm">
   <input type="text" id="patientName" placeholder="Your Name" required />
   <input type="tel" id="patientPhone" placeholder="Your WhatsApp Number" required pattern="[0-9]{10}" />
@@ -98,48 +45,56 @@
   <button type="submit">Submit Booking</button>
 </form>
 
-<!-- Status देखें बटन -->
-<button id="statusBtn" style="display:none;">See Booking Status</button>
+<button id="statusBtn" style="display:none; margin-top: 10px; background:#2196f3; color:white; padding:10px 15px; border:none; border-radius:10px; box-shadow: 0 5px 8px rgba(0,0,0,0.25); cursor:pointer;">See Booking Status</button>
 
-<!-- बुकिंग स्टेटस दिखाने वाला डिव -->
 <div id="bookingStatus"></div>
 
-<!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
 
 <script>
-  // अपनी Firebase कॉन्फ़िग डालें
   const firebaseConfig = {
     apiKey: "AIzaSyCFgRQxK_W2T9S5QWZnxAd-kYV52Kzyb94",
     authDomain: "zara-life-care.firebaseapp.com",
     projectId: "zara-life-care",
     storageBucket: "zara-life-care.appspot.com",
     messagingSenderId: "307306937129",
-    appId: "1:307306937129:web:a949207fe64fe87dd3d538"
+    appId: "1:307306937129:web:a949207fe64fe64fe87dd3d538"
   };
-  
   firebase.initializeApp(firebaseConfig);
   const auth = firebase.auth();
   const db = firebase.database();
 
+  const loginBtn = document.getElementById('loginBtn');
+  const logoutBtn = document.getElementById('logoutBtn');
   const bookingForm = document.getElementById('bookingForm');
   const statusBtn = document.getElementById('statusBtn');
   const bookingStatus = document.getElementById('bookingStatus');
 
-  // लॉगिन चेक करें और Status बटन दिखाएं/छुपाएं
+  loginBtn.addEventListener('click', () => {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    auth.signInWithPopup(provider).catch(e => alert(e.message));
+  });
+
+  logoutBtn.addEventListener('click', () => {
+    auth.signOut();
+  });
+
   auth.onAuthStateChanged(user => {
-    if(user) {
+    if(user){
+      loginBtn.style.display = 'none';
+      logoutBtn.style.display = 'inline-block';
       statusBtn.style.display = 'block';
-      bookingStatus.innerHTML = ''; // साफ करें
+      bookingStatus.innerHTML = '';
     } else {
+      loginBtn.style.display = 'inline-block';
+      logoutBtn.style.display = 'none';
       statusBtn.style.display = 'none';
       bookingStatus.innerHTML = '<p style="color:red; text-align:center;">Please login to book ambulance and see status.</p>';
     }
   });
 
-  // Booking फॉर्म सबमिट
   bookingForm.addEventListener('submit', e => {
     e.preventDefault();
     const user = auth.currentUser;
@@ -147,7 +102,6 @@
       alert('Please login first');
       return;
     }
-
     const bookingData = {
       patientId: user.uid,
       patientName: document.getElementById('patientName').value.trim(),
@@ -161,7 +115,6 @@
       driverWhatsapp: null,
       createdAt: firebase.database.ServerValue.TIMESTAMP
     };
-
     db.ref('bookings').push(bookingData)
       .then(() => {
         alert('Booking submitted! Waiting for driver approval.');
@@ -172,7 +125,6 @@
       });
   });
 
-  // Status देखें बटन पर क्लिक पर बुकिंग्स दिखाएं
   statusBtn.addEventListener('click', () => {
     const user = auth.currentUser;
     if(!user){
@@ -188,7 +140,6 @@
           bookingStatus.innerHTML = '<p>No bookings found.</p>';
           return;
         }
-
         let html = '';
         Object.entries(bookings).forEach(([key, booking]) => {
           let statusClass = '';
