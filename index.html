@@ -3,13 +3,15 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Zara Life Care</title>
+<title>Zara Life Care - Home</title>
 <style>
   body {
     font-family: Arial, sans-serif;
-    margin: 0; padding: 0;
+    margin:0; padding:0;
     background: #f5f5f5;
-    text-align: center;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
   }
   header {
     background: #007BFF;
@@ -18,66 +20,90 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    position: relative;
   }
   .logo {
     font-weight: bold;
-    font-size: 1.4em;
+    font-size: 1.5em;
   }
-  #loginBtn, #logoutBtn {
+  #loginBtn {
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    padding: 5px 10px;
     font-size: 0.8em;
-    padding: 6px 12px;
+    border-radius: 10px;
     border: none;
-    border-radius: 12px;
-    cursor: pointer;
+    background: linear-gradient(145deg, #ffa500, #cc8400);
     color: white;
-    background: linear-gradient(145deg, #4a8dff, #0061d5);
-    box-shadow: 0 2px 5px rgba(0,0,0,0.3), inset 0 -3px 0 rgba(255,255,255,0.3);
+    cursor: pointer;
+    box-shadow:
+      0 4px 6px rgba(0,0,0,0.3),
+      inset 0 -3px 0 rgba(255,255,255,0.3);
     transition: all 0.3s ease;
-    min-width: 70px;
   }
-  #loginBtn:hover, #logoutBtn:hover {
-    background: linear-gradient(145deg, #0061d5, #004ea1);
+  #loginBtn:hover {
+    background: linear-gradient(145deg, #cc8400, #995c00);
   }
+
   main {
-    margin: 30px 10px;
+    flex-grow: 1;
+    padding: 20px;
   }
-  .btn-grid {
+  .button-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 15px;
     max-width: 400px;
-    margin: 0 auto;
+    margin: 20px auto;
   }
-  .action-btn {
-    background: linear-gradient(145deg, #4caf50, #388e3c);
-    color: white;
-    padding: 18px;
+  button.action-btn {
+    padding: 15px;
     font-size: 1.1em;
+    font-weight: bold;
     border-radius: 20px;
+    color: white;
     border: none;
     cursor: pointer;
     box-shadow:
-      0 5px 10px rgba(0,0,0,0.3),
-      inset 0 -3px 0 rgba(255,255,255,0.4);
+      0 6px 8px rgba(0,0,0,0.35),
+      inset 0 -4px 0 rgba(255,255,255,0.3);
     transition: all 0.3s ease;
-    user-select: none;
   }
-  .action-btn:nth-child(2) {
+  button#bookAmbulanceBtn {
+    background: linear-gradient(145deg, #4caf50, #388e3c);
+  }
+  button#bookAmbulanceBtn:hover {
+    background: linear-gradient(145deg, #388e3c, #2e7030);
+  }
+  button#hospitalListBtn {
+    background: linear-gradient(145deg, #2196f3, #1565c0);
+  }
+  button#hospitalListBtn:hover {
+    background: linear-gradient(145deg, #1565c0, #0d3a7a);
+  }
+  button#driverBtn {
     background: linear-gradient(145deg, #ff5722, #d84315);
   }
-  .action-btn:nth-child(3) {
-    background: linear-gradient(145deg, #009688, #00695c);
+  button#driverBtn:hover {
+    background: linear-gradient(145deg, #d84315, #a32c0c);
   }
-  .action-btn:nth-child(4) {
-    background: linear-gradient(145deg, #673ab7, #4527a0);
+  button#marijStatusBtn {
+    background: linear-gradient(145deg, #9c27b0, #6a1b9a);
   }
-  .action-btn:hover {
-    filter: brightness(0.85);
+  button#marijStatusBtn:hover {
+    background: linear-gradient(145deg, #6a1b9a, #4a0d6a);
   }
-  @media(max-width: 480px) {
-    .btn-grid {
+
+  /* Responsive */
+  @media(max-width:450px) {
+    .button-grid {
       grid-template-columns: 1fr;
       max-width: 90%;
+    }
+    button.action-btn {
+      font-size: 1em;
+      padding: 12px;
     }
   }
 </style>
@@ -87,72 +113,35 @@
 <header>
   <div class="logo">Zara Life Care</div>
   <button id="loginBtn">Login</button>
-  <button id="logoutBtn" style="display:none;">Logout</button>
 </header>
 
 <main>
-  <div class="btn-grid">
-    <button class="action-btn" id="bookAmbulanceBtn">Book Ambulance</button>
-    <button class="action-btn" id="hospitalListBtn">Hospital List</button>
-    <button class="action-btn" id="driverBtn">Driver</button>
-    <button class="action-btn" id="marijStatusBtn">Marij Status</button>
+  <div class="button-grid">
+    <button id="bookAmbulanceBtn" class="action-btn">Book Ambulance</button>
+    <button id="hospitalListBtn" class="action-btn">Hospital List</button>
+    <button id="driverBtn" class="action-btn">Driver</button>
+    <button id="marijStatusBtn" class="action-btn">Marij Status</button>
   </div>
 </main>
 
-<script type="module">
-// Import Firebase modules from CDN
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+<script>
+  // Replace these URLs with your actual pages or routes
+  const links = {
+    bookAmbulanceBtn: 'https://example.com/book-ambulance',
+    hospitalListBtn: 'https://example.com/hospital-list',
+    driverBtn: 'https://example.com/driver',
+    marijStatusBtn: 'https://example.com/marij-status',
+    loginBtn: 'https://example.com/login'
+  };
 
-// Your Firebase config
-const firebaseConfig = {
-  apiKey: "AIzaSyCFgRQxK_W2T9S5QWZnxAd-kYV52Kzyb94",
-  authDomain: "zara-life-care.firebaseapp.com",
-  projectId: "zara-life-care",
-  storageBucket: "zara-life-care.appspot.com",
-  messagingSenderId: "307306937129",
-  appId: "1:307306937129:web:a949207fe64fe87dd3d538"
-};
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-
-const loginBtn = document.getElementById('loginBtn');
-const logoutBtn = document.getElementById('logoutBtn');
-
-loginBtn.addEventListener('click', () => {
-  const provider = new GoogleAuthProvider();
-  signInWithPopup(auth, provider).catch(err => alert(err.message));
-});
-
-logoutBtn.addEventListener('click', () => {
-  signOut(auth);
-});
-
-onAuthStateChanged(auth, user => {
-  if (user) {
-    loginBtn.style.display = 'none';
-    logoutBtn.style.display = 'inline-block';
-  } else {
-    loginBtn.style.display = 'inline-block';
-    logoutBtn.style.display = 'none';
-  }
-});
-
-// Buttons click demo handlers
-document.getElementById('bookAmbulanceBtn').addEventListener('click', () => {
-  alert('Book Ambulance clicked');
-});
-document.getElementById('hospitalListBtn').addEventListener('click', () => {
-  alert('Hospital List clicked');
-});
-document.getElementById('driverBtn').addEventListener('click', () => {
-  alert('Driver clicked');
-});
-document.getElementById('marijStatusBtn').addEventListener('click', () => {
-  alert('Marij Status clicked');
-});
+  Object.keys(links).forEach(id => {
+    const el = document.getElementById(id);
+    if(el){
+      el.addEventListener('click', () => {
+        window.location.href = links[id];
+      });
+    }
+  });
 </script>
 
 </body>
