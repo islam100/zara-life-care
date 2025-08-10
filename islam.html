@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Zara Life Care - Dashboard</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: #f0f2f5;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+  }
+  .button-container {
+    display: flex;
+    gap: 25px;
+  }
+  .btn-3d {
+    position: relative;
+    padding: 12px 25px;
+    border-radius: 15px;
+    font-weight: bold;
+    font-size: 1em;
+    color: white;
+    border: none;
+    cursor: pointer;
+    box-shadow:
+      0 6px 0 #999,
+      0 10px 20px rgba(0,0,0,0.3);
+    transition: all 0.15s ease;
+    width: 140px;
+    text-align: center;
+  }
+  .btn-3d:active {
+    box-shadow: none;
+    transform: translateY(6px);
+  }
+  /* Colors */
+  #registerBtn {
+    background: linear-gradient(145deg, #4caf50, #388e3c);
+  }
+  #dashboardBtn {
+    background: linear-gradient(145deg, #ff9800, #e67e22);
+  }
+  #rechargeBtn {
+    background: linear-gradient(145deg, #2196f3, #1565c0);
+  }
+
+  /* LED Indicator */
+  #led {
+    position: absolute;
+    top: 8px;
+    right: 12px;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: #d4d400;
+    box-shadow: 0 0 8px #d4d400;
+    animation: blink 1s infinite;
+    display: none; /* hidden by default */
+  }
+  @keyframes blink {
+    0%, 50%, 100% { opacity: 1; }
+    25%, 75% { opacity: 0.3; }
+  }
+
+  /* Responsive */
+  @media(max-width: 480px) {
+    .button-container {
+      flex-direction: column;
+      gap: 20px;
+      align-items: center;
+    }
+    .btn-3d {
+      width: 90%;
+      max-width: 250px;
+      font-size: 1.2em;
+      padding: 15px 20px;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="button-container">
+  <button id="registerBtn" class="btn-3d">Ambulance Registration</button>
+
+
+
+  <button id="rechargeBtn" class="btn-3d">Recharge Wallet</button>
+</div>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+
+<script>
+  // अपना Firebase config यहाँ डालें
+  const firebaseConfig = {
+    apiKey: "AIzaSyCFgRQxK_W2T9S5QWZnxAd-kYV52Kzyb94",
+    authDomain: "zara-life-care.firebaseapp.com",
+    databaseURL: "https://zara-life-care-default-rtdb.firebaseio.com", // अपनी DB URL डालें
+    projectId: "zara-life-care",
+    storageBucket: "zara-life-care.appspot.com",
+    messagingSenderId: "307306937129",
+    appId: "1:307306937129:web:a949207fe64fe87dd3d538"
+  };
+
+  // Initialize Firebase
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+  const auth = firebase.auth();
+
+  const led = document.getElementById('led');
+  const registerBtn = document.getElementById('registerBtn');
+  const dashboardBtn = document.getElementById('dashboardBtn');
+  const rechargeBtn = document.getElementById('rechargeBtn');
+
+  // अपनी लिंक यहाँ लगाएं
+  const links = {
+    registerBtn: 'https://zara-life-care.vercel.app/add-ambulance.html',
+    dashboardBtn: 'https://yourdomain.com/driver-dashboard.html',
+    rechargeBtn: 'https://yourdomain.com/recharge.html',
+  };
+
+  // Redirect बटन क्लिक पर
+  registerBtn.onclick = () => window.location.href = links.registerBtn;
+  rechargeBtn.onclick = () => window.location.href = links.rechargeBtn;
+
+  // Dashboard के लिए Login चेक और redirect
+  dashboardBtn.onclick = () => {
+    if (!auth.currentUser) {
+      alert('Please login first to access Driver Dashboard.');
+      return;
+    }
+    window.location.href = links.dashboardBtn;
+  };
+
+  // LED blinking logic: अगर कोई नई booking हो जो 'accepted' नहीं है, तब LED blink करे
+  // मान लेते हैं bookings path में सभी बुकिंग्स हैं, और उनमें status होता है
+
+  function checkNewBookingsForLed() {
+    const user = auth.currentUser;
+    if (!user) {
+      led.style.display = 'none';
+      return;
+    }
+
+    // ड्राइवर के UID के हिसाब से नई बुकिंग चेक करें, या पूरी booking लिस्ट देख सकते हैं
+    // यहाँ मान लीजिये driverId में user.uid होता है, और status pending/accepted/canceled होता है
+
+    const bookingsRef = db.ref('bookings');
+    bookingsRef.orderByChild('driverId').equalTo(user.uid).on('value', snapshot => {
+      const data = snapshot.val();
+      let hasPending = false;
+
+      if (data) {
+        Object.values(data).forEach(booking => {
+          if (booking.status !== 'accepted' && booking.status !== 'canceled') {
+            hasPending = true;
+          }
+        });
+      }
+
+      led.style.display = hasPending ? 'inline-block' : 'none';
+    });
+  }
+
+  // Firebase Authentication state चेक करें
+  auth.onAuthStateChanged(user => {
+    if (user) {
+      checkNewBookingsForLed();
+    } else {
+      led.style.display = 'none';
+    }
+  });
+</script>
+
+</body>
+</html>
