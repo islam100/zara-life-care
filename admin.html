@@ -7,79 +7,98 @@
 <style>
   body {
     font-family: Arial, sans-serif;
-    padding: 20px;
-    background: #f9f9f9;
+    margin: 0; padding: 0;
+    background: #f5f5f5;
   }
-  h1 { color: #333; }
-  button {
-    padding: 6px 12px;
-    margin: 5px;
-    border: none;
+  header {
     background: #007BFF;
+    color: white;
+    padding: 10px 15px;
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  #logoutBtn {
+    padding: 6px 12px;
+    font-size: 0.9em;
+    border-radius: 6px;
+    border: none;
+    background: #ff4444;
     color: white;
     cursor: pointer;
-    border-radius: 5px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+    display: none;
   }
-  button:hover {
-    background: #0056b3;
+  #logoutBtn:hover {
+    background: #cc0000;
   }
-  table {
-    border-collapse: collapse;
-    width: 100%;
-    margin-top: 20px;
+  main {
+    padding: 20px;
+    max-width: 900px;
+    margin: auto;
   }
-  th, td {
-    padding: 10px;
-    border: 1px solid #ddd;
+  h1 {
+    margin-bottom: 15px;
   }
-  th {
-    background: #007BFF;
+  .booking-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+    padding: 15px;
+    margin-bottom: 15px;
+  }
+  .booking-card p {
+    margin: 5px 0;
+  }
+  .status-pending {
+    color: orange;
+    font-weight: bold;
+  }
+  .status-confirmed {
+    color: green;
+    font-weight: bold;
+  }
+  button.confirm-btn {
+    background: #4caf50;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 8px;
     color: white;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 10px;
+  }
+  button.confirm-btn:hover {
+    background: #388e3c;
+  }
+  #loginMessage {
+    text-align: center;
+    margin-top: 50px;
+    font-size: 1.2em;
+    color: #555;
   }
 </style>
 </head>
 <body>
 
-<h1>Admin Panel - Zara Life Care</h1>
-<button id="logoutBtn">Logout</button>
+<header>
+  <div>Zara Life Care - Admin Panel</div>
+  <button id="logoutBtn">Logout</button>
+</header>
 
-<h2>Bookings</h2>
-<table id="bookingTable">
-  <thead>
-    <tr>
-      <th>Patient Name</th>
-      <th>Phone</th>
-      <th>Address</th>
-      <th>Destination</th>
-      <th>Ambulance Category</th>
-      <th>Status</th>
-      <th>Action</th>
-    </tr>
-  </thead>
-  <tbody></tbody>
-</table>
+<main>
+  <div id="loginMessage">Loading...</div>
+  <div id="bookingList" style="display:none;"></div>
+</main>
 
-<h2>Drivers</h2>
-<table id="driversTable">
-  <thead>
-    <tr>
-      <th>Name</th>
-      <th>Ambulance Number</th>
-      <th>Category</th>
-      <th>Whatsapp</th>
-      <th>Approved</th>
-      <th>Action</th>
-    </tr>
-  </thead>
-  <tbody></tbody>
-</table>
-
+<!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
 
 <script>
-  // Firebase config
+  // Firebase config (अपना config यहाँ डालें)
   const firebaseConfig = {
     apiKey: "AIzaSyCFgRQxK_W2T9S5QWZnxAd-kYV52Kzyb94",
     authDomain: "zara-life-care.firebaseapp.com",
@@ -90,114 +109,101 @@
     appId: "1:307306937129:web:a949207fe64fe87dd3d538"
   };
 
+  // Initialize Firebase
   firebase.initializeApp(firebaseConfig);
   const auth = firebase.auth();
   const db = firebase.database();
 
-  const adminsRef = db.ref('admins');
-  const bookingsRef = db.ref('bookings');
-  const driversRef = db.ref('drivers');
-
-  const bookingTableBody = document.querySelector('#bookingTable tbody');
-  const driversTableBody = document.querySelector('#driversTable tbody');
   const logoutBtn = document.getElementById('logoutBtn');
+  const bookingList = document.getElementById('bookingList');
+  const loginMessage = document.getElementById('loginMessage');
 
-  let currentUser = null;
+  // Admin email list
+  const adminEmails = ['zarasamajiksevasanstha@gmail.com'];
 
-  // Check admin permission
-  function isAdmin(user) {
-    return adminsRef.orderByChild('email').equalTo(user.email).once('value').then(snapshot => {
-      return snapshot.exists();
-    });
-  }
-
-  // Show Bookings in table
-  function loadBookings() {
-    bookingsRef.on('value', snapshot => {
-      bookingTableBody.innerHTML = '';
-      const bookings = snapshot.val();
-      if (!bookings) return;
-
-      Object.entries(bookings).forEach(([key, booking]) => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td>${booking.patientName || ''}</td>
-          <td>${booking.patientPhone || ''}</td>
-          <td>${booking.patientAddress || ''}</td>
-          <td>${booking.destination || ''}</td>
-          <td>${booking.ambulanceCategory || ''}</td>
-          <td>${booking.status || 'pending'}</td>
-          <td>
-            ${booking.status === 'pending' ? 
-              `<button onclick="changeBookingStatus('${key}', 'confirmed')">Approve</button>
-               <button onclick="changeBookingStatus('${key}', 'rejected')">Reject</button>` : ''}
-          </td>
-        `;
-        bookingTableBody.appendChild(tr);
-      });
-    });
-  }
-
-  // Change booking status
-  window.changeBookingStatus = function(key, status) {
-    bookingsRef.child(key).update({status: status, confirmedBy: currentUser.email});
-  }
-
-  // Show Drivers in table
-  function loadDrivers() {
-    driversRef.on('value', snapshot => {
-      driversTableBody.innerHTML = '';
-      const drivers = snapshot.val();
-      if (!drivers) return;
-
-      Object.entries(drivers).forEach(([key, driver]) => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td>${driver.driverName || ''}</td>
-          <td>${driver.ambulanceNumber || ''}</td>
-          <td>${driver.ambulanceCategory || ''}</td>
-          <td>${driver.whatsappNumber || ''}</td>
-          <td>${driver.isApproved ? 'Yes' : 'No'}</td>
-          <td>
-            ${driver.isApproved ? 
-              `<button onclick="approveDriver('${key}', false)">Revoke</button>` : 
-              `<button onclick="approveDriver('${key}', true)">Approve</button>`}
-          </td>
-        `;
-        driversTableBody.appendChild(tr);
-      });
-    });
-  }
-
-  // Approve / Revoke driver
-  window.approveDriver = function(key, approve) {
-    driversRef.child(key).update({isApproved: approve});
-  }
-
+  // Logout handler
   logoutBtn.addEventListener('click', () => {
     auth.signOut();
   });
 
-  // Authentication & authorization
-  auth.onAuthStateChanged(async user => {
-    if (user) {
-      currentUser = user;
-      const admin = await isAdmin(user);
-      if (!admin) {
-        alert('You are not authorized to access this page.');
-        auth.signOut();
-        location.href = 'index.html'; // या लॉगिन पेज
-        return;
+  // Check auth state
+  auth.onAuthStateChanged(user => {
+    if(user) {
+      if(adminEmails.includes(user.email)) {
+        loginMessage.style.display = 'none';
+        logoutBtn.style.display = 'inline-block';
+        bookingList.style.display = 'block';
+        loadBookings();
+      } else {
+        loginMessage.textContent = 'You are not authorized to access this page.';
+        logoutBtn.style.display = 'inline-block';
+        bookingList.style.display = 'none';
       }
-      loadBookings();
-      loadDrivers();
     } else {
-      location.href = 'index.html'; // या लॉगिन पेज
+      loginMessage.textContent = 'Please login with your Google account.';
+      logoutBtn.style.display = 'none';
+      bookingList.style.display = 'none';
+      // Trigger login
+      const provider = new firebase.auth.GoogleAuthProvider();
+      auth.signInWithPopup(provider).catch(error => {
+        loginMessage.textContent = 'Login failed: ' + error.message;
+      });
     }
   });
 
-  // Trigger Google login if not logged in
-  auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).catch(console.error);
+  function loadBookings() {
+    bookingList.innerHTML = '<p>Loading bookings...</p>';
+    db.ref('bookings').on('value', snapshot => {
+      const bookings = snapshot.val();
+      if(!bookings) {
+        bookingList.innerHTML = '<p>No bookings found.</p>';
+        return;
+      }
+      bookingList.innerHTML = ''; // clear previous
+      Object.entries(bookings).forEach(([key, booking]) => {
+        const card = document.createElement('div');
+        card.className = 'booking-card';
+
+        card.innerHTML = `
+          <p><strong>Booking ID:</strong> ${key}</p>
+          <p><strong>Patient Name:</strong> ${booking.patientName}</p>
+          <p><strong>Phone:</strong> ${booking.patientPhone}</p>
+          <p><strong>Address:</strong> ${booking.patientAddress}</p>
+          <p><strong>Destination:</strong> ${booking.destination}</p>
+          <p><strong>Ambulance Category:</strong> ${booking.ambulanceCategory}</p>
+          <p><strong>Status:</strong> <span class="status-${booking.status}">${booking.status}</span></p>
+          <p><strong>Driver Assigned:</strong> ${booking.driverName ? booking.driverName : 'Not assigned'}</p>
+          <button class="confirm-btn" ${booking.status === 'confirmed' ? 'disabled' : ''} data-key="${key}">${booking.status === 'pending' ? 'Confirm Booking' : 'Confirmed'}</button>
+        `;
+
+        bookingList.appendChild(card);
+      });
+
+      // Add event listeners to confirm buttons
+      document.querySelectorAll('.confirm-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const bookingKey = btn.getAttribute('data-key');
+          confirmBooking(bookingKey, btn);
+        });
+      });
+    });
+  }
+
+  function confirmBooking(key, btn) {
+    btn.disabled = true;
+    db.ref('bookings/' + key).update({
+      status: 'confirmed',
+      confirmedBy: auth.currentUser.email,
+      confirmedAt: Date.now()
+    }).then(() => {
+      btn.textContent = 'Confirmed';
+      btn.classList.remove('confirm-btn');
+      btn.style.backgroundColor = '#777';
+    }).catch(err => {
+      alert('Error confirming booking: ' + err.message);
+      btn.disabled = false;
+    });
+  }
 </script>
 
 </body>
