@@ -5,24 +5,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Zara Life Care - Ambulance Service</title>
 <style>
-  body {
-    font-family: Arial, sans-serif;
-    margin: 0; padding: 0;
-    background: #f7f7f7;
-  }
+  body { font-family: Arial, sans-serif; margin:0; padding:0; background:#f7f7f7; }
   header {
     background: #003366;
     color: white;
     padding: 10px 15px;
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
-    flex-wrap: wrap;
   }
-  header h1 {
-    margin: 0;
-    font-size: 1.5rem;
-  }
+  header h1 { margin: 0; font-size: 1.5rem; }
   .dropdown-container {
     display: flex;
     gap: 15px;
@@ -43,34 +36,25 @@
     border-radius: 10px;
     font-weight: bold;
     cursor: pointer;
-    box-shadow:
-      0 3px 6px rgba(0,0,0,0.2),
-      0 0 0 0 rgba(0,123,255,0.7);
+    box-shadow: 0 3px 6px rgba(0,0,0,0.2), 0 0 0 0 rgba(0,123,255,0.7);
     transition: all 0.3s ease;
     margin-left: 15px;
   }
   button:hover {
-    box-shadow:
-      0 6px 12px rgba(0,0,0,0.3),
-      0 0 8px 2px rgba(0,123,255,0.8);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.3), 0 0 8px 2px rgba(0,123,255,0.8);
   }
-  button:focus {
-    outline: none;
-  }
-
+  button:focus { outline:none; }
   main {
     padding: 15px;
     max-width: 900px;
     margin: 0 auto;
   }
-
   #drivers-container {
     margin-top: 20px;
     display: flex;
     flex-wrap: wrap;
     gap: 15px;
   }
-
   .card {
     background: white;
     border-radius: 10px;
@@ -79,29 +63,19 @@
     width: 250px;
     box-sizing: border-box;
   }
-  .card h3 {
-    margin: 0 0 8px;
-  }
-  .card p {
-    margin: 5px 0;
-  }
+  .card h3 { margin: 0 0 8px; }
+  .card p { margin: 5px 0; }
   .card button {
     margin-top: 10px;
     width: 100%;
     border-radius: 8px;
     font-weight: bold;
     background-color: #28a745;
-    box-shadow:
-      0 4px 6px rgba(40,167,69,0.4),
-      0 0 0 0 rgba(40,167,69,0.7);
+    box-shadow: 0 4px 6px rgba(40,167,69,0.4), 0 0 0 0 rgba(40,167,69,0.7);
   }
   .card button:hover {
-    box-shadow:
-      0 6px 12px rgba(40,167,69,0.6),
-      0 0 8px 2px rgba(40,167,69,0.8);
+    box-shadow: 0 6px 12px rgba(40,167,69,0.6), 0 0 8px 2px rgba(40,167,69,0.8);
   }
-
-  /* Responsive */
   @media (max-width: 600px) {
     header {
       flex-direction: column;
@@ -136,12 +110,11 @@
 
     <select id="quickLinksDropdown" aria-label="Quick Links">
       <option value="" disabled selected>Quick Links</option>
-      <option value="https://example.com/link1">Link 1</option>
-      <option value="https://example.com/link2">Link 2</option>
-      <!-- आप Firebase से भी ये लोड कर सकते हैं -->
+      <option value="https://example.com/link1" target="_blank">Link 1</option>
+      <option value="https://example.com/link2" target="_blank">Link 2</option>
     </select>
 
-    <button id="loginBtn">Login</button>
+    <button id="loginBtn">Login with Google</button>
     <button id="logoutBtn" style="display:none;">Logout</button>
   </div>
 </header>
@@ -150,30 +123,30 @@
   <button id="bookBtn">Book Ambulance</button>
 
   <h2>Available Ambulances</h2>
-  <div id="drivers-container">Loading...</div>
+  <div id="drivers-container">Please login to see available ambulances.</div>
 </main>
 
-<!-- Firebase -->
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
+<!-- Firebase Namespaced SDKs -->
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
 <script>
-  // Firebase config
-  const firebaseConfig = {
+  // Initialize Firebase
+  var firebaseConfig = {
     apiKey: "AIzaSyCFgRQxK_W2T9S5QWZnxAd-kYV52Kzyb94",
     authDomain: "zara-life-care.firebaseapp.com",
+    databaseURL: "https://zara-life-care-default-rtdb.firebaseio.com",
     projectId: "zara-life-care",
     storageBucket: "zara-life-care.appspot.com",
     messagingSenderId: "307306937129",
-    appId: "1:307306937129:web:a949207fe64fe87dd3d538"
+    appId: "1:307306937129:web:a949207fe87dd3d538"
   };
   firebase.initializeApp(firebaseConfig);
 
   const auth = firebase.auth();
   const db = firebase.database();
 
-  // UI Elements
   const loginBtn = document.getElementById('loginBtn');
   const logoutBtn = document.getElementById('logoutBtn');
   const bookBtn = document.getElementById('bookBtn');
@@ -181,22 +154,22 @@
   const infoDropdown = document.getElementById('infoDropdown');
   const quickLinksDropdown = document.getElementById('quickLinksDropdown');
 
-  // Dropdown link navigation
+  // Dropdown navigation
   infoDropdown.addEventListener('change', () => {
     const url = infoDropdown.value;
     if(url) window.location.href = url;
   });
-
   quickLinksDropdown.addEventListener('change', () => {
     const url = quickLinksDropdown.value;
     if(url) window.open(url, '_blank');
   });
 
-  // Authentication state observer
+  // Auth state listener
   auth.onAuthStateChanged(user => {
     if(user) {
       loginBtn.style.display = 'none';
       logoutBtn.style.display = 'inline-block';
+      loadApprovedDrivers();
     } else {
       loginBtn.style.display = 'inline-block';
       logoutBtn.style.display = 'none';
@@ -204,36 +177,32 @@
     }
   });
 
-  // Login with Google popup
+  // Google Login
   loginBtn.onclick = () => {
-    const provider = new firebase.auth.GoogleAuthProvider();
-    auth.signInWithPopup(provider).catch(error => {
-      alert('Login Failed: ' + error.message);
-    });
+    var provider = new firebase.auth.GoogleAuthProvider();
+    auth.signInWithPopup(provider).catch(e => alert('Login Failed: ' + e.message));
   };
 
+  // Logout
   logoutBtn.onclick = () => {
     auth.signOut();
-    driversContainer.innerHTML = 'Please login to see available ambulances.';
   };
 
-  // Book ambulance button click
+  // Book Ambulance button
   bookBtn.onclick = () => {
-    const user = auth.currentUser;
-    if(!user) {
+    if(!auth.currentUser) {
       alert('Please login first to book ambulance.');
       return;
     }
-    // Redirect to booking page or open modal etc.
-    window.location.href = 'booking.html'; // आप अपना booking पेज लिंक दें
+    window.location.href = 'booking.html';
   };
 
-  // Load approved drivers from Firebase Realtime Database
+  // Load approved drivers
   function loadApprovedDrivers() {
     driversContainer.innerHTML = 'Loading...';
-    db.ref('drivers').orderByChild('status').equalTo('approved').on('value', snapshot => {
+    db.ref('drivers').orderByChild('status').equalTo('approved').once('value', snapshot => {
       driversContainer.innerHTML = '';
-      if (!snapshot.exists()) {
+      if(!snapshot.exists()) {
         driversContainer.innerHTML = 'No approved ambulances found.';
         return;
       }
@@ -250,16 +219,10 @@
         driversContainer.appendChild(card);
       });
     }, error => {
-      driversContainer.innerHTML = 'Error loading ambulances. Please try again later.';
+      driversContainer.innerHTML = 'Error loading ambulances.';
       console.error(error);
     });
   }
-
-  // Call loadApprovedDrivers only when logged in
-  auth.onAuthStateChanged(user => {
-    if(user) loadApprovedDrivers();
-  });
 </script>
-
 </body>
 </html>
