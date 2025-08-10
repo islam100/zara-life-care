@@ -7,53 +7,86 @@
 <style>
   body {
     font-family: Arial, sans-serif;
-    padding: 20px;
     background: #f5f5f5;
+    padding: 20px;
   }
-  form, #statusSection {
+  form {
+    max-width: 400px;
+    margin: 0 auto;
     background: white;
     padding: 20px;
-    border-radius: 12px;
-    max-width: 400px;
-    margin: auto;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    border-radius: 15px;
+    box-shadow:
+      0 4px 15px rgba(0,0,0,0.2);
   }
   input, select, textarea, button {
     width: 100%;
-    margin: 10px 0;
+    margin-top: 10px;
     padding: 10px;
     font-size: 1em;
-    border-radius: 8px;
+    border-radius: 10px;
     border: 1px solid #ccc;
+    box-sizing: border-box;
   }
   button {
     cursor: pointer;
-    background: linear-gradient(145deg, #4caf50, #388e3c);
-    color: white;
-    border: none;
-    font-weight: bold;
     box-shadow:
-      0 5px 10px rgba(0,0,0,0.3),
-      inset 0 -3px 0 rgba(255,255,255,0.4);
+      0 5px 8px rgba(0,0,0,0.25),
+      inset 0 -3px 0 rgba(255,255,255,0.3);
+    border: none;
+    color: white;
+    background: linear-gradient(145deg, #4caf50, #388e3c);
     transition: background 0.3s ease;
   }
   button:hover {
     background: linear-gradient(145deg, #388e3c, #2e7030);
   }
+  #statusBtn {
+    background: linear-gradient(145deg, #2196f3, #1565c0);
+    margin-top: 10px;
+  }
   #bookingStatus {
-    margin-top: 15px;
+    max-width: 400px;
+    margin: 20px auto;
+    background: white;
+    border-radius: 15px;
+    padding: 15px;
+    box-shadow:
+      0 4px 15px rgba(0,0,0,0.1);
+  }
+  .booking-card {
+    border: 1px solid #ddd;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 10px;
+  }
+  .booking-card strong {
+    display: block;
+    margin-bottom: 5px;
+  }
+  .accepted {
+    background-color: #d4edda;
+  }
+  .pending {
+    background-color: #fff3cd;
+  }
+  .rejected {
+    background-color: #f8d7da;
+  }
+  a.whatsapp-link {
+    color: #075e54;
     font-weight: bold;
-    color: #333;
+    text-decoration: none;
   }
 </style>
 </head>
 <body>
 
-<h2 style="text-align:center;">Book Ambulance</h2>
+<h2>Book Ambulance</h2>
 
 <form id="bookingForm">
   <input type="text" id="patientName" placeholder="Your Name" required />
-  <input type="tel" id="patientPhone" placeholder="Your WhatsApp Number" pattern="[0-9]{10}" required />
+  <input type="tel" id="patientPhone" placeholder="Your WhatsApp Number" required pattern="[0-9]{10}" />
   <textarea id="patientAddress" placeholder="Pickup Address" required></textarea>
   <input type="text" id="destination" placeholder="Destination" required />
   <select id="ambulanceCategory" required>
@@ -65,11 +98,9 @@
   <button type="submit">Submit Booking</button>
 </form>
 
-<!-- Booking Status Section -->
-<div id="statusSection" style="display:none;">
-  <button id="checkStatusBtn">Check Booking Status</button>
-  <div id="bookingStatus"></div>
-</div>
+<button id="statusBtn" style="display:none;">See Booking Status</button>
+
+<div id="bookingStatus"></div>
 
 <!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
@@ -77,7 +108,7 @@
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
 
 <script>
-  // Your Firebase config here
+  // Firebase config — अपनी कॉन्फिग डालें
   const firebaseConfig = {
     apiKey: "AIzaSyCFgRQxK_W2T9S5QWZnxAd-kYV52Kzyb94",
     authDomain: "zara-life-care.firebaseapp.com",
@@ -86,75 +117,100 @@
     messagingSenderId: "307306937129",
     appId: "1:307306937129:web:a949207fe64fe87dd3d538"
   };
-
+  
   firebase.initializeApp(firebaseConfig);
   const auth = firebase.auth();
   const db = firebase.database();
 
-  // Simulate login for demo (replace with actual login flow)
-  // For production, implement proper login using firebase.auth()
-  // Here, we'll use a dummy UID for testing
-  const demoUserUid = 'demoUser123';
+  const bookingForm = document.getElementById('bookingForm');
+  const statusBtn = document.getElementById('statusBtn');
+  const bookingStatus = document.getElementById('bookingStatus');
 
-  // Show status section only after booking is done or user logs in
-  const statusSection = document.getElementById('statusSection');
-  const bookingStatusDiv = document.getElementById('bookingStatus');
-  const checkStatusBtn = document.getElementById('checkStatusBtn');
+  // Check if user is logged in
+  auth.onAuthStateChanged(user => {
+    if(user) {
+      statusBtn.style.display = 'block';
+    } else {
+      statusBtn.style.display = 'none';
+      bookingStatus.innerHTML = '<p style="color:red;">Please login to book and see status.</p>';
+    }
+  });
 
-  // Submit booking form
-  document.getElementById('bookingForm').addEventListener('submit', e => {
+  // Booking form submit
+  bookingForm.addEventListener('submit', e => {
     e.preventDefault();
 
-    // Here use actual logged in user UID in production
-    const userUid = demoUserUid;
+    const user = auth.currentUser;
+    if(!user){
+      alert('Please login first');
+      return;
+    }
 
     const bookingData = {
-      patientId: userUid,
+      patientId: user.uid,
       patientName: document.getElementById('patientName').value.trim(),
       patientPhone: document.getElementById('patientPhone').value.trim(),
       patientAddress: document.getElementById('patientAddress').value.trim(),
       destination: document.getElementById('destination').value.trim(),
       ambulanceCategory: document.getElementById('ambulanceCategory').value,
       status: 'pending',
+      driverId: null,
       driverName: null,
       driverWhatsapp: null,
       createdAt: firebase.database.ServerValue.TIMESTAMP
     };
 
+    // Save booking
     db.ref('bookings').push(bookingData)
       .then(() => {
-        alert('Booking submitted! Please wait for approval.');
-        statusSection.style.display = 'block';
-        bookingStatusDiv.textContent = '';
-        document.getElementById('bookingForm').reset();
+        alert('Booking submitted! Waiting for driver approval.');
+        bookingForm.reset();
       })
       .catch(err => {
-        alert('Error: ' + err.message);
+        alert('Error submitting booking: ' + err.message);
       });
   });
 
-  // Check booking status button click
-  checkStatusBtn.addEventListener('click', () => {
-    const userUid = demoUserUid;
-    bookingStatusDiv.textContent = 'Loading...';
+  // Show booking status when user clicks "See Booking Status"
+  statusBtn.addEventListener('click', () => {
+    const user = auth.currentUser;
+    if(!user){
+      alert('Please login first');
+      return;
+    }
+    bookingStatus.innerHTML = 'Loading...';
 
-    db.ref('bookings').orderByChild('patientId').equalTo(userUid).once('value', snapshot => {
-      const bookings = snapshot.val();
-      if (!bookings) {
-        bookingStatusDiv.textContent = 'No bookings found.';
-        return;
-      }
-      // Get latest booking by createdAt
-      const latestBookingId = Object.keys(bookings).sort((a,b) => bookings[b].createdAt - bookings[a].createdAt)[0];
-      const booking = bookings[latestBookingId];
+    db.ref('bookings').orderByChild('patientId').equalTo(user.uid).once('value')
+      .then(snapshot => {
+        const bookings = snapshot.val();
+        if(!bookings){
+          bookingStatus.innerHTML = '<p>No bookings found.</p>';
+          return;
+        }
 
-      let statusHtml = `Status: ${booking.status}<br/>`;
-      if(booking.status === 'accepted') {
-        statusHtml += `Driver: ${booking.driverName || '-'}<br/>`;
-        statusHtml += `WhatsApp: <a href="https://wa.me/${booking.driverWhatsapp}" target="_blank">${booking.driverWhatsapp}</a><br/>`;
-      }
-      bookingStatusDiv.innerHTML = statusHtml;
-    });
+        let html = '';
+        Object.entries(bookings).forEach(([key, booking]) => {
+          let statusClass = '';
+          if(booking.status === 'accepted') statusClass = 'accepted';
+          else if(booking.status === 'pending') statusClass = 'pending';
+          else if(booking.status === 'rejected') statusClass = 'rejected';
+
+          html += `
+            <div class="booking-card ${statusClass}">
+              <strong>Booking ID:</strong> ${key}<br/>
+              <strong>Status:</strong> ${booking.status}<br/>
+              <strong>Driver:</strong> ${booking.driverName ? booking.driverName : 'Not assigned yet'}<br/>
+              <strong>Ambulance Category:</strong> ${booking.ambulanceCategory}<br/>
+              <strong>WhatsApp:</strong> ${booking.driverWhatsapp ? `<a class="whatsapp-link" href="https://wa.me/${booking.driverWhatsapp}" target="_blank">${booking.driverWhatsapp}</a>` : 'N/A'}<br/>
+              <strong>Created At:</strong> ${new Date(booking.createdAt).toLocaleString()}<br/>
+            </div>
+          `;
+        });
+        bookingStatus.innerHTML = html;
+      })
+      .catch(err => {
+        bookingStatus.innerHTML = `<p style="color:red;">Error loading bookings: ${err.message}</p>`;
+      });
   });
 
 </script>
