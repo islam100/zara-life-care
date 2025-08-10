@@ -3,68 +3,200 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Zara Life Care - Book Ambulance</title>
+<title>Zara Life Care - Ambulance Booking</title>
 <style>
-  body { font-family: Arial; background:#f5f5f5; padding:20px; }
-  /* ... (उपर वाला CSS जैसा ही) ... */
-  button { cursor: pointer; }
-  #loginBtn, #logoutBtn {
-    position: fixed;
-    top: 10px;
-    right: 10px;
-    padding: 8px 12px;
-    border: none;
-    border-radius: 8px;
-    background: #007bff;
+  body {
+    font-family: Arial, sans-serif;
+    background: #f5f5f5;
+    margin: 0; padding: 0 10px 50px;
+  }
+  header {
+    background: #007BFF;
     color: white;
+    padding: 15px 10px;
+    position: sticky;
+    top: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 1000;
     box-shadow: 0 3px 6px rgba(0,0,0,0.2);
-    transition: background 0.3s;
+  }
+  .logo {
+    font-size: 1.5em;
+    font-weight: bold;
+  }
+  #loginBtn, #logoutBtn {
+    background: linear-gradient(145deg, #ffa500, #cc8400);
+    border: none;
+    padding: 8px 15px;
+    border-radius: 12px;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow:
+      0 6px 8px rgba(0,0,0,0.35),
+      inset 0 -4px 0 rgba(255,255,255,0.3);
+    transition: all 0.3s ease;
   }
   #loginBtn:hover, #logoutBtn:hover {
-    background: #0056b3;
+    background: linear-gradient(145deg, #cc8400, #995c00);
+  }
+  main {
+    max-width: 450px;
+    margin: 20px auto;
+    background: white;
+    border-radius: 15px;
+    padding: 15px 20px 30px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  }
+  h2 {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  form input, form select, form textarea {
+    width: 100%;
+    padding: 10px 12px;
+    margin-bottom: 15px;
+    font-size: 1em;
+    border-radius: 10px;
+    border: 1.5px solid #ccc;
+    box-sizing: border-box;
+    transition: border-color 0.3s ease;
+  }
+  form input:focus, form select:focus, form textarea:focus {
+    border-color: #007BFF;
+    outline: none;
+  }
+  button.submitBtn {
+    background: linear-gradient(145deg, #4caf50, #388e3c);
+    color: white;
+    font-weight: 700;
+    font-size: 1.1em;
+    padding: 14px;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    width: 100%;
+    box-shadow:
+      0 6px 8px rgba(0,0,0,0.35),
+      inset 0 -4px 0 rgba(255,255,255,0.3);
+    transition: all 0.3s ease;
+  }
+  button.submitBtn:hover {
+    background: linear-gradient(145deg, #388e3c, #2e7030);
+  }
+  button#statusBtn {
+    margin-top: 15px;
+    width: 100%;
+    background: linear-gradient(145deg, #2196f3, #1565c0);
+    color: white;
+    font-weight: 700;
+    font-size: 1.1em;
+    padding: 14px;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    box-shadow:
+      0 6px 8px rgba(0,0,0,0.35),
+      inset 0 -4px 0 rgba(255,255,255,0.3);
+    transition: all 0.3s ease;
+  }
+  button#statusBtn:hover {
+    background: linear-gradient(145deg, #1565c0, #0d3a7a);
+  }
+  #bookingStatus {
+    margin-top: 20px;
+    background: #eef6ff;
+    padding: 15px;
+    border-radius: 12px;
+    font-size: 0.95em;
+    max-height: 300px;
+    overflow-y: auto;
+    box-shadow: inset 0 0 5px rgba(0,0,0,0.1);
+  }
+  #bookingStatus p {
+    margin: 8px 0;
+  }
+  a.whatsapp-link {
+    color: #075E54;
+    text-decoration: none;
+  }
+  a.whatsapp-link:hover {
+    text-decoration: underline;
+  }
+  @media (max-width: 480px) {
+    main {
+      margin: 10px auto;
+      padding: 15px;
+    }
   }
 </style>
 </head>
 <body>
 
-<button id="loginBtn">Login with Google</button>
-<button id="logoutBtn" style="display:none;">Logout</button>
+<header>
+  <div class="logo">Zara Life Care</div>
+  <button id="loginBtn">Login with Google</button>
+  <button id="logoutBtn" style="display:none;">Logout</button>
+</header>
 
-<h2>Book Ambulance</h2>
-<form id="bookingForm">
-  <input type="text" id="patientName" placeholder="Your Name" required />
-  <input type="tel" id="patientPhone" placeholder="Your WhatsApp Number" required pattern="[0-9]{10}" />
-  <textarea id="patientAddress" placeholder="Pickup Address" required></textarea>
-  <input type="text" id="destination" placeholder="Destination" required />
-  <select id="ambulanceCategory" required>
-    <option value="" disabled selected>Select Ambulance Category</option>
-    <option value="ICU">ICU</option>
-    <option value="Basic">Basic</option>
-    <option value="Non-ICU">Non-ICU</option>
-  </select>
-  <button type="submit">Submit Booking</button>
-</form>
+<main>
+  <h2>Book Ambulance</h2>
+  <form id="bookingForm">
+    <input type="text" id="patientName" placeholder="Your Name" required />
+    <input type="tel" id="patientPhone" placeholder="Your WhatsApp Number" pattern="[0-9]{10}" required />
+    <textarea id="patientAddress" placeholder="Pickup Address" required></textarea>
+    <input type="text" id="destination" placeholder="Destination" required />
+    <select id="ambulanceCategory" required>
+      <option value="" disabled selected>Select Ambulance Category</option>
+      <option value="ICU">ICU</option>
+      <option value="Basic">Basic</option>
+      <option value="Non-ICU">Non-ICU</option>
+    </select>
+    <button type="submit" class="submitBtn">Submit Booking</button>
+  </form>
 
-<button id="statusBtn" style="display:none; margin-top: 10px; background:#2196f3; color:white; padding:10px 15px; border:none; border-radius:10px; box-shadow: 0 5px 8px rgba(0,0,0,0.25); cursor:pointer;">See Booking Status</button>
+  <button id="statusBtn" style="display:none;">See Booking Status</button>
 
-<div id="bookingStatus"></div>
+  <div id="bookingStatus"></div>
+</main>
 
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
+<!-- Firebase v9 Modular SDK -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+  import {
+    getAuth,
+    GoogleAuthProvider,
+    signInWithPopup,
+    signOut,
+    onAuthStateChanged,
+  } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+  import {
+    getDatabase,
+    ref,
+    push,
+    query,
+    orderByChild,
+    equalTo,
+    get,
+    serverTimestamp,
+  } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
 
-<script>
   const firebaseConfig = {
     apiKey: "AIzaSyCFgRQxK_W2T9S5QWZnxAd-kYV52Kzyb94",
     authDomain: "zara-life-care.firebaseapp.com",
+    databaseURL: "https://zara-life-care-default-rtdb.firebaseio.com",
     projectId: "zara-life-care",
     storageBucket: "zara-life-care.appspot.com",
     messagingSenderId: "307306937129",
     appId: "1:307306937129:web:a949207fe64fe64fe87dd3d538"
   };
-  firebase.initializeApp(firebaseConfig);
-  const auth = firebase.auth();
-  const db = firebase.database();
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getDatabase(app);
 
   const loginBtn = document.getElementById('loginBtn');
   const logoutBtn = document.getElementById('logoutBtn');
@@ -73,16 +205,16 @@
   const bookingStatus = document.getElementById('bookingStatus');
 
   loginBtn.addEventListener('click', () => {
-    const provider = new firebase.auth.GoogleAuthProvider();
-    auth.signInWithPopup(provider).catch(e => alert(e.message));
+    const provider = new GoogleAuthProvider();
+    signInWithPopup(auth, provider).catch(e => alert(e.message));
   });
 
   logoutBtn.addEventListener('click', () => {
-    auth.signOut();
+    signOut(auth);
   });
 
-  auth.onAuthStateChanged(user => {
-    if(user){
+  onAuthStateChanged(auth, user => {
+    if (user) {
       loginBtn.style.display = 'none';
       logoutBtn.style.display = 'inline-block';
       statusBtn.style.display = 'block';
@@ -92,16 +224,18 @@
       logoutBtn.style.display = 'none';
       statusBtn.style.display = 'none';
       bookingStatus.innerHTML = '<p style="color:red; text-align:center;">Please login to book ambulance and see status.</p>';
+      bookingForm.reset();
     }
   });
 
   bookingForm.addEventListener('submit', e => {
     e.preventDefault();
     const user = auth.currentUser;
-    if(!user){
+    if (!user) {
       alert('Please login first');
       return;
     }
+
     const bookingData = {
       patientId: user.uid,
       patientName: document.getElementById('patientName').value.trim(),
@@ -113,55 +247,58 @@
       driverId: null,
       driverName: null,
       driverWhatsapp: null,
-      createdAt: firebase.database.ServerValue.TIMESTAMP
+      createdAt: serverTimestamp()
     };
-    db.ref('bookings').push(bookingData)
+
+    push(ref(db, 'bookings'), bookingData)
       .then(() => {
         alert('Booking submitted! Waiting for driver approval.');
         bookingForm.reset();
+        statusBtn.click();  // Show status after submit
       })
       .catch(err => {
-        alert('Error submitting booking: ' + err.message);
+        alert('Error: ' + err.message);
       });
   });
 
   statusBtn.addEventListener('click', () => {
     const user = auth.currentUser;
-    if(!user){
-      alert('Please login first');
+    if (!user) {
+      alert('Please login first to see booking status.');
       return;
     }
-    bookingStatus.innerHTML = 'Loading...';
 
-    db.ref('bookings').orderByChild('patientId').equalTo(user.uid).once('value')
+    bookingStatus.innerHTML = 'Loading status...';
+
+    const bookingsQuery = query(ref(db, 'bookings'), orderByChild('patientId'), equalTo(user.uid));
+
+    get(bookingsQuery)
       .then(snapshot => {
-        const bookings = snapshot.val();
-        if(!bookings){
+        const data = snapshot.val();
+        if (!data) {
           bookingStatus.innerHTML = '<p>No bookings found.</p>';
           return;
         }
-        let html = '';
-        Object.entries(bookings).forEach(([key, booking]) => {
-          let statusClass = '';
-          if(booking.status === 'accepted') statusClass = 'accepted';
-          else if(booking.status === 'pending') statusClass = 'pending';
-          else if(booking.status === 'rejected') statusClass = 'rejected';
 
-          html += `
-            <div class="booking-card ${statusClass}">
-              <strong>Booking ID:</strong> ${key}<br/>
-              <strong>Status:</strong> ${booking.status}<br/>
-              <strong>Driver:</strong> ${booking.driverName ? booking.driverName : 'Not assigned yet'}<br/>
-              <strong>Ambulance Category:</strong> ${booking.ambulanceCategory}<br/>
-              <strong>WhatsApp:</strong> ${booking.driverWhatsapp ? `<a class="whatsapp-link" href="https://wa.me/${booking.driverWhatsapp}" target="_blank">${booking.driverWhatsapp}</a>` : 'N/A'}<br/>
-              <strong>Created At:</strong> ${new Date(booking.createdAt).toLocaleString()}<br/>
-            </div>
-          `;
+        const bookings = Object.entries(data).sort((a, b) => b[1].createdAt - a[1].createdAt);
+
+        let html = '';
+        bookings.forEach(([key, booking]) => {
+          // Clean whatsapp number for link
+          const cleanWhatsapp = booking.driverWhatsapp ? booking.driverWhatsapp.replace(/\D/g, '') : '';
+
+          html += `<p><strong>Status:</strong> ${booking.status} <br/>`;
+          html += `<strong>Ambulance Category:</strong> ${booking.ambulanceCategory} <br/>`;
+          if (booking.status === 'accepted' || booking.status === 'confirmed') {
+            html += `<strong>Driver:</strong> ${booking.driverName || '-'} <br/>`;
+            html += `<strong>WhatsApp:</strong> <a class="whatsapp-link" href="https://wa.me/${cleanWhatsapp}" target="_blank" rel="noopener noreferrer">${booking.driverWhatsapp}</a><br/>`;
+          }
+          html += `<em>Booked on: ${booking.createdAt ? new Date(booking.createdAt).toLocaleString() : 'N/A'}</em></p><hr>`;
         });
         bookingStatus.innerHTML = html;
       })
       .catch(err => {
-        bookingStatus.innerHTML = `<p style="color:red;">Error loading bookings: ${err.message}</p>`;
+        bookingStatus.innerHTML = '<p style="color:red;">Error loading bookings: ' + err.message + '</p>';
       });
   });
 </script>
