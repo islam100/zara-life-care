@@ -1,157 +1,212 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Button Panel with Admin Login</title>
-<style>
-  body {
-    margin: 0; padding: 20px;
-    font-family: Arial, sans-serif;
-    background: #f0f0f0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-  #loginStatus {
-    position: fixed;
-    top: 10px; right: 10px;
-    padding: 8px 12px;
-    background: #4caf50;
-    color: white;
-    border-radius: 20px;
-    font-weight: bold;
-    cursor: pointer;
-    box-shadow:
-      0 5px 10px rgba(0,0,0,0.2),
-      inset 0 -3px 0 rgba(255,255,255,0.3);
-  }
-  #loginStatus.logged-out {
-    background: #f44336;
-  }
-  .button-container {
-    margin-top: 60px;
-    width: 90%;
-    max-width: 400px;
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 20px;
-  }
-  button {
-    padding: 15px;
-    font-size: 1.1em;
-    font-weight: bold;
-    color: white;
-    border: none;
-    border-radius: 15px;
-    cursor: pointer;
-    box-shadow:
-      0 6px 10px rgba(0,0,0,0.3),
-      inset 0 -4px 0 rgba(255,255,255,0.3);
-    transition: all 0.3s ease;
-  }
-  button:hover {
-    filter: brightness(0.9);
-  }
-  #loginBtn {
-    background: linear-gradient(145deg, #ff5722, #ff7043);
-    grid-column: span 2;
-  }
-  #logoutBtn {
-    background: linear-gradient(145deg, #d32f2f, #f44336);
-    grid-column: span 2;
-  }
-  #adminBtn {
-    background: linear-gradient(145deg, #6a1b9a, #9c27b0);
-  }
-  #rechargeBtn {
-    background: linear-gradient(145deg, #0d47a1, #2196f3);
-  }
-  #hospitalBtn {
-    background: linear-gradient(145deg, #2e7d32, #4caf50);
-  }
-  #noticeBtn {
-    background: linear-gradient(145deg, #f57f17, #ffb300);
-  }
-  @media(max-width: 480px) {
-    .button-container {
-      grid-template-columns: 1fr;
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Admin Login + Firebase Auth Panel</title>
+  <style>
+    * {
+      box-sizing: border-box;
     }
-    #loginBtn, #logoutBtn {
-      grid-column: span 1;
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: #fff;
     }
-  }
-</style>
+    .container {
+      background: rgba(0,0,0,0.7);
+      padding: 30px 40px;
+      border-radius: 15px;
+      width: 320px;
+      text-align: center;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.6);
+    }
+    h2 {
+      margin-bottom: 25px;
+      font-weight: 700;
+    }
+    input[type="email"],
+    input[type="password"] {
+      width: 100%;
+      padding: 12px 15px;
+      margin-bottom: 20px;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+    }
+    button.login-btn {
+      width: 100%;
+      padding: 12px 0;
+      background: #5a67d8;
+      border: none;
+      border-radius: 12px;
+      font-size: 18px;
+      font-weight: 700;
+      color: white;
+      cursor: pointer;
+      box-shadow: 0 6px #434190;
+      transition: all 0.2s ease;
+    }
+    button.login-btn:active {
+      box-shadow: 0 3px #434190;
+      transform: translateY(3px);
+    }
+    .panel {
+      margin-top: 20px;
+      display: none;
+      flex-direction: column;
+      gap: 15px;
+    }
+    .btn3d {
+      padding: 15px 20px;
+      font-size: 16px;
+      font-weight: 600;
+      color: #fff;
+      background: linear-gradient(145deg, #6a72d4, #5860b1);
+      border: none;
+      border-radius: 15px;
+      box-shadow: 0 6px #3e458d;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      user-select: none;
+      text-decoration: none;
+      display: inline-block;
+    }
+    .btn3d:active {
+      box-shadow: 0 3px #3e458d;
+      transform: translateY(3px);
+    }
+    #errorMsg {
+      color: #ff6b6b;
+      margin-top: 10px;
+      display: none;
+    }
+  </style>
 </head>
 <body>
 
-<div id="loginStatus" class="logged-out">Not Logged In</div>
+  <div class="container" id="loginContainer">
+    <h2>Admin Login</h2>
+    <input type="email" id="email" placeholder="Admin Email" />
+    <input type="password" id="password" placeholder="Password" />
+    <button class="login-btn" onclick="login()">Login</button>
+    <p id="errorMsg"></p>
+  </div>
 
-<div class="button-container" id="buttonContainer" style="display:none;">
-  <button id="adminBtn">Admin Panel</button>
-  <button id="rechargeBtn">Recharge</button>
-  <button id="hospitalBtn">Hospital</button>
-  <button id="noticeBtn">Notice Board</button>
-  <button id="logoutBtn" style="display:none;">Logout</button>
-</div>
+  <div class="container panel" id="adminPanel">
+    <h2>Admin Panel</h2>
+    <a href="#" class="btn3d" id="btn1" target="_blank">Button 1</a>
+    <a href="#" class="btn3d" id="btn2" target="_blank">Button 2</a>
+    <a href="#" class="btn3d" id="btn3" target="_blank">Button 3</a>
+    <a href="#" class="btn3d" id="btn4" target="_blank">Button 4</a>
+    <a href="#" class="btn3d" id="btn5" target="_blank">Button 5</a>
+    <br /><br />
+    <button class="login-btn" style="background:#c53030; box-shadow: 0 6px #822020;" onclick="logout()">Logout</button>
+  </div>
 
-<button id="loginBtn">Login as Admin</button>
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
 
-<script>
-  const adminEmail = "zarasamajiksevasanstha@gmail.com";
-  const loginStatus = document.getElementById('loginStatus');
-  const buttonContainer = document.getElementById('buttonContainer');
-  const loginBtn = document.getElementById('loginBtn');
-  const logoutBtn = document.getElementById('logoutBtn');
+  <script>
+    // Firebase config
+    const firebaseConfig = {
+      apiKey: "AIzaSyCFgRQxK_W2T9S5QWZnxAd-kYV52Kzyb94",
+      authDomain: "zara-life-care.firebaseapp.com",
+      projectId: "zara-life-care",
+      storageBucket: "zara-life-care.appspot.com",
+      messagingSenderId: "307306937129",
+      appId: "1:307306937129:web:a949207fe64fe87dd3d538"
+    };
 
-  // Check login state from localStorage on page load
-  if(localStorage.getItem('adminLoggedIn') === 'true') {
-    setLoggedInState();
-  }
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
 
-  loginBtn.onclick = () => {
-    const email = prompt("Please enter admin email:");
-    if(email && email.toLowerCase().trim() === adminEmail) {
-      localStorage.setItem('adminLoggedIn', 'true');
-      setLoggedInState();
-    } else {
-      alert("Access denied. आप अपनी मर्यादा में रहें।");
+    // Admin emails allowed to login
+    const allowedAdmins = [
+      "admin1@example.com",
+      "admin2@example.com",
+      "zarafix3@gmail.com"  // अपनी admin email यहाँ डालें
+    ];
+
+    const loginContainer = document.getElementById('loginContainer');
+    const adminPanel = document.getElementById('adminPanel');
+    const errorMsg = document.getElementById('errorMsg');
+
+    function login() {
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+
+      if (!email || !password) {
+        showError("Please enter email and password");
+        return;
+      }
+
+      auth.signInWithEmailAndPassword(email, password)
+        .then(userCredential => {
+          const user = userCredential.user;
+          if (allowedAdmins.includes(user.email)) {
+            showAdminPanel();
+          } else {
+            auth.signOut();
+            showError("Access denied. You are not an admin.");
+          }
+        })
+        .catch(error => {
+          showError(error.message);
+        });
     }
-  };
 
-  logoutBtn.onclick = () => {
-    localStorage.removeItem('adminLoggedIn');
-    setLoggedOutState();
-  };
+    function showAdminPanel() {
+      errorMsg.style.display = 'none';
+      loginContainer.style.display = 'none';
+      adminPanel.style.display = 'flex';
+      setButtonLinks();
+    }
 
-  function setLoggedInState() {
-    loginStatus.textContent = "Logged in as Admin";
-    loginStatus.classList.remove('logged-out');
-    buttonContainer.style.display = 'grid';
-    loginBtn.style.display = 'none';
-    logoutBtn.style.display = 'block';
-  }
-  function setLoggedOutState() {
-    loginStatus.textContent = "Not Logged In";
-    loginStatus.classList.add('logged-out');
-    buttonContainer.style.display = 'none';
-    loginBtn.style.display = 'block';
-    logoutBtn.style.display = 'none';
-  }
+    function logout() {
+      auth.signOut().then(() => {
+        adminPanel.style.display = 'none';
+        loginContainer.style.display = 'block';
+        errorMsg.style.display = 'none';
+        clearInputs();
+      });
+    }
 
-  document.getElementById('adminBtn').onclick = () => {
-    window.location.href = "https://zara-life-care.vercel.app/admin.html";
-  };
-  document.getElementById('rechargeBtn').onclick = () => {
-    window.location.href = "https://zara-life-care.vercel.app/recharge.html";
-  };
-  document.getElementById('hospitalBtn').onclick = () => {
-    window.location.href = "https://zara-life-care.vercel.app/admin-hospital.html";
-  };
-  document.getElementById('noticeBtn').onclick = () => {
-    window.location.href = "https://zara-life-care.vercel.app/notice.html";
-  };
-</script>
+    function clearInputs() {
+      document.getElementById('email').value = '';
+      document.getElementById('password').value = '';
+    }
+
+    function showError(msg) {
+      errorMsg.textContent = msg;
+      errorMsg.style.display = 'block';
+    }
+
+    function setButtonLinks() {
+      document.getElementById('btn1').href = "https://example.com/page1";
+      document.getElementById('btn2').href = "https://example.com/page2";
+      document.getElementById('btn3').href = "https://example.com/page3";
+      document.getElementById('btn4').href = "https://example.com/page4";
+      document.getElementById('btn5').href = "https://example.com/page5";
+    }
+
+    // Check if user already logged in on page load
+    auth.onAuthStateChanged(user => {
+      if (user && allowedAdmins.includes(user.email)) {
+        showAdminPanel();
+      } else {
+        adminPanel.style.display = 'none';
+        loginContainer.style.display = 'block';
+      }
+    });
+  </script>
 
 </body>
 </html>
