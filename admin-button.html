@@ -3,83 +3,146 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>4 Button Mobile Layout with Admin Check</title>
+<title>4 Button Mobile Layout with Admin Login</title>
 <style>
-  /* (Your existing CSS here) */
-  /* ... same as before ... */
-  .hidden { display: none !important; }
+  body {
+    margin: 0; padding: 20px;
+    font-family: Arial, sans-serif;
+    background: #f0f0f0;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .button-container {
+    width: 90%;
+    max-width: 400px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+
+  button {
+    padding: 14px;
+    font-size: 1.1em;
+    font-weight: bold;
+    color: white;
+    border: none;
+    border-radius: 15px;
+    cursor: pointer;
+    box-shadow:
+      0 8px 15px rgba(0,0,0,0.3),
+      inset 0 -5px 0 rgba(255,255,255,0.25);
+    transition: all 0.3s ease;
+  }
+  button:hover {
+    filter: brightness(0.9);
+  }
+
+  /* अलग-अलग रंग और 3D प्रभाव */
+  #adminBtn {
+    background: linear-gradient(145deg, #6a1b9a, #9c27b0);
+    box-shadow:
+      0 10px 14px rgba(106, 27, 154, 0.7),
+      inset 0 -6px 0 rgba(255,255,255,0.3);
+  }
+  #rechargeBtn {
+    background: linear-gradient(145deg, #0d47a1, #2196f3);
+    box-shadow:
+      0 10px 14px rgba(13, 71, 161, 0.7),
+      inset 0 -6px 0 rgba(255,255,255,0.3);
+  }
+  #hospitalBtn {
+    background: linear-gradient(145deg, #2e7d32, #4caf50);
+    box-shadow:
+      0 10px 14px rgba(46, 125, 50, 0.7),
+      inset 0 -6px 0 rgba(255,255,255,0.3);
+  }
+  #noticeBtn {
+    background: linear-gradient(145deg, #f57f17, #ffb300);
+    box-shadow:
+      0 10px 14px rgba(245, 127, 23, 0.7),
+      inset 0 -6px 0 rgba(255,255,255,0.3);
+  }
+
+  /* Responsive मोबाइल के लिए */
+  @media(max-width: 480px) {
+    .button-container {
+      grid-template-columns: 1fr;
+    }
+    button {
+      font-size: 1.2em;
+      padding: 18px;
+    }
+  }
 </style>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+
 </head>
 <body>
 
 <div class="button-container">
-  <button id="adminBtn" class="hidden">Admin Panel</button>
-  <button id="rechargeBtn">Recharge</button>
-  <button id="hospitalBtn">Hospital</button>
-  <button id="noticeBtn">Notice Board</button>
+  <button id="adminBtn">Admin Panel</button>
+  <button id="rechargeBtn" onclick="window.location.href='https://example.com/recharge'">Recharge</button>
+  <button id="hospitalBtn" onclick="window.location.href='https://zara-life-care.vercel.app/admin-hospital.html'">Hospital</button>
+  <button id="noticeBtn" onclick="window.location.href='https://example.com/notice'">Notice Board</button>
 </div>
 
-<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
-
 <script>
-  // Firebase config
+  // Firebase config (आपका config डालें)
   const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_AUTH_DOMAIN",
-    databaseURL: "YOUR_DB_URL",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_BUCKET",
-    messagingSenderId: "YOUR_MSG_ID",
-    appId: "YOUR_APP_ID"
+    apiKey: "AIzaSyCFgRQxK_W2T9S5QWZnxAd-kYV52Kzyb94",
+    authDomain: "zara-life-care.firebaseapp.com",
+    projectId: "zara-life-care",
+    storageBucket: "zara-life-care.appspot.com",
+    messagingSenderId: "307306937129",
+    appId: "1:307306937129:web:a949207fe64fe87dd3d538"
   };
 
   firebase.initializeApp(firebaseConfig);
   const auth = firebase.auth();
-  const db = firebase.database();
+
+  const adminEmail = "zarasamajiksevasanstha@gmail.com";
 
   const adminBtn = document.getElementById('adminBtn');
-  const rechargeBtn = document.getElementById('rechargeBtn');
-  const hospitalBtn = document.getElementById('hospitalBtn');
-  const noticeBtn = document.getElementById('noticeBtn');
 
-  // Login check function (for demo you can do Google login or Email/Password)
-  function checkAdmin(user) {
-    if (!user) {
-      adminBtn.classList.add('hidden');
-      alert('Please login to access admin panel');
-      return;
-    }
-    const userEmailKey = user.email.replace('.', ','); // Firebase keys में dot नहीं हो सकता
-    db.ref('admins/' + userEmailKey).get().then(snapshot => {
-      if (snapshot.exists() && snapshot.val() === true) {
-        // User is admin
-        adminBtn.classList.remove('hidden');
+  // Admin button click handling
+  adminBtn.addEventListener('click', () => {
+    const user = auth.currentUser;
+    if (user) {
+      if (user.email === adminEmail) {
+        // Authorized admin
+        window.location.href = 'https://zara-life-care.vercel.app/admin.html';
       } else {
-        adminBtn.classList.add('hidden');
-        alert('आप अपनी मर्यादा में रहें, admin panel खोलने की अनुमति नहीं है।');
+        alert("आप अपनी मर्यादा में रहें। आप इस पेज को खोलने के लिए अधिकृत नहीं हैं।");
       }
-    });
-  }
-
-  // Firebase auth listener
-  auth.onAuthStateChanged(user => {
-    checkAdmin(user);
+    } else {
+      // Not logged in, prompt login
+      loginWithGoogle();
+    }
   });
 
-  // Buttons के click पर redirect (adminBtn के लिए चेक भी कर सकते हैं)
-  adminBtn.onclick = () => {
-    window.location.href = 'https://zara-life-care.vercel.app/admin.html';
-  }
-  rechargeBtn.onclick = () => {
-    window.location.href = 'https://example.com/recharge';
-  }
-  hospitalBtn.onclick = () => {
-    window.location.href = 'https://zara-life-care.vercel.app/admin-hospital.html';
-  }
-  noticeBtn.onclick = () => {
-    window.location.href = 'https://example.com/notice';
+  function loginWithGoogle() {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    auth.signInWithPopup(provider)
+      .then((result) => {
+        const user = result.user;
+        if (user.email === adminEmail) {
+          alert("Admin login सफल हुआ। अब Admin Panel खोल सकते हैं।");
+          window.location.href = 'https://zara-life-care.vercel.app/admin.html';
+        } else {
+          alert("आप अपनी मर्यादा में रहें। आप इस पेज को खोलने के लिए अधिकृत नहीं हैं।");
+          auth.signOut();
+        }
+      })
+      .catch((error) => {
+        alert("लॉगिन में समस्या आई: " + error.message);
+      });
   }
 </script>
 
