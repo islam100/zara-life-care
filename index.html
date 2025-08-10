@@ -99,63 +99,60 @@
   </div>
 </main>
 
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
+<script type="module">
+// Import Firebase modules from CDN
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
 
-<script>
-  // Firebase config
-  const firebaseConfig = {
-    apiKey: "AIzaSyCFgRQxK_W2T9S5QWZnxAd-kYV52Kzyb94",
-    authDomain: "zara-life-care.firebaseapp.com",
-    projectId: "zara-life-care",
-    storageBucket: "zara-life-care.appspot.com",
-    messagingSenderId: "307306937129",
-    appId: "1:307306937129:web:a949207fe64fe87dd3d538"
-  };
+// Your Firebase config
+const firebaseConfig = {
+  apiKey: "AIzaSyCFgRQxK_W2T9S5QWZnxAd-kYV52Kzyb94",
+  authDomain: "zara-life-care.firebaseapp.com",
+  projectId: "zara-life-care",
+  storageBucket: "zara-life-care.appspot.com",
+  messagingSenderId: "307306937129",
+  appId: "1:307306937129:web:a949207fe64fe87dd3d538"
+};
 
-  // Initialize Firebase
-  firebase.initializeApp(firebaseConfig);
-  const auth = firebase.auth();
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
 
-  const loginBtn = document.getElementById('loginBtn');
-  const logoutBtn = document.getElementById('logoutBtn');
+const loginBtn = document.getElementById('loginBtn');
+const logoutBtn = document.getElementById('logoutBtn');
 
-  loginBtn.addEventListener('click', () => {
-    const provider = new firebase.auth.GoogleAuthProvider();
-    auth.signInWithPopup(provider).catch(err => alert(err.message));
-  });
+loginBtn.addEventListener('click', () => {
+  const provider = new GoogleAuthProvider();
+  signInWithPopup(auth, provider).catch(err => alert(err.message));
+});
 
-  logoutBtn.addEventListener('click', () => {
-    auth.signOut();
-  });
+logoutBtn.addEventListener('click', () => {
+  signOut(auth);
+});
 
-  auth.onAuthStateChanged(user => {
-    if (user) {
-      loginBtn.style.display = 'none';
-      logoutBtn.style.display = 'inline-block';
-    } else {
-      loginBtn.style.display = 'inline-block';
-      logoutBtn.style.display = 'none';
-    }
-  });
+onAuthStateChanged(auth, user => {
+  if (user) {
+    loginBtn.style.display = 'none';
+    logoutBtn.style.display = 'inline-block';
+  } else {
+    loginBtn.style.display = 'inline-block';
+    logoutBtn.style.display = 'none';
+  }
+});
 
-  // Example: Buttons click handlers (replace alert with your real navigation)
-  document.getElementById('bookAmbulanceBtn').addEventListener('click', () => {
-    alert('Book Ambulance clicked');
-    // window.location.href = 'booking.html';
-  });
-  document.getElementById('hospitalListBtn').addEventListener('click', () => {
-    alert('Hospital List clicked');
-    // window.location.href = 'hospitals.html';
-  });
-  document.getElementById('driverBtn').addEventListener('click', () => {
-    alert('Driver clicked');
-    // window.location.href = 'driver.html';
-  });
-  document.getElementById('marijStatusBtn').addEventListener('click', () => {
-    alert('Marij Status clicked');
-    // window.location.href = 'status.html';
-  });
+// Buttons click demo handlers
+document.getElementById('bookAmbulanceBtn').addEventListener('click', () => {
+  alert('Book Ambulance clicked');
+});
+document.getElementById('hospitalListBtn').addEventListener('click', () => {
+  alert('Hospital List clicked');
+});
+document.getElementById('driverBtn').addEventListener('click', () => {
+  alert('Driver clicked');
+});
+document.getElementById('marijStatusBtn').addEventListener('click', () => {
+  alert('Marij Status clicked');
+});
 </script>
 
 </body>
