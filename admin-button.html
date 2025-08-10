@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>4 Button Mobile Layout with Admin Login</title>
+<title>4 Button Mobile Layout with Login</title>
 <style>
   body {
     margin: 0; padding: 20px;
@@ -11,12 +11,36 @@
     background: #f0f0f0;
     display: flex;
     flex-direction: column;
-    height: 100vh;
-    justify-content: center;
+    min-height: 100vh;
+    justify-content: flex-start;
     align-items: center;
   }
 
+  /* ऊपर login/logout button */
+  #loginBtn {
+    position: fixed;
+    top: 15px;
+    right: 15px;
+    padding: 8px 14px;
+    font-weight: bold;
+    font-size: 0.9em;
+    color: white;
+    background: linear-gradient(145deg, #3b5998, #8b9dc3);
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    box-shadow:
+      0 5px 10px rgba(0,0,0,0.2),
+      inset 0 -3px 0 rgba(255,255,255,0.3);
+    transition: all 0.3s ease;
+    z-index: 1000;
+  }
+  #loginBtn:hover {
+    filter: brightness(0.9);
+  }
+
   .button-container {
+    margin-top: 80px; /* ऊपर लॉगिन बटन के लिए जगह */
     width: 90%;
     max-width: 400px;
     display: grid;
@@ -24,126 +48,142 @@
     gap: 20px;
   }
 
-  button {
-    padding: 14px;
-    font-size: 1.1em;
+  button.action-btn {
+    padding: 12px;
+    font-size: 1em;
     font-weight: bold;
     color: white;
     border: none;
     border-radius: 15px;
     cursor: pointer;
     box-shadow:
-      0 8px 15px rgba(0,0,0,0.3),
-      inset 0 -5px 0 rgba(255,255,255,0.25);
+      0 5px 10px rgba(0,0,0,0.2),
+      inset 0 -3px 0 rgba(255,255,255,0.3);
     transition: all 0.3s ease;
   }
-  button:hover {
+  button.action-btn:hover {
     filter: brightness(0.9);
   }
 
-  /* अलग-अलग रंग और 3D प्रभाव */
   #adminBtn {
     background: linear-gradient(145deg, #6a1b9a, #9c27b0);
     box-shadow:
-      0 10px 14px rgba(106, 27, 154, 0.7),
-      inset 0 -6px 0 rgba(255,255,255,0.3);
+      0 6px 8px rgba(106, 27, 154, 0.6),
+      inset 0 -4px 0 rgba(255,255,255,0.3);
   }
   #rechargeBtn {
     background: linear-gradient(145deg, #0d47a1, #2196f3);
     box-shadow:
-      0 10px 14px rgba(13, 71, 161, 0.7),
-      inset 0 -6px 0 rgba(255,255,255,0.3);
+      0 6px 8px rgba(13, 71, 161, 0.6),
+      inset 0 -4px 0 rgba(255,255,255,0.3);
   }
   #hospitalBtn {
     background: linear-gradient(145deg, #2e7d32, #4caf50);
     box-shadow:
-      0 10px 14px rgba(46, 125, 50, 0.7),
-      inset 0 -6px 0 rgba(255,255,255,0.3);
+      0 6px 8px rgba(46, 125, 50, 0.6),
+      inset 0 -4px 0 rgba(255,255,255,0.3);
   }
   #noticeBtn {
     background: linear-gradient(145deg, #f57f17, #ffb300);
     box-shadow:
-      0 10px 14px rgba(245, 127, 23, 0.7),
-      inset 0 -6px 0 rgba(255,255,255,0.3);
+      0 6px 8px rgba(245, 127, 23, 0.6),
+      inset 0 -4px 0 rgba(255,255,255,0.3);
   }
-
+  
   /* Responsive मोबाइल के लिए */
   @media(max-width: 480px) {
     .button-container {
       grid-template-columns: 1fr;
     }
-    button {
-      font-size: 1.2em;
-      padding: 18px;
+    button.action-btn {
+      font-size: 1.1em;
+      padding: 15px;
     }
   }
 </style>
-
-<!-- Firebase SDK -->
-<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
-
 </head>
 <body>
 
+<button id="loginBtn">Login</button>
+
 <div class="button-container">
-  <button id="adminBtn">Admin Panel</button>
-  <button id="rechargeBtn" onclick="window.location.href='https://example.com/recharge'">Recharge</button>
-  <button id="hospitalBtn" onclick="window.location.href='https://zara-life-care.vercel.app/admin-hospital.html'">Hospital</button>
-  <button id="noticeBtn" onclick="window.location.href='https://example.com/notice'">Notice Board</button>
+  <button class="action-btn" id="adminBtn">Admin Panel</button>
+  <button class="action-btn" id="rechargeBtn">Recharge</button>
+  <button class="action-btn" id="hospitalBtn">Hospital</button>
+  <button class="action-btn" id="noticeBtn">Notice Board</button>
 </div>
 
+<!-- Firebase JS SDKs -->
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+
 <script>
-  // Firebase config (आपका config डालें)
+  // Firebase config - अपनी Firebase details यहाँ लगाएं
   const firebaseConfig = {
-    apiKey: "AIzaSyCFgRQxK_W2T9S5QWZnxAd-kYV52Kzyb94",
-    authDomain: "zara-life-care.firebaseapp.com",
-    projectId: "zara-life-care",
-    storageBucket: "zara-life-care.appspot.com",
-    messagingSenderId: "307306937129",
-    appId: "1:307306937129:web:a949207fe64fe87dd3d538"
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_PROJECT.firebaseapp.com",
+    projectId: "YOUR_PROJECT",
+    storageBucket: "YOUR_PROJECT.appspot.com",
+    messagingSenderId: "YOUR_SENDER_ID",
+    appId: "YOUR_APP_ID"
   };
 
   firebase.initializeApp(firebaseConfig);
   const auth = firebase.auth();
 
-  const adminEmail = "zarasamajiksevasanstha@gmail.com";
-
+  const loginBtn = document.getElementById('loginBtn');
   const adminBtn = document.getElementById('adminBtn');
 
-  // Admin button click handling
-  adminBtn.addEventListener('click', () => {
-    const user = auth.currentUser;
-    if (user) {
-      if (user.email === adminEmail) {
-        // Authorized admin
-        window.location.href = 'https://zara-life-care.vercel.app/admin.html';
-      } else {
-        alert("आप अपनी मर्यादा में रहें। आप इस पेज को खोलने के लिए अधिकृत नहीं हैं।");
-      }
+  // जाँचें यूज़र लॉगिन है या नहीं और बटन बदलें
+  auth.onAuthStateChanged(user => {
+    if(user){
+      loginBtn.textContent = "Logout";
+      loginBtn.style.background = "linear-gradient(145deg, #b71c1c, #f44336)";
     } else {
-      // Not logged in, prompt login
-      loginWithGoogle();
+      loginBtn.textContent = "Login";
+      loginBtn.style.background = "linear-gradient(145deg, #3b5998, #8b9dc3)";
     }
   });
 
-  function loginWithGoogle() {
-    const provider = new firebase.auth.GoogleAuthProvider();
-    auth.signInWithPopup(provider)
-      .then((result) => {
-        const user = result.user;
-        if (user.email === adminEmail) {
-          alert("Admin login सफल हुआ। अब Admin Panel खोल सकते हैं।");
-          window.location.href = 'https://zara-life-care.vercel.app/admin.html';
-        } else {
-          alert("आप अपनी मर्यादा में रहें। आप इस पेज को खोलने के लिए अधिकृत नहीं हैं।");
-          auth.signOut();
-        }
-      })
-      .catch((error) => {
-        alert("लॉगिन में समस्या आई: " + error.message);
-      });
-  }
+  // Login / Logout बटन का व्यवहार
+  loginBtn.onclick = () => {
+    if(auth.currentUser){
+      auth.signOut();
+      alert("Logged out successfully.");
+    } else {
+      // Google Sign-In
+      const provider = new firebase.auth.GoogleAuthProvider();
+      auth.signInWithPopup(provider)
+        .then(result => {
+          alert("Logged in as: " + result.user.email);
+        })
+        .catch(err => alert("Login failed: " + err.message));
+    }
+  };
+
+  // Admin Panel बटन पर क्लिक
+  adminBtn.onclick = () => {
+    const user = auth.currentUser;
+    if(user && user.email === "zarasamajiksevasanstha@gmail.com"){
+      // Admin Panel का लिंक डालें
+      window.location.href = "https://zara-life-care.vercel.app/admin.html";
+    } else if(user){
+      alert("आप अपनी मर्यादा में रहें। केवल admin ही इस पेज को खोल सकते हैं।");
+    } else {
+      alert("कृपया पहले लॉगिन करें।");
+    }
+  };
+
+  // बाकी बटन सीधे लिंक पर जाएं
+  document.getElementById('rechargeBtn').onclick = () => {
+    window.location.href = "https://example.com/recharge";
+  };
+  document.getElementById('hospitalBtn').onclick = () => {
+    window.location.href = "https://zara-life-care.vercel.app/admin-hospital.html";
+  };
+  document.getElementById('noticeBtn').onclick = () => {
+    window.location.href = "https://example.com/notice";
+  };
 </script>
 
 </body>
