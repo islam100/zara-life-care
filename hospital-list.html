@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Hospital Gallery</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    padding: 10px;
+    max-width: 700px;
+    margin: auto;
+  }
+  #searchArea {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 15px;
+    font-size: 1em;
+    box-sizing: border-box;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill,minmax(150px,1fr));
+    gap: 15px;
+  }
+  .card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 10px;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.16);
+    cursor: pointer;
+    text-align: center;
+  }
+  .card img {
+    width: 100%;
+    border-radius: 8px;
+    max-height: 120px;
+    object-fit: cover;
+  }
+  .card h4 {
+    margin: 8px 0 5px;
+  }
+  .whatsapp-btn {
+    background: #25D366;
+    color: white;
+    border: none;
+    padding: 6px 10px;
+    border-radius: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 0.9em;
+  }
+  /* Modal Styles */
+  .modal {
+    display: none;
+    position: fixed;
+    z-index: 9999;
+    left:0; top:0; right:0; bottom:0;
+    background: rgba(0,0,0,0.7);
+    justify-content: center;
+    align-items: center;
+  }
+  .modal-content {
+    position: relative;
+    max-width: 90%;
+    max-height: 90%;
+  }
+  .modal-content img {
+    width: 100%;
+    height: auto;
+    border-radius: 10px;
+  }
+  .modal-close {
+    position: absolute;
+    top: -15px;
+    right: -15px;
+    background: red;
+    color: white;
+    font-weight: bold;
+    border-radius: 50%;
+    padding: 5px 10px;
+    cursor: pointer;
+    font-size: 18px;
+  }
+</style>
+</head>
+<body>
+
+<h2>Hospital Gallery</h2>
+<input type="text" id="searchArea" placeholder="Search by Area..." />
+
+<div class="grid" id="hospitalGrid"></div>
+
+<!-- Modal -->
+<div class="modal" id="imageModal">
+  <div class="modal-content">
+    <span class="modal-close" id="modalClose">&times;</span>
+    <img id="modalImg" src="" alt="Large View" />
+  </div>
+</div>
+
+<script>
+  // Load hospitals data from localStorage (or replace with backend fetch)
+  let hospitals = JSON.parse(localStorage.getItem('hospitals') || '[]');
+
+  const hospitalGrid = document.getElementById('hospitalGrid');
+  const searchInput = document.getElementById('searchArea');
+
+  function renderHospitals(filter='') {
+    hospitalGrid.innerHTML = '';
+    const filtered = hospitals.filter(h => h.area.toLowerCase().includes(filter.toLowerCase()));
+    if(filtered.length === 0){
+      hospitalGrid.innerHTML = '<p>No hospitals found for this area.</p>';
+      return;
+    }
+    filtered.forEach(hospital => {
+      const card = document.createElement('div');
+      card.className = 'card';
+
+      card.innerHTML = `
+        <img src="${hospital.imageUrl}" alt="${hospital.name}" />
+        <h4>${hospital.name}</h4>
+        <button class="whatsapp-btn" onclick="event.stopPropagation(); window.open('https://wa.me/${hospital.whatsapp.replace(/[^0-9]/g,'')}')">WhatsApp</button>
+      `;
+
+      // Click to open modal with large image
+      card.addEventListener('click', () => {
+        modalImg.src = hospital.imageUrl;
+        imageModal.style.display = 'flex';
+      });
+
+      hospitalGrid.appendChild(card);
+    });
+  }
+
+  // Modal elements
+  const imageModal = document.getElementById('imageModal');
+  const modalClose = document.getElementById('modalClose');
+  const modalImg = document.getElementById('modalImg');
+
+  modalClose.onclick = () => {
+    imageModal.style.display = 'none';
+    modalImg.src = '';
+  };
+  imageModal.onclick = (e) => {
+    if(e.target === imageModal) {
+      imageModal.style.display = 'none';
+      modalImg.src = '';
+    }
+  };
+
+  searchInput.addEventListener('input', () => {
+    renderHospitals(searchInput.value);
+  });
+
+  // Initial render
+  renderHospitals();
+</script>
+
+</body>
+</html>
