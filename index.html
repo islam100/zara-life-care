@@ -7,83 +7,106 @@
 <style>
   body {
     font-family: Arial, sans-serif;
-    margin:0; padding:0;
-    background: #f0f0f0;
+    margin: 0; padding: 0;
+    background: #f0f4f8;
   }
   header {
-    background: #004080;
+    background-color: #004080;
     color: white;
-    padding: 10px 15px;
+    padding: 15px 20px;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-wrap: wrap;
   }
-  header h1 { margin:0; font-size: 1.5rem; }
-  header button {
-    background: #0080ff;
-    border: none;
-    color: white;
-    padding: 8px 15px;
-    border-radius: 8px;
+  header h1 {
+    margin: 0;
+    font-size: 1.8rem;
+  }
+
+  /* 3D BUTTON STYLE */
+  button {
     cursor: pointer;
     font-weight: bold;
-    box-shadow: 0 4px 6px rgba(0, 123, 255, 0.5);
+    padding: 10px 20px;
+    border-radius: 10px;
+    border: none;
+    background: linear-gradient(145deg, #1e90ff, #0066cc);
+    box-shadow: 5px 5px 10px #004080, -5px -5px 10px #3388ff;
+    color: white;
+    transition: all 0.2s ease;
+    user-select: none;
   }
+  button:hover {
+    background: linear-gradient(145deg, #3ea0ff, #3388ff);
+    box-shadow: 2px 2px 5px #004080, -2px -2px 5px #66b2ff;
+  }
+  button:active {
+    box-shadow: inset 3px 3px 5px #004080, inset -3px -3px 5px #3388ff;
+  }
+  button:focus {
+    outline: none;
+  }
+
   main {
     max-width: 600px;
-    margin: 20px auto;
+    margin: 30px auto;
     background: white;
-    padding: 15px;
-    border-radius: 10px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 3px 5px 15px rgba(0,0,0,0.1);
+  }
+  #bookAmbBtn {
+    display: block;
+    margin: 0 auto 20px auto;
   }
   #bookingForm {
     display: none;
-    margin-top: 15px;
   }
   #bookingForm input, #bookingForm select, #bookingForm textarea {
     width: 100%;
-    padding: 8px 10px;
-    margin: 8px 0;
-    border-radius: 6px;
+    padding: 8px 12px;
+    margin: 10px 0;
+    border-radius: 8px;
     border: 1px solid #ccc;
     box-sizing: border-box;
+    font-size: 1rem;
   }
-  #bookingForm button {
-    background: #28a745;
-    color: white;
-    border: none;
-    padding: 10px;
-    font-weight: bold;
-    border-radius: 8px;
-    cursor: pointer;
-    box-shadow: 0 4px 8px rgba(40,167,69,0.5);
-  }
-  #bookingForm button:hover {
-    box-shadow: 0 6px 12px rgba(40,167,69,0.8);
+  #bookingForm textarea {
+    resize: vertical;
   }
   #statusMessage {
     margin-top: 15px;
     font-weight: bold;
-    color: #555;
+    color: #444;
+    text-align: center;
   }
   #driverInfo {
     margin-top: 20px;
+    background: #dff0d8;
     padding: 15px;
-    background: #d9f7d9;
-    border-radius: 10px;
-    box-shadow: 0 0 10px #28a745;
-  }
-  #driverInfo h2 {
-    margin-top: 0;
+    border-radius: 12px;
+    box-shadow: 0 0 10px #6ab04c;
   }
   #driverInfo a {
-    color: #007bff;
+    color: #228822;
     font-weight: bold;
     text-decoration: none;
   }
   #driverInfo a:hover {
     text-decoration: underline;
+  }
+
+  /* Responsive */
+  @media (max-width: 480px) {
+    header {
+      flex-direction: column;
+      gap: 10px;
+    }
+    main {
+      margin: 15px;
+      padding: 15px;
+    }
   }
 </style>
 </head>
@@ -98,12 +121,12 @@
 </header>
 
 <main>
-  <button id="bookAmbBtn">Book Ambulance</button>
+  <button id="bookAmbBtn" disabled>Book Ambulance</button>
 
   <form id="bookingForm">
     <h2>Ambulance Booking Form</h2>
     <input type="text" id="patientName" placeholder="Patient Name" required />
-    <textarea id="patientAddress" placeholder="Patient Address" rows="2" required></textarea>
+    <textarea id="patientAddress" placeholder="Patient Address" rows="3" required></textarea>
     <input type="text" id="destination" placeholder="Destination" required />
     <select id="ambulanceCategory" required>
       <option value="" disabled selected>Select Ambulance Category</option>
@@ -127,13 +150,13 @@
   </div>
 </main>
 
-<!-- Firebase Namespaced SDK -->
+<!-- Firebase Libraries v8 -->
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
 <script>
-  // Firebase config
+  // Initialize Firebase
   const firebaseConfig = {
     apiKey: "AIzaSyCFgRQxK_W2T9S5QWZnxAd-kYV52Kzyb94",
     authDomain: "zara-life-care.firebaseapp.com",
@@ -148,6 +171,7 @@
   const auth = firebase.auth();
   const db = firebase.database();
 
+  // DOM Elements
   const loginBtn = document.getElementById('loginBtn');
   const logoutBtn = document.getElementById('logoutBtn');
   const bookAmbBtn = document.getElementById('bookAmbBtn');
@@ -155,31 +179,32 @@
   const statusMessage = document.getElementById('statusMessage');
   const driverInfoDiv = document.getElementById('driverInfo');
 
-  // Driver info elements
+  // Driver info fields
   const driverNameSpan = document.getElementById('driverName');
   const driverAmbCategorySpan = document.getElementById('driverAmbCategory');
   const driverAmbNoSpan = document.getElementById('driverAmbNo');
   const driverWhatsappLink = document.getElementById('driverWhatsappLink');
 
-  // Show form on button click
+  // Show/hide form on button click
   bookAmbBtn.addEventListener('click', () => {
     bookingForm.style.display = 'block';
     statusMessage.textContent = '';
     driverInfoDiv.style.display = 'none';
   });
 
-  // Login with Google
-  loginBtn.onclick = () => {
+  // Login handler
+  loginBtn.addEventListener('click', () => {
     const provider = new firebase.auth.GoogleAuthProvider();
-    auth.signInWithPopup(provider).catch(err => alert('Login failed: ' + err.message));
-  };
+    auth.signInWithPopup(provider)
+      .catch(error => alert("Login failed: " + error.message));
+  });
 
-  // Logout
-  logoutBtn.onclick = () => {
+  // Logout handler
+  logoutBtn.addEventListener('click', () => {
     auth.signOut();
-  };
+  });
 
-  // Auth state change
+  // Auth state listener
   auth.onAuthStateChanged(user => {
     if (user) {
       loginBtn.style.display = 'none';
@@ -196,25 +221,28 @@
     }
   });
 
-  // Submit booking form
+  // Submit booking
   bookingForm.addEventListener('submit', e => {
     e.preventDefault();
     const user = auth.currentUser;
-    if(!user){
+    if (!user) {
       alert('Please login first!');
       return;
     }
+
+    // Get form data
     const patientName = document.getElementById('patientName').value.trim();
     const patientAddress = document.getElementById('patientAddress').value.trim();
     const destination = document.getElementById('destination').value.trim();
     const ambulanceCategory = document.getElementById('ambulanceCategory').value;
     const whatsappNumber = document.getElementById('whatsappNumber').value.trim();
 
-    if(!patientName || !patientAddress || !destination || !ambulanceCategory || !whatsappNumber){
-      alert('Please fill all fields!');
+    if (!patientName || !patientAddress || !destination || !ambulanceCategory || !whatsappNumber) {
+      alert('Please fill all fields');
       return;
     }
 
+    // Prepare booking data
     const newBookingKey = db.ref().child('bookings').push().key;
     const bookingData = {
       userId: user.uid,
@@ -227,9 +255,9 @@
       timestamp: Date.now()
     };
 
-    // Save booking
-    const updates = {};
+    // Write booking and notify drivers
+    let updates = {};
     updates['/bookings/' + newBookingKey] = bookingData;
 
     // Notify all approved drivers
-    db.ref('drivers').order
+    db.ref('drivers').orderByChild('status').equalTo('approved').once('value
