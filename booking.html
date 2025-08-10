@@ -98,8 +98,10 @@
   <button type="submit">Submit Booking</button>
 </form>
 
+<!-- Status देखें बटन -->
 <button id="statusBtn" style="display:none;">See Booking Status</button>
 
+<!-- बुकिंग स्टेटस दिखाने वाला डिव -->
 <div id="bookingStatus"></div>
 
 <!-- Firebase SDK -->
@@ -108,7 +110,7 @@
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
 
 <script>
-  // Firebase config — अपनी कॉन्फिग डालें
+  // अपनी Firebase कॉन्फ़िग डालें
   const firebaseConfig = {
     apiKey: "AIzaSyCFgRQxK_W2T9S5QWZnxAd-kYV52Kzyb94",
     authDomain: "zara-life-care.firebaseapp.com",
@@ -126,20 +128,20 @@
   const statusBtn = document.getElementById('statusBtn');
   const bookingStatus = document.getElementById('bookingStatus');
 
-  // Check if user is logged in
+  // लॉगिन चेक करें और Status बटन दिखाएं/छुपाएं
   auth.onAuthStateChanged(user => {
     if(user) {
       statusBtn.style.display = 'block';
+      bookingStatus.innerHTML = ''; // साफ करें
     } else {
       statusBtn.style.display = 'none';
-      bookingStatus.innerHTML = '<p style="color:red;">Please login to book and see status.</p>';
+      bookingStatus.innerHTML = '<p style="color:red; text-align:center;">Please login to book ambulance and see status.</p>';
     }
   });
 
-  // Booking form submit
+  // Booking फॉर्म सबमिट
   bookingForm.addEventListener('submit', e => {
     e.preventDefault();
-
     const user = auth.currentUser;
     if(!user){
       alert('Please login first');
@@ -160,7 +162,6 @@
       createdAt: firebase.database.ServerValue.TIMESTAMP
     };
 
-    // Save booking
     db.ref('bookings').push(bookingData)
       .then(() => {
         alert('Booking submitted! Waiting for driver approval.');
@@ -171,7 +172,7 @@
       });
   });
 
-  // Show booking status when user clicks "See Booking Status"
+  // Status देखें बटन पर क्लिक पर बुकिंग्स दिखाएं
   statusBtn.addEventListener('click', () => {
     const user = auth.currentUser;
     if(!user){
@@ -212,7 +213,6 @@
         bookingStatus.innerHTML = `<p style="color:red;">Error loading bookings: ${err.message}</p>`;
       });
   });
-
 </script>
 
 </body>
