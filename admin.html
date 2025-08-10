@@ -1,67 +1,332 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Admin Dashboard</title>
-<style>
-  .card { border: 1px solid #ccc; border-radius: 8px; padding: 10px; margin: 10px; display: inline-block; width: 200px; }
-  .led { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
-  .led-yellow { background: yellow; animation: blink 1s infinite; }
-  .led-green { background: green; }
-  @keyframes blink { 50% { opacity: 0; } }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Admin Panel - Zara Life Care</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0; padding: 0;
+      background: #f5f5f5;
+    }
+    header {
+      background: #007BFF;
+      color: white;
+      padding: 10px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    button {
+      padding: 8px 12px;
+      font-weight: bold;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+    }
+    #loginBtn { background: #ffa500; color: white; }
+    #logoutBtn { background: #ff4444; color: white; display: none; }
+
+    main {
+      padding: 20px;
+      max-width: 1000px;
+      margin: auto;
+    }
+    h2 { margin-top: 30px; }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-top: 10px;
+      background: white;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 8px;
+      text-align: left;
+    }
+    th {
+      background: #007BFF;
+      color: white;
+    }
+    .btn-approve {
+      background: #4caf50;
+      color: white;
+      margin-right: 5px;
+    }
+    .btn-reject {
+      background: #f44336;
+      color: white;
+    }
+    select {
+      padding: 6px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+    }
+  </style>
 </head>
 <body>
-<h1>Admin Dashboard</h1>
-<div id="drivers-container"></div>
 
-<!-- Firebase -->
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
+<header>
+  <div><strong>Zara Life Care - Admin Panel</strong></div>
+  <div>
+    <button id="loginBtn">Login with Google</button>
+    <button id="logoutBtn">Logout</button>
+  </div>
+</header>
+
+<main>
+  <div id="adminContent" style="display:none;">
+    <h2>Bookings</h2>
+    <table id="bookingsTable">
+      <thead>
+        <tr>
+          <th>Booking ID</th>
+          <th>Patient Name</th>
+          <th>Phone</th>
+          <th>Address</th>
+          <th>Destination</th>
+          <th>Category</th>
+          <th>Status</th>
+          <th>Driver</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <h2>Drivers</h2>
+    <table id="driversTable">
+      <thead>
+        <tr>
+          <th>Driver Name</th>
+          <th>Ambulance No</th>
+          <th>Category</th>
+          <th>Whatsapp</th>
+          <th>Approved</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <h2>Wallet Transactions (Sample)</h2>
+    <pre id="walletData" style="background:#eee; padding:10px; max-height:300px; overflow:auto;"></pre>
+  </div>
+
+  <div id="notAdminMessage" style="display:none; padding:20px; color:red;">
+    You are not authorized to access this page.
+  </div>
+</main>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+
 <script>
   const firebaseConfig = {
     apiKey: "AIzaSyCFgRQxK_W2T9S5QWZnxAd-kYV52Kzyb94",
     authDomain: "zara-life-care.firebaseapp.com",
+    databaseURL: "https://zara-life-care-default-rtdb.firebaseio.com/",
     projectId: "zara-life-care",
     storageBucket: "zara-life-care.appspot.com",
     messagingSenderId: "307306937129",
     appId: "1:307306937129:web:a949207fe64fe87dd3d538"
   };
-  firebase.initializeApp(firebaseConfig);
 
-  firebase.auth().onAuthStateChanged(user => {
-    if (!user) { window.location.href = "login.html"; }
-    else {
-      firebase.database().ref("admins/" + user.uid).once("value").then(snap => {
-        if (!snap.exists()) { alert("Access Denied"); window.location.href = "index.html"; }
-        else { loadRequests(); }
-      });
+  // Initialize Firebase
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.database();
+
+  const loginBtn = document.getElementById('loginBtn');
+  const logoutBtn = document.getElementById('logoutBtn');
+  const adminContent = document.getElementById('adminContent');
+  const notAdminMessage = document.getElementById('notAdminMessage');
+
+  let currentUser = null;
+  let adminsData = null;
+
+  // Admin email list fetched from DB (populate this dynamically)
+  let adminEmails = [];
+
+  // Login
+  loginBtn.onclick = () => {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    auth.signInWithPopup(provider).catch(e => alert(e.message));
+  };
+
+  // Logout
+  logoutBtn.onclick = () => auth.signOut();
+
+  // On Auth State Changed
+  auth.onAuthStateChanged(async user => {
+    if(user){
+      currentUser = user;
+      loginBtn.style.display = 'none';
+      logoutBtn.style.display = 'inline-block';
+
+      // Fetch admins from DB
+      const adminsSnapshot = await db.ref('admins').once('value');
+      adminsData = adminsSnapshot.val() || {};
+      adminEmails = Object.values(adminsData).map(admin => admin.email);
+
+      if(adminEmails.includes(user.email)){
+        notAdminMessage.style.display = 'none';
+        adminContent.style.display = 'block';
+        loadBookings();
+        loadDrivers();
+        loadWalletTransactions();
+      } else {
+        adminContent.style.display = 'none';
+        notAdminMessage.style.display = 'block';
+      }
+    } else {
+      currentUser = null;
+      loginBtn.style.display = 'inline-block';
+      logoutBtn.style.display = 'none';
+      adminContent.style.display = 'none';
+      notAdminMessage.style.display = 'none';
     }
   });
 
-  function loadRequests() {
-    const container = document.getElementById('drivers-container');
-    firebase.database().ref('drivers').on('value', snapshot => {
-      container.innerHTML = '';
-      snapshot.forEach(child => {
-        const d = child.val();
-        let ledClass = d.status === 'approved' ? 'led-green' : 'led-yellow';
-        container.innerHTML += `
-          <div class="card">
-            <h3>${d.name}</h3>
-            <p>Ambulance: ${d.ambulanceNo}</p>
-            <span class="led ${ledClass}"></span>
-            ${d.status !== 'approved' ? `<button onclick="approve('${child.key}')">Approve</button>` : ''}
-          </div>
-        `;
-      });
+  // Load bookings from Firebase
+  async function loadBookings(){
+    const snapshot = await db.ref('bookings').once('value');
+    const bookings = snapshot.val() || {};
+    const tbody = document.querySelector('#bookingsTable tbody');
+    tbody.innerHTML = '';
+
+    for(const bookingId in bookings){
+      const b = bookings[bookingId];
+
+      // Create driver assignment dropdown options
+      let driverOptions = `<option value="">--Select Driver--</option>`;
+      const driversSnapshot = await db.ref('drivers').once('value');
+      const drivers = driversSnapshot.val() || {};
+      for(const driverId in drivers){
+        const d = drivers[driverId];
+        if(d.isApproved){
+          driverOptions += `<option value="${driverId}" ${b.driverId === driverId ? 'selected' : ''}>${d.driverName}</option>`;
+        }
+      }
+
+      const driverSelect = `<select data-booking="${bookingId}" class="driver-select">${driverOptions}</select>`;
+
+      tbody.innerHTML += `
+        <tr>
+          <td>${bookingId}</td>
+          <td>${b.patientName}</td>
+          <td>${b.patientPhone}</td>
+          <td>${b.patientAddress}</td>
+          <td>${b.destination}</td>
+          <td>${b.ambulanceCategory}</td>
+          <td>${b.status}</td>
+          <td>${b.driverName || driverSelect}</td>
+          <td>
+            ${b.status === 'pending' ? `
+              <button class="btn-approve" data-id="${bookingId}">Approve</button>
+              <button class="btn-reject" data-id="${bookingId}">Reject</button>
+            ` : '-'}
+          </td>
+        </tr>
+      `;
+    }
+
+    // Add event listeners to buttons & selects
+    document.querySelectorAll('.btn-approve').forEach(btn => {
+      btn.onclick = () => handleApprove(btn.dataset.id);
+    });
+    document.querySelectorAll('.btn-reject').forEach(btn => {
+      btn.onclick = () => handleReject(btn.dataset.id);
+    });
+    document.querySelectorAll('.driver-select').forEach(select => {
+      select.onchange = (e) => assignDriver(e.target.dataset.booking, e.target.value);
     });
   }
 
-  function approve(uid) {
-    firebase.database().ref('drivers/' + uid).update({ status: 'approved' });
+  // Approve booking
+  async function handleApprove(bookingId){
+    const bookingRef = db.ref('bookings/' + bookingId);
+    const bookingSnapshot = await bookingRef.once('value');
+    const booking = bookingSnapshot.val();
+
+    if(!booking) return alert('Booking not found');
+
+    if(!booking.driverId){
+      return alert('Please assign a driver before approving.');
+    }
+
+    await bookingRef.update({
+      status: 'approved',
+      confirmedBy: currentUser.email,
+      confirmedAt: Date.now()
+    });
+
+    alert('Booking approved');
+    loadBookings();
   }
+
+  // Reject booking
+  async function handleReject(bookingId){
+    const bookingRef = db.ref('bookings/' + bookingId);
+    await bookingRef.update({
+      status: 'rejected',
+      confirmedBy: currentUser.email,
+      confirmedAt: Date.now()
+    });
+    alert('Booking rejected');
+    loadBookings();
+  }
+
+  // Assign driver to booking
+  async function assignDriver(bookingId, driverId){
+    if(!driverId) return; // No driver selected
+
+    const driverSnapshot = await db.ref('drivers/' + driverId).once('value');
+    const driver = driverSnapshot.val();
+    if(!driver) return alert('Driver not found');
+
+    const bookingRef = db.ref('bookings/' + bookingId);
+    await bookingRef.update({
+      driverId: driverId,
+      driverName: driver.driverName,
+      driverWhatsapp: driver.whatsappNumber
+    });
+
+    alert(`Driver ${driver.driverName} assigned to booking ${bookingId}`);
+    loadBookings();
+  }
+
+  // Load drivers list
+  async function loadDrivers(){
+    const snapshot = await db.ref('drivers').once('value');
+    const drivers = snapshot.val() || {};
+    const tbody = document.querySelector('#driversTable tbody');
+    tbody.innerHTML = '';
+
+    for(const driverId in drivers){
+      const d = drivers[driverId];
+      tbody.innerHTML += `
+        <tr>
+          <td>${d.driverName}</td>
+          <td>${d.ambulanceNumber}</td>
+          <td>${d.ambulanceCategory}</td>
+          <td>${d.whatsappNumber}</td>
+          <td>${d.isApproved ? 'Yes' : 'No'}</td>
+        </tr>
+      `;
+    }
+  }
+
+  // Load wallet transactions (just display JSON for simplicity)
+  async function loadWalletTransactions(){
+    const snapshot = await db.ref('walletTransactions').once('value');
+    const data = snapshot.val() || {};
+    document.getElementById('walletData').textContent = JSON.stringify(data, null, 2);
+  }
+
 </script>
+
 </body>
 </html>
