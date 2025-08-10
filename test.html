@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Button Panel with Admin Login</title>
+<style>
+  body {
+    margin: 0; padding: 20px;
+    font-family: Arial, sans-serif;
+    background: #f0f0f0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  #loginStatus {
+    position: fixed;
+    top: 10px; right: 10px;
+    padding: 8px 12px;
+    background: #4caf50;
+    color: white;
+    border-radius: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow:
+      0 5px 10px rgba(0,0,0,0.2),
+      inset 0 -3px 0 rgba(255,255,255,0.3);
+  }
+  #loginStatus.logged-out {
+    background: #f44336;
+  }
+  .button-container {
+    margin-top: 60px;
+    width: 90%;
+    max-width: 400px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+  button {
+    padding: 15px;
+    font-size: 1.1em;
+    font-weight: bold;
+    color: white;
+    border: none;
+    border-radius: 15px;
+    cursor: pointer;
+    box-shadow:
+      0 6px 10px rgba(0,0,0,0.3),
+      inset 0 -4px 0 rgba(255,255,255,0.3);
+    transition: all 0.3s ease;
+  }
+  button:hover {
+    filter: brightness(0.9);
+  }
+  #loginBtn {
+    background: linear-gradient(145deg, #ff5722, #ff7043);
+    grid-column: span 2;
+  }
+  #logoutBtn {
+    background: linear-gradient(145deg, #d32f2f, #f44336);
+    grid-column: span 2;
+  }
+  #adminBtn {
+    background: linear-gradient(145deg, #6a1b9a, #9c27b0);
+  }
+  #rechargeBtn {
+    background: linear-gradient(145deg, #0d47a1, #2196f3);
+  }
+  #hospitalBtn {
+    background: linear-gradient(145deg, #2e7d32, #4caf50);
+  }
+  #noticeBtn {
+    background: linear-gradient(145deg, #f57f17, #ffb300);
+  }
+  @media(max-width: 480px) {
+    .button-container {
+      grid-template-columns: 1fr;
+    }
+    #loginBtn, #logoutBtn {
+      grid-column: span 1;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div id="loginStatus" class="logged-out">Not Logged In</div>
+
+<div class="button-container" id="buttonContainer" style="display:none;">
+  <button id="adminBtn">Admin Panel</button>
+  <button id="rechargeBtn">Recharge</button>
+  <button id="hospitalBtn">Hospital</button>
+  <button id="noticeBtn">Notice Board</button>
+  <button id="logoutBtn" style="display:none;">Logout</button>
+</div>
+
+<button id="loginBtn">Login as Admin</button>
+
+<script>
+  const adminEmail = "zarasamajiksevasanstha@gmail.com";
+  const loginStatus = document.getElementById('loginStatus');
+  const buttonContainer = document.getElementById('buttonContainer');
+  const loginBtn = document.getElementById('loginBtn');
+  const logoutBtn = document.getElementById('logoutBtn');
+
+  // Check login state from localStorage on page load
+  if(localStorage.getItem('adminLoggedIn') === 'true') {
+    setLoggedInState();
+  }
+
+  loginBtn.onclick = () => {
+    const email = prompt("Please enter admin email:");
+    if(email && email.toLowerCase().trim() === adminEmail) {
+      localStorage.setItem('adminLoggedIn', 'true');
+      setLoggedInState();
+    } else {
+      alert("Access denied. आप अपनी मर्यादा में रहें।");
+    }
+  };
+
+  logoutBtn.onclick = () => {
+    localStorage.removeItem('adminLoggedIn');
+    setLoggedOutState();
+  };
+
+  function setLoggedInState() {
+    loginStatus.textContent = "Logged in as Admin";
+    loginStatus.classList.remove('logged-out');
+    buttonContainer.style.display = 'grid';
+    loginBtn.style.display = 'none';
+    logoutBtn.style.display = 'block';
+  }
+  function setLoggedOutState() {
+    loginStatus.textContent = "Not Logged In";
+    loginStatus.classList.add('logged-out');
+    buttonContainer.style.display = 'none';
+    loginBtn.style.display = 'block';
+    logoutBtn.style.display = 'none';
+  }
+
+  document.getElementById('adminBtn').onclick = () => {
+    window.location.href = "https://zara-life-care.vercel.app/admin.html";
+  };
+  document.getElementById('rechargeBtn').onclick = () => {
+    window.location.href = "https://zara-life-care.vercel.app/recharge.html";
+  };
+  document.getElementById('hospitalBtn').onclick = () => {
+    window.location.href = "https://zara-life-care.vercel.app/admin-hospital.html";
+  };
+  document.getElementById('noticeBtn').onclick = () => {
+    window.location.href = "https://zara-life-care.vercel.app/notice.html";
+  };
+</script>
+
+</body>
+</html>
