@@ -69,10 +69,17 @@
   const userRoleSpan = document.getElementById('userRole');
   const driversContainer = document.getElementById('drivers-container');
 
-  // Google login बटन का काम
   googleLoginBtn.addEventListener('click', () => {
     const provider = new firebase.auth.GoogleAuthProvider();
-    auth.signInWithPopup(provider).catch(e => alert(e.message));
+    auth.signInWithPopup(provider)
+      .then((result) => {
+        // लॉगिन सफल
+        console.log("User signed in:", result.user.displayName);
+      })
+      .catch((error) => {
+        alert("Login failed: " + error.message);
+        console.error(error);
+      });
   });
 
   logoutBtn.addEventListener('click', () => {
@@ -81,7 +88,6 @@
 
   auth.onAuthStateChanged(user => {
     if (user) {
-      // लॉगिन हो गया है
       loginSection.classList.add('hidden');
       mainSection.classList.remove('hidden');
       logoutBtn.classList.remove('hidden');
@@ -90,7 +96,6 @@
 
       loadApprovedDrivers();
     } else {
-      // लॉग आउट या लॉगिन नहीं है
       loginSection.classList.remove('hidden');
       mainSection.classList.add('hidden');
       logoutBtn.classList.add('hidden');
