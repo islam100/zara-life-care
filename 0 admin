@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Admin Panel - Zara Life Care</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+    background: #f9f9f9;
+  }
+  h1 {
+    color: #007BFF;
+  }
+  .section {
+    margin-bottom: 30px;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+  }
+  th, td {
+    border: 1px solid #ccc;
+    padding: 8px;
+    text-align: left;
+  }
+  th {
+    background: #007BFF;
+    color: white;
+  }
+  button {
+    padding: 6px 12px;
+    margin: 2px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    color: white;
+  }
+  button.approve {
+    background: #4CAF50;
+  }
+  button.reject {
+    background: #f44336;
+  }
+  button.recharge {
+    background: #2196F3;
+  }
+  input.recharge-amount {
+    width: 70px;
+    padding: 4px;
+    margin-right: 5px;
+  }
+</style>
+</head>
+<body>
+
+<h1>Admin Panel</h1>
+
+<div class="section" id="driverApprovalSection">
+  <h2>Driver Approvals</h2>
+  <table id="driversTable">
+    <thead>
+      <tr>
+        <th>Driver Name</th>
+        <th>Ambulance No</th>
+        <th>Category</th>
+        <th>WhatsApp</th>
+        <th>Wallet</th>
+        <th>Approve / Reject</th>
+        <th>Recharge Wallet</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Drivers loaded here -->
+    </tbody>
+  </table>
+</div>
+
+<div class="section" id="bookingSection">
+  <h2>Bookings</h2>
+  <table id="bookingsTable">
+    <thead>
+      <tr>
+        <th>Patient Name</th>
+        <th>Category</th>
+        <th>Status</th>
+        <th>Driver</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Bookings loaded here -->
+    </tbody>
+  </table>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
+
+<script>
+  // Your Firebase Config Here
+  const firebaseConfig = {
+    apiKey: "AIzaSyCFgRQxK_W2T9S5QWZnxAd-kYV52Kzyb94",
+    authDomain: "zara-life-care.firebaseapp.com",
+    projectId: "zara-life-care",
+    storageBucket: "zara-life-care.appspot.com",
+    messagingSenderId: "307306937129",
+    appId: "1:307306937129:web:a949207fe64fe87dd3d538"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.database();
+
+  // Check if logged in and is admin
+  auth.onAuthStateChanged(user => {
+    if (!user) {
+      alert("Please login as admin.");
+      window.location.href = "login.html";  // Your login page
+      return;
+    }
+    // Check admin
+    db.ref('admins/' + user.uid).get().then(snapshot => {
+      if (!snapshot.exists()) {
+        alert("You are not an admin.");
+        auth.signOut();
+        window.location.href = "login.html";
+      } else {
+        loadDrivers();
+        loadBookings();
+      }
+    });
+  });
+
+  // Load Drivers and show approval & wallet recharge UI
+  function loadDrivers() {
+    db.ref('drivers').on('value', snapshot => {
+      const drivers = snapshot.val() || {};
+      const tbody = document.querySelector('#driversTable tbody');
+      tbody.innerHTML = '';
+      Object.entries(drivers).forEach(([driverId, driver]) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${driver.driverName || '-'}</td>
+          <td>${driver.ambulanceNumber || '-'}</td>
+          <td>${driver.ambulanceCategory || '-'}</td>
+          <td><a href="https://wa.me/${driver.whatsappNumber}" target="_blank">${driver.whatsappNumber || '-'}</a></td>
+          <td>₹${driver.wallet || 0}</td>
+          <td>
+            <button class="approve" onclick="approveDriver('${driverId}')">Approve</button>
+            <button class="reject" onclick="rejectDriver('${driverId}')">Reject</button>
+          </td>
+          <td>
+            <input type="number" min="1" placeholder="Amount" class="recharge-amount" id="recharge-${driverId}" />
+            <button class="recharge" onclick="rechargeWallet('${driverId}')">Recharge</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    });
+  }
+
+  // Approve driver
+  function approveDriver(driverId) {
+    db.ref('drivers/' + driverId).update({ isApproved: true })
+      .then(() => alert('Driver approved'))
+      .catch(e => alert('Error: ' + e.message));
+  }
+
+  // Reject driver
+  function rejectDriver(driverId) {
+    db.ref('drivers/' + driverId).update({ isApproved: false })
+      .then(() => alert('Driver rejected'))
+      .catch(e => alert('Error: ' + e.message));
+  }
+
+  // Recharge wallet
+  function rechargeWallet(driverId) {
+    const amountInput = document.getElementById('recharge-' + driverId);
+    const amount = Number(amountInput.value);
+    if (!amount || amount <= 0) {
+      alert('Please enter valid recharge amount');
+      return;
+    }
+    const driverRef = db.ref('drivers/' + driverId);
+    driverRef.get().then(snapshot => {
+      if (!snapshot.exists()) return alert('Driver not found');
+      const currentWallet = snapshot.val().wallet || 0;
+      const newWallet = currentWallet + amount;
+
+      // Update wallet
+      driverRef.update({ wallet: newWallet }).then(() => {
+        // Log transaction
+        const txnRef = db.ref('walletTransactions/' + driverId).push();
+        txnRef.set({
+          type: 'recharge',
+          amount: amount,
+          description: 'Wallet recharge by admin',
+          date: Date.now()
+        });
+        alert('Wallet recharged successfully');
+        amountInput.value = '';
+      });
+    });
+  }
+
+  // Load Bookings for admin to accept/reject
+  function loadBookings() {
+    db.ref('bookings').on('value', snapshot => {
+      const bookings = snapshot.val() || {};
+      const tbody = document.querySelector('#bookingsTable tbody');
+      tbody.innerHTML = '';
+      Object.entries(bookings).forEach(([bookingId, booking]) => {
+        const tr = document.createElement('tr');
+
+        let driverInfo = '-';
+        if (booking.driverName) {
+          driverInfo = `${booking.driverName} (<a href="https://wa.me/${booking.driverWhatsapp}" target="_blank">${booking.driverWhatsapp}</a>)`;
+        }
+
+        let actions = '';
+        if (booking.status === 'pending') {
+          actions = `
+            <button onclick="assignDriver('${bookingId}')">Assign Driver</button>
+            <button onclick="rejectBooking('${bookingId}')">Reject</button>
+          `;
+        } else {
+          actions = 'N/A';
+        }
+
+        tr.innerHTML = `
+          <td>${booking.patientName}</td>
+          <td>${booking.ambulanceCategory}</td>
+          <td>${booking.status}</td>
+          <td>${driverInfo}</td>
+          <td>${actions}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    });
+  }
+
+  // Assign driver to booking (simple prompt to choose driver from approved list)
+  function assignDriver(bookingId) {
+    db.ref('drivers').orderByChild('isApproved').equalTo(true).get().then(snapshot => {
+      const drivers = snapshot.val();
+      if (!drivers) return alert('No approved drivers found');
+
+      let driverOptions = '';
+      Object.entries(drivers).forEach(([driverId, driver]) => {
+        driverOptions += `${driverId}: ${driver.driverName} (${driver.ambulanceCategory})\n`;
+      });
+
+      const chosenId = prompt(`Choose driverId to assign:\n${driverOptions}`);
+      if (!chosenId || !drivers[chosenId]) {
+        alert('Invalid driver ID');
+        return;
+      }
+
+      // Deduct 100 from driver wallet on assignment
+      const driverWallet = drivers[chosenId].wallet || 0;
+      if (driverWallet < 100) {
+        alert('Driver wallet balance is insufficient for booking');
+        return;
+      }
+
+      // Update booking
+      const bookingRef = db.ref('bookings/' + bookingId);
+      bookingRef.update({
+        status: 'accepted',
+        driverId: chosenId,
+        driverName: drivers[chosenId].driverName,
+        driverWhatsapp: drivers[chosenId].whatsappNumber,
+        confirmedBy: 'admin'
+      }).then(() => {
+        // Deduct wallet
+        const driverRef = db.ref('drivers/' + chosenId);
+        driverRef.update({ wallet: driverWallet - 100 });
+
+        // Add transaction log
+        const txnRef = db.ref('walletTransactions/' + chosenId).push();
+        txnRef.set({
+          type: 'deduction',
+          amount: 100,
+          description: `Booking assigned - ${bookingId}`,
+          date: Date.now()
+        });
+
+        alert('Driver assigned and wallet deducted ₹100');
+      });
+    });
+  }
+
+  // Reject booking and refund wallet if needed
+  function rejectBooking(bookingId) {
+    const bookingRef = db.ref('bookings/' + bookingId);
+    bookingRef.get().then(snapshot => {
+      if (!snapshot.exists()) return alert('Booking not found');
+      const booking = snapshot.val();
+      if (booking.status !== 'pending' && booking.driverId) {
+        // refund wallet to driver
+        const driverId = booking.driverId;
+        db.ref('drivers/' + driverId).get().then(driverSnap => {
+          if (!driverSnap.exists()) return;
+          const driver = driverSnap.val();
+          const newWallet = (driver.wallet || 0) + 100;
+          db.ref('drivers/' + driverId).update({ wallet: newWallet });
+
+          const txnRef = db.ref('walletTransactions/' + driverId).push();
+          txnRef.set({
+            type: 'recharge',
+            amount: 100,
+            description: `Booking rejected refund - ${bookingId}`,
+            date: Date.now()
+          });
+        });
+      }
+      // Update booking status to rejected
+      bookingRef.update({ status: 'rejected' }).then(() => {
+        alert('Booking rejected');
+      });
+    });
+  }
+</script>
+
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Zara Life Care - Ambulance Service</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    margin: 0; padding: 10px;
+    background: #f9f9f9;
+  }
+  header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+  .logo {
+    font-weight: bold;
+    font-size: 1.5rem;
+    color: #2c3e50;
+  }
+  nav {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  select {
+    padding: 8px 12px;
+    font-size: 0.9rem;
+    border-radius: 5px;
+    border: 1.5px solid #ccc;
+    background: white;
+    cursor: pointer;
+  }
+  select:focus {
+    outline: none;
+    border-color: #3498db;
+  }
+  button {
+    background: #3498db;
+    border: none;
+    color: white;
+    padding: 10px 20px;
+    font-weight: 600;
+    font-size: 1rem;
+    border-radius: 10px;
+    box-shadow:
+      0 4px 6px rgba(52, 152, 219, 0.4),
+      0 0 10px rgba(52, 152, 219, 0.7);
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  button:hover {
+    box-shadow:
+      0 6px 8px rgba(52, 152, 219, 0.7),
+      0 0 14px rgba(52, 152, 219, 1);
+  }
+  #bookingBtn {
+    display: block;
+    margin: 30px auto 20px auto; /* center horizontally */
+    max-width: 200px;
+    width: 90%;
+  }
+  #authBtn {
+    min-width: 100px;
+  }
+
+  #drivers-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    justify-content: center;
+  }
+  .card {
+    background: white;
+    border-radius: 12px;
+    padding: 15px;
+    width: 220px;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+    text-align: center;
+  }
+  .card h3 {
+    margin-top: 0;
+    margin-bottom: 8px;
+    color: #2c3e50;
+  }
+  .card p {
+    margin: 5px 0;
+    font-size: 0.9rem;
+  }
+  .card .dropdown {
+    margin-top: 10px;
+    width: 100%;
+  }
+
+  @media (max-width: 480px) {
+    header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 10px;
+    }
+    #bookingBtn {
+      width: 100%;
+      max-width: none;
+    }
+    .card {
+      width: 100%;
+    }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Zara Life Care</div>
+  <nav>
+    <select id="infoDropdown" aria-label="Information">
+      <option disabled selected>Info</option>
+      <option value="about.html">About</option>
+      <option value="privacy.html">Privacy Policy</option>
+      <option value="contact.html">Contact</option>
+    </select>
+
+    <select id="linkDropdown" aria-label="Links">
+      <option disabled selected>Quick Links</option>
+      <option value="https://example.com/link1">Link 1</option>
+      <option value="https://example.com/link2">Link 2</option>
+    </select>
+
+    <button id="authBtn" title="Login / Logout">Loading...</button>
+  </nav>
+</header>
+
+<button id="bookingBtn" title="Book Ambulance">Book Ambulance</button>
+
+<h1 style="text-align:center; color:#34495e;">Available Ambulances</h1>
+<div id="drivers-container">Loading...</div>
+
+<!-- Firebase (compat version) -->
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyCFgRQxK_W2T9S5QWZnxAd-kYV52Kzyb94",
+    authDomain: "zara-life-care.firebaseapp.com",
+    projectId: "zara-life-care",
+    storageBucket: "zara-life-care.appspot.com",
+    messagingSenderId: "307306937129",
+    appId: "1:307306937129:web:a949207fe64fe87dd3d538"
+  };
+
+  // Initialize Firebase
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.database();
+
+  const authBtn = document.getElementById('authBtn');
+  const bookingBtn = document.getElementById('bookingBtn');
+
+  // Dropdown navigation
+  document.getElementById('infoDropdown').addEventListener('change', e => {
+    if (e.target.value) window.location.href = e.target.value;
+  });
+  document.getElementById('linkDropdown').addEventListener('change', e => {
+    if (e.target.value) window.open(e.target.value, '_blank');
+  });
+
+  // Booking button click
+  bookingBtn.addEventListener('click', () => {
+    if(auth.currentUser) {
+      window.location.href = 'booking.html'; // Booking page
+    } else {
+      alert('Please login to book ambulance.');
+      authBtn.focus();
+    }
+  });
+
+  // Auth button login/logout toggle
+  auth.onAuthStateChanged(user => {
+    if (user) {
+      authBtn.textContent = 'Logout';
+      authBtn.onclick = () => {
+        auth.signOut().then(() => {
+          location.reload();
+        });
+      };
+      loadApprovedDrivers();
+    } else {
+      authBtn.textContent = 'Login';
+      authBtn.onclick = () => {
+        window.location.href = 'login.html'; // Login page
+      };
+      document.getElementById('drivers-container').innerHTML = 'Please login to see ambulances.';
+    }
+  });
+
+  function loadApprovedDrivers() {
+    const container = document.getElementById('drivers-container');
+    container.innerHTML = 'Loading ambulances...';
+
+    db.ref('drivers').orderByChild('status').equalTo('approved').on('value', snapshot => {
+      container.innerHTML = '';
+      if (!snapshot.exists()) {
+        container.innerHTML = '<p>No ambulances available currently.</p>';
+        return;
+      }
+      snapshot.forEach(child => {
+        const d = child.val();
+        const card = document.createElement('div');
+        card.classList.add('card');
+        card.innerHTML = `
+          <h3>${d.name || 'Unknown'}</h3>
+          <p>Ambulance No: ${d.ambulanceNo || 'N/A'}</p>
+          <select class="dropdown" aria-label="Options">
+            <option selected disabled>Options</option>
+            <option>Call</option>
+            <option>Details</option>
+          </select>
+          <select class="dropdown" aria-label="Links">
+            <option selected disabled>Links</option>
+            <option value="https://example.com">Website</option>
+            <option value="https://example2.com">More Info</option>
+          </select>
+        `;
+        const selects = card.querySelectorAll('select');
+        selects[0].addEventListener('change', e => {
+          if(e.target.value === 'Call') {
+            if(d.phone) window.open(`tel:${d.phone}`);
+            e.target.selectedIndex = 0;
+          } else if (e.target.value === 'Details') {
+            alert(`Driver: ${d.name}\nAmbulance No: ${d.ambulanceNo}\nAddress: ${d.address || 'N/A'}`);
+            e.target.selectedIndex = 0;
+          }
+        });
+        selects[1].addEventListener('change', e => {
+          if (e.target.value) {
+            window.open(e.target.value, '_blank');
+            e.target.selectedIndex = 0;
+          }
+        });
+
+        container.appendChild(card);
+      });
+    });
+  }
+</script>
+
+</body>
+</html>
