@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Admin Login + Firebase Auth Panel</title>
+  <title>Admin Login with Firebase UID Check</title>
   <style>
     * {
       box-sizing: border-box;
@@ -92,7 +92,7 @@
 
   <div class="container" id="loginContainer">
     <h2>Admin Login</h2>
-    <input type="email" id="email" placeholder="Admin Email" />
+    <input type="email" id="email" placeholder="Email" />
     <input type="password" id="password" placeholder="Password" />
     <button class="login-btn" onclick="login()">Login</button>
     <p id="errorMsg"></p>
@@ -112,12 +112,13 @@
   <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
 
   <script>
-    // Firebase config
     const firebaseConfig = {
       apiKey: "AIzaSyCFgRQxK_W2T9S5QWZnxAd-kYV52Kzyb94",
       authDomain: "zara-life-care.firebaseapp.com",
+      databaseURL: "https://zara-life-care-default-rtdb.firebaseio.com", // Realtime DB URL यहाँ डालें
       projectId: "zara-life-care",
       storageBucket: "zara-life-care.appspot.com",
       messagingSenderId: "307306937129",
@@ -126,14 +127,9 @@
 
     // Initialize Firebase
     firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
 
-    // Admin emails allowed to login
-    const allowedAdmins = [
-      "admin1@example.com",
-      "admin2@example.com",
-      "zarafix3@gmail.com"  // अपनी admin email यहाँ डालें
-    ];
+    const auth = firebase.auth();
+    const database = firebase.database();
 
     const loginContainer = document.getElementById('loginContainer');
     const adminPanel = document.getElementById('adminPanel');
@@ -149,17 +145,28 @@
       }
 
       auth.signInWithEmailAndPassword(email, password)
-        .then(userCredential => {
-          const user = userCredential.user;
-          if (allowedAdmins.includes(user.email)) {
-            showAdminPanel();
-          } else {
-            auth.signOut();
-            showError("Access denied. You are not an admin.");
-          }
+        .then(({ user }) => {
+          checkIfAdmin(user.uid);
         })
         .catch(error => {
           showError(error.message);
+        });
+    }
+
+    function checkIfAdmin(uid) {
+      const adminRef = database.ref('admins/' + uid);
+      adminRef.once('value')
+        .then(snapshot => {
+          if (snapshot.exists()) {
+            // Admin है
+            showAdminPanel();
+          } else {
+            showError("Access denied. You are not an admin.");
+            auth.signOut();
+          }
+        })
+        .catch(err => {
+          showError("Error checking admin status: " + err.message);
         });
     }
 
@@ -197,10 +204,10 @@
       document.getElementById('btn5').href = "https://example.com/page5";
     }
 
-    // Check if user already logged in on page load
+    // पेज लोड पर लॉगिन चेक करें
     auth.onAuthStateChanged(user => {
-      if (user && allowedAdmins.includes(user.email)) {
-        showAdminPanel();
+      if (user) {
+        checkIfAdmin(user.uid);
       } else {
         adminPanel.style.display = 'none';
         loginContainer.style.display = 'block';
