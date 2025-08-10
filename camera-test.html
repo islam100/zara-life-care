@@ -1,22 +1,75 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Camera Test</title>
+  <title>Camera with Capture Button</title>
+  <style>
+    video, img {
+      display: block;
+      margin: 10px auto;
+      max-width: 100%;
+      border-radius: 8px;
+      box-shadow: 0 0 10px #999;
+    }
+    button {
+      display: block;
+      margin: 10px auto;
+      padding: 10px 20px;
+      font-size: 16px;
+      border-radius: 8px;
+      background: linear-gradient(145deg, #6ca6f8, #1a53e8);
+      color: white;
+      border: none;
+      box-shadow: 0 5px 15px rgba(26, 83, 232, 0.5);
+      cursor: pointer;
+      transition: box-shadow 0.3s ease;
+    }
+    button:hover {
+      box-shadow: 0 8px 20px rgba(26, 83, 232, 0.7);
+    }
+  </style>
 </head>
 <body>
-  <h2>Camera Live Stream Test</h2>
-  <video id="video" width="400" height="300" autoplay playsinline></video>
 
-  <script>
-    async function startCamera() {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-        document.getElementById('video').srcObject = stream;
-      } catch (err) {
-        alert('Camera access denied or not available: ' + err.message);
-      }
+<h2>Camera Live Stream with Capture</h2>
+<video id="video" width="400" height="300" autoplay playsinline></video>
+<button id="captureBtn">Capture Photo</button>
+<img id="photo" alt="Captured photo will appear here" />
+
+<script>
+  const video = document.getElementById('video');
+  const captureBtn = document.getElementById('captureBtn');
+  const photo = document.getElementById('photo');
+
+  // कैमरा शुरू करें
+  async function startCamera() {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      video.srcObject = stream;
+    } catch (err) {
+      alert('Camera access denied or not available: ' + err.message);
     }
-    startCamera();
-  </script>
+  }
+
+  // फोटो कैप्चर करें
+  captureBtn.addEventListener('click', () => {
+    // एक कैनवास बनाएं वीडियो के साइज के अनुसार
+    const canvas = document.createElement('canvas');
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+
+    // वीडियो फ्रेम को कैनवास में कॉपी करें
+    const context = canvas.getContext('2d');
+    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    // कैनवास को डेटा URL में बदलें (base64 image)
+    const dataUrl = canvas.toDataURL('image/png');
+
+    // फोटो इमेज में दिखाएं
+    photo.src = dataUrl;
+  });
+
+  startCamera();
+</script>
+
 </body>
 </html>
