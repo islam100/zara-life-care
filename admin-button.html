@@ -3,101 +3,107 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>4 Button Mobile Layout with Login</title>
+<title>Admin Only Buttons</title>
 <style>
   body {
     margin: 0; padding: 20px;
     font-family: Arial, sans-serif;
     background: #f0f0f0;
+    min-height: 100vh;
     display: flex;
     flex-direction: column;
-    min-height: 100vh;
-    justify-content: flex-start;
     align-items: center;
   }
 
-  /* ऊपर login/logout button */
   #loginBtn {
     position: fixed;
     top: 15px;
     right: 15px;
-    padding: 8px 14px;
+    padding: 10px 18px;
     font-weight: bold;
-    font-size: 0.9em;
+    font-size: 1em;
     color: white;
     background: linear-gradient(145deg, #3b5998, #8b9dc3);
-    border: none;
-    border-radius: 12px;
-    cursor: pointer;
-    box-shadow:
-      0 5px 10px rgba(0,0,0,0.2),
-      inset 0 -3px 0 rgba(255,255,255,0.3);
-    transition: all 0.3s ease;
-    z-index: 1000;
-  }
-  #loginBtn:hover {
-    filter: brightness(0.9);
-  }
-
-  .button-container {
-    margin-top: 80px; /* ऊपर लॉगिन बटन के लिए जगह */
-    width: 90%;
-    max-width: 400px;
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 20px;
-  }
-
-  button.action-btn {
-    padding: 12px;
-    font-size: 1em;
-    font-weight: bold;
-    color: white;
     border: none;
     border-radius: 15px;
     cursor: pointer;
     box-shadow:
-      0 5px 10px rgba(0,0,0,0.2),
-      inset 0 -3px 0 rgba(255,255,255,0.3);
+      0 5px 12px rgba(0,0,0,0.25),
+      inset 0 -4px 0 rgba(255,255,255,0.4);
+    transition: all 0.3s ease;
+    z-index: 1000;
+  }
+  #loginBtn:hover {
+    filter: brightness(0.85);
+  }
+
+  .button-container {
+    margin-top: 70px;
+    width: 90%;
+    max-width: 400px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 22px;
+  }
+
+  button.action-btn {
+    padding: 14px;
+    font-size: 1.1em;
+    font-weight: bold;
+    color: white;
+    border: none;
+    border-radius: 18px;
+    cursor: pointer;
+    box-shadow:
+      0 7px 15px rgba(0,0,0,0.25),
+      inset 0 -5px 0 rgba(255,255,255,0.45);
     transition: all 0.3s ease;
   }
   button.action-btn:hover {
-    filter: brightness(0.9);
+    filter: brightness(0.85);
   }
 
   #adminBtn {
     background: linear-gradient(145deg, #6a1b9a, #9c27b0);
     box-shadow:
-      0 6px 8px rgba(106, 27, 154, 0.6),
-      inset 0 -4px 0 rgba(255,255,255,0.3);
+      0 7px 12px rgba(106, 27, 154, 0.7),
+      inset 0 -5px 0 rgba(255,255,255,0.4);
   }
   #rechargeBtn {
     background: linear-gradient(145deg, #0d47a1, #2196f3);
     box-shadow:
-      0 6px 8px rgba(13, 71, 161, 0.6),
-      inset 0 -4px 0 rgba(255,255,255,0.3);
+      0 7px 12px rgba(13, 71, 161, 0.7),
+      inset 0 -5px 0 rgba(255,255,255,0.4);
   }
   #hospitalBtn {
     background: linear-gradient(145deg, #2e7d32, #4caf50);
     box-shadow:
-      0 6px 8px rgba(46, 125, 50, 0.6),
-      inset 0 -4px 0 rgba(255,255,255,0.3);
+      0 7px 12px rgba(46, 125, 50, 0.7),
+      inset 0 -5px 0 rgba(255,255,255,0.4);
   }
   #noticeBtn {
     background: linear-gradient(145deg, #f57f17, #ffb300);
     box-shadow:
-      0 6px 8px rgba(245, 127, 23, 0.6),
-      inset 0 -4px 0 rgba(255,255,255,0.3);
+      0 7px 12px rgba(245, 127, 23, 0.7),
+      inset 0 -5px 0 rgba(255,255,255,0.4);
   }
-  
+
+  #message {
+    margin-top: 100px;
+    font-size: 1.3em;
+    color: #b71c1c;
+    font-weight: bold;
+    text-align: center;
+  }
+
   /* Responsive मोबाइल के लिए */
   @media(max-width: 480px) {
     .button-container {
       grid-template-columns: 1fr;
     }
     button.action-btn {
-      font-size: 1.1em;
-      padding: 15px;
+      font-size: 1.2em;
+      padding: 18px;
     }
   }
 </style>
@@ -106,19 +112,22 @@
 
 <button id="loginBtn">Login</button>
 
-<div class="button-container">
+<div id="message" style="display:none;">
+  आप अपनी मर्यादा में रहें। इसे खोलने की अनुमति नहीं है।
+</div>
+
+<div class="button-container" id="buttons" style="display:none;">
   <button class="action-btn" id="adminBtn">Admin Panel</button>
   <button class="action-btn" id="rechargeBtn">Recharge</button>
   <button class="action-btn" id="hospitalBtn">Hospital</button>
   <button class="action-btn" id="noticeBtn">Notice Board</button>
 </div>
 
-<!-- Firebase JS SDKs -->
 <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
 
 <script>
-  // Firebase config - अपनी Firebase details यहाँ लगाएं
+  // Firebase config डालें अपने प्रोजेक्ट के अनुसार
   const firebaseConfig = {
     apiKey: "YOUR_API_KEY",
     authDomain: "YOUR_PROJECT.firebaseapp.com",
@@ -132,26 +141,43 @@
   const auth = firebase.auth();
 
   const loginBtn = document.getElementById('loginBtn');
-  const adminBtn = document.getElementById('adminBtn');
+  const buttonsDiv = document.getElementById('buttons');
+  const messageDiv = document.getElementById('message');
 
-  // जाँचें यूज़र लॉगिन है या नहीं और बटन बदलें
+  // बटन एलिमेंट्स
+  const adminBtn = document.getElementById('adminBtn');
+  const rechargeBtn = document.getElementById('rechargeBtn');
+  const hospitalBtn = document.getElementById('hospitalBtn');
+  const noticeBtn = document.getElementById('noticeBtn');
+
+  // लॉगिन चेक और UI सेट करें
   auth.onAuthStateChanged(user => {
     if(user){
-      loginBtn.textContent = "Logout";
-      loginBtn.style.background = "linear-gradient(145deg, #b71c1c, #f44336)";
+      if(user.email === "zarasamajiksevasanstha@gmail.com"){
+        loginBtn.textContent = "Logout";
+        loginBtn.style.background = "linear-gradient(145deg, #b71c1c, #f44336)";
+        buttonsDiv.style.display = "grid";
+        messageDiv.style.display = "none";
+      } else {
+        loginBtn.textContent = "Logout";
+        loginBtn.style.background = "linear-gradient(145deg, #b71c1c, #f44336)";
+        buttonsDiv.style.display = "none";
+        messageDiv.style.display = "block";
+      }
     } else {
       loginBtn.textContent = "Login";
       loginBtn.style.background = "linear-gradient(145deg, #3b5998, #8b9dc3)";
+      buttonsDiv.style.display = "none";
+      messageDiv.style.display = "block";
     }
   });
 
-  // Login / Logout बटन का व्यवहार
   loginBtn.onclick = () => {
     if(auth.currentUser){
-      auth.signOut();
-      alert("Logged out successfully.");
+      auth.signOut()
+        .then(() => alert("Logged out successfully."))
+        .catch(e => alert("Logout failed: " + e.message));
     } else {
-      // Google Sign-In
       const provider = new firebase.auth.GoogleAuthProvider();
       auth.signInWithPopup(provider)
         .then(result => {
@@ -161,27 +187,17 @@
     }
   };
 
-  // Admin Panel बटन पर क्लिक
+  // बटन क्लिक हैंडलर्स (सिर्फ admin के लिए)
   adminBtn.onclick = () => {
-    const user = auth.currentUser;
-    if(user && user.email === "zarasamajiksevasanstha@gmail.com"){
-      // Admin Panel का लिंक डालें
-      window.location.href = "https://zara-life-care.vercel.app/admin.html";
-    } else if(user){
-      alert("आप अपनी मर्यादा में रहें। केवल admin ही इस पेज को खोल सकते हैं।");
-    } else {
-      alert("कृपया पहले लॉगिन करें।");
-    }
+    window.location.href = "https://zara-life-care.vercel.app/admin.html";
   };
-
-  // बाकी बटन सीधे लिंक पर जाएं
-  document.getElementById('rechargeBtn').onclick = () => {
+  rechargeBtn.onclick = () => {
     window.location.href = "https://example.com/recharge";
   };
-  document.getElementById('hospitalBtn').onclick = () => {
+  hospitalBtn.onclick = () => {
     window.location.href = "https://zara-life-care.vercel.app/admin-hospital.html";
   };
-  document.getElementById('noticeBtn').onclick = () => {
+  noticeBtn.onclick = () => {
     window.location.href = "https://example.com/notice";
   };
 </script>
